@@ -1,0 +1,1 @@
+﻿Import-Module .\WizCloud.psd1 -Force
