@@ -7,4 +7,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\WizCloud\WizCloud.csproj" />
+  </ItemGroup>
+
 </Project>
