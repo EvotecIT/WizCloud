@@ -5,11 +5,9 @@ using WizCloud;
 namespace WizCloud.Tests;
 
 [TestClass]
-public sealed class WizUserTests
-{
+public sealed class WizUserTests {
     [TestMethod]
-    public void FromJson_ParsesAllFields()
-    {
+    public void FromJson_ParsesAllFields() {
         string jsonString = """
 {
   "id": "1",
