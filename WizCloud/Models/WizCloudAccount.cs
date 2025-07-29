@@ -1,4 +1,4 @@
-namespace WizCloud.Models
+namespace WizCloud
 {
     /// <summary>
     /// Represents a cloud account in Wiz.

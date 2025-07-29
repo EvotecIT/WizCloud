@@ -3,10 +3,8 @@ using System.Management.Automation;
 using System.Threading.Tasks;
 using ISUID.PowerShell;
 using WizCloud;
-using WizCloud.Authentication;
-using WizCloud.Helpers;
 
-namespace WizCloud.PowerShell.Cmdlets
+namespace WizCloud.PowerShell
 {
     /// <summary>
     /// <para type="synopsis">Connects to Wiz.io and stores authentication for the session.</para>

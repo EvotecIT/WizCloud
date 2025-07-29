@@ -1,4 +1,4 @@
-namespace WizCloud.Enums
+namespace WizCloud
 {
     /// <summary>
     /// Represents the different types of users and identities in Wiz.

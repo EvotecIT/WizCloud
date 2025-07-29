@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
-using WizCloud.Enums;
-using WizCloud.Helpers;
 
-namespace WizCloud.Authentication
+
+namespace WizCloud
 {
     /// <summary>
     /// Provides methods to acquire Wiz service account tokens using client credentials.

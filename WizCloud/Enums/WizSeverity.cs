@@ -1,4 +1,4 @@
-namespace WizCloud.Enums
+namespace WizCloud
 {
     /// <summary>
     /// Represents the severity levels for issues in Wiz.

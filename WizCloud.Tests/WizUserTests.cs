@@ -1,6 +1,6 @@
 using System;
 using System.Text.Json.Nodes;
-using WizCloud.Models;
+using WizCloud;
 
 namespace WizCloud.Tests;
 

@@ -1,4 +1,4 @@
-namespace WizCloud.Models
+namespace WizCloud
 {
     /// <summary>
     /// Represents analytics data for security issues associated with a user or resource.

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Nodes;
 
-namespace WizCloud.Models
+namespace WizCloud
 {
     /// <summary>
     /// Represents a user or identity principal in Wiz.

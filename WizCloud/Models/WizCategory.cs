@@ -1,4 +1,4 @@
-namespace WizCloud.Models
+namespace WizCloud
 {
     /// <summary>
     /// Represents a technology category in Wiz.

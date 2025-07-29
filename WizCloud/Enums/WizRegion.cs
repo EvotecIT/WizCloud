@@ -1,4 +1,4 @@
-namespace WizCloud.Enums
+namespace WizCloud
 {
     /// <summary>
     /// Represents the available Wiz deployment regions.
