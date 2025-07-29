@@ -32,6 +32,9 @@ namespace WizCloud
             if (string.IsNullOrWhiteSpace(token))
                 throw new ArgumentException("Token cannot be null or empty", nameof(token));
 
+            if (region is null)
+                throw new ArgumentNullException(nameof(region));
+
             _apiEndpoint = $"https://api.{region}.app.wiz.io/graphql";
             _httpClient = new HttpClient();
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -44,12 +47,15 @@ namespace WizCloud
         /// <param name="token">The Wiz service account token for authentication.</param>
         /// <param name="region">The Wiz region enumeration value.</param>
         /// <exception cref="ArgumentException">Thrown when the token is null or empty.</exception>
-        public WizClient(string token, WizRegion region)
+        public WizClient(string token, WizRegion? region)
         {
             if (string.IsNullOrWhiteSpace(token))
                 throw new ArgumentException("Token cannot be null or empty", nameof(token));
 
-            var regionString = WizRegionHelper.ToApiString(region);
+            if (region is null)
+                throw new ArgumentNullException(nameof(region));
+
+            var regionString = WizRegionHelper.ToApiString(region.Value);
             _apiEndpoint = $"https://api.{regionString}.app.wiz.io/graphql";
             _httpClient = new HttpClient();
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
