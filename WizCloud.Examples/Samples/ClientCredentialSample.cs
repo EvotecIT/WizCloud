@@ -1,9 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using WizCloud;
-using WizCloud.Authentication;
 
-namespace WizCloud.Examples.Samples
+namespace WizCloud.Examples
 {
     internal static class ClientCredentialSample
     {

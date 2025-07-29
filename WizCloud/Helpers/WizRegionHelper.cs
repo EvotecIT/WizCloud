@@ -1,7 +1,7 @@
 using System;
-using WizCloud.Enums;
 
-namespace WizCloud.Helpers
+
+namespace WizCloud
 {
     /// <summary>
     /// Provides helper methods for working with Wiz regions.

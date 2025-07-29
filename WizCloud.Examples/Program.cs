@@ -1,6 +1,4 @@
 using System.Threading.Tasks;
-using WizCloud.Examples.Samples;
-
 namespace WizCloud.Examples
 {
     internal class Program

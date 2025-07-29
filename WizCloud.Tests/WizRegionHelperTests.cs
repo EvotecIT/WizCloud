@@ -1,6 +1,5 @@
 using System;
-using WizCloud.Enums;
-using WizCloud.Helpers;
+using WizCloud;
 
 namespace WizCloud.Tests;
 

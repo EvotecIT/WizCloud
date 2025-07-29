@@ -1,8 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using WizCloud.Authentication;
-using WizCloud.Enums;
+using WizCloud;
 
 namespace WizCloud.Tests;
 

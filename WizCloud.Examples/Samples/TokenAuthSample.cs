@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using WizCloud;
 
-namespace WizCloud.Examples.Samples
+namespace WizCloud.Examples
 {
     internal static class TokenAuthSample
     {

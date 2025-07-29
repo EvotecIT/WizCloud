@@ -3,9 +3,8 @@ using System.Management.Automation;
 using System.Threading.Tasks;
 using ISUID.PowerShell;
 using WizCloud;
-using WizCloud.Models;
 
-namespace WizCloud.PowerShell.Cmdlets
+namespace WizCloud.PowerShell
 {
     /// <summary>
     /// <para type="synopsis">Gets users from Wiz.io with all their properties.</para>

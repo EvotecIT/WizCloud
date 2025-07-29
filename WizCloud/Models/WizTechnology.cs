@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace WizCloud.Models
+namespace WizCloud
 {
     /// <summary>
     /// Represents technology information associated with a user or resource in Wiz.
