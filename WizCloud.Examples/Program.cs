@@ -1,12 +1,8 @@
 using System.Threading.Tasks;
-namespace WizCloud.Examples
-{
-    internal class Program
-    {
-        private static async Task Main(string[] args)
-        {
-            await TokenAuthSample.RunAsync();
-            await ClientCredentialSample.RunAsync();
-        }
+namespace WizCloud.Examples;
+internal class Program {
+    private static async Task Main(string[] args) {
+        await TokenAuthSample.RunAsync();
+        await ClientCredentialSample.RunAsync();
     }
 }
