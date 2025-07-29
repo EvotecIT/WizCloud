@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WizCloud;
 
@@ -54,6 +55,23 @@ public sealed class WizRegionServiceTests {
         Assert.AreEqual(0, handler2.CallCount);
     }
 
+    [TestMethod]
+    public async Task GetAvailableRegionsAsync_MultipleConcurrentCalls_OnlyRequestsOnce() {
+        var handler = new FakeHandler("[\"eu1\"]");
+        SetHttpClient(new HttpClient(handler));
+        ClearCache();
+
+        var tasks = Enumerable.Range(0, 5).Select(_ => WizRegionService.GetAvailableRegionsAsync());
+        var results = await Task.WhenAll(tasks);
+
+        foreach (var regions in results) {
+            Assert.AreEqual(1, regions.Count);
+            Assert.AreEqual(WizRegion.EU1, regions[0]);
+        }
+
+        Assert.AreEqual(1, handler.CallCount);
+    }
+
     private static void SetHttpClient(HttpClient client) {
         var field = typeof(WizRegionService).GetField("_httpClient", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
         Assert.IsNotNull(field);
@@ -63,6 +81,9 @@ public sealed class WizRegionServiceTests {
     private static void ClearCache() {
         var field = typeof(WizRegionService).GetField("_cachedRegions", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
         Assert.IsNotNull(field);
-        field!.SetValue(null, null);
+        var method = typeof(WizRegionService).GetMethod("CreateLazy", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
+        Assert.IsNotNull(method);
+        var lazy = method!.Invoke(null, null);
+        field!.SetValue(null, lazy);
     }
 }
