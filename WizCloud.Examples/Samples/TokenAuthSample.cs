@@ -17,5 +17,11 @@ internal static class TokenAuthSample {
         if (users.Count > 0) {
             Console.WriteLine($"First user type: {users[0].Type}");
         }
+
+        var projects = await client.GetProjectsAsync(pageSize: 1);
+        Console.WriteLine($"Token auth sample retrieved {projects.Count} project(s).");
+        if (projects.Count > 0) {
+            Console.WriteLine($"First project slug: {projects[0].Slug}");
+        }
     }
 }

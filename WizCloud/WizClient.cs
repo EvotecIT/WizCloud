@@ -185,6 +185,92 @@ public class WizClient : IDisposable {
     }
 
     /// <summary>
+    /// Retrieves all projects from Wiz asynchronously.
+    /// </summary>
+    /// <param name="pageSize">The number of projects to retrieve per page. Defaults to 20.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of all projects.</returns>
+    public async Task<List<WizProject>> GetProjectsAsync(int pageSize = 20) {
+        var projects = new List<WizProject>();
+        string? endCursor = null;
+        bool hasNextPage = true;
+
+        while (hasNextPage) {
+            var result = await GetProjectsPageAsync(pageSize, endCursor);
+            projects.AddRange(result.Projects);
+            hasNextPage = result.HasNextPage;
+            endCursor = result.EndCursor;
+        }
+
+        return projects;
+    }
+
+    /// <summary>
+    /// Retrieves a single page of projects from the Wiz API.
+    /// </summary>
+    /// <param name="first">The number of projects to retrieve.</param>
+    /// <param name="after">The cursor for pagination, if retrieving subsequent pages.</param>
+    /// <returns>A tuple containing the projects, whether there's a next page, and the cursor for the next page.</returns>
+    private async Task<(List<WizProject> Projects, bool HasNextPage, string? EndCursor)> GetProjectsPageAsync(int first, string? after = null) {
+        const string query = @"query Projects($first: Int, $after: String) {
+            projects(first: $first, after: $after) {
+                pageInfo { hasNextPage endCursor }
+                nodes { id name slug isFolder }
+            }
+        }";
+
+        var variables = new {
+            first,
+            after
+        };
+
+        var requestBody = new {
+            query,
+            variables
+        };
+
+        using (var request = new HttpRequestMessage(HttpMethod.Post, _apiEndpoint)) {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+            request.Content = new StringContent(
+                JsonSerializer.Serialize(requestBody),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            using (var response = await _httpClient.SendAsync(request)) {
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                var jsonResponse = JsonNode.Parse(content);
+
+                if (jsonResponse == null)
+                    throw new InvalidOperationException("Received null response from API");
+
+                var projects = new List<WizProject>();
+                var nodes = jsonResponse["data"]?["projects"]?["nodes"]?.AsArray();
+
+                if (nodes != null) {
+                    foreach (var node in nodes) {
+                        if (node != null) {
+                            projects.Add(new WizProject {
+                                Id = node["id"]?.GetValue<string>() ?? string.Empty,
+                                Name = node["name"]?.GetValue<string>() ?? string.Empty,
+                                Slug = node["slug"]?.GetValue<string>() ?? string.Empty,
+                                IsFolder = node["isFolder"]?.GetValue<bool>() ?? false
+                            });
+                        }
+                    }
+                }
+
+                var pageInfo = jsonResponse["data"]?["projects"]?["pageInfo"];
+                bool hasNextPage = pageInfo?["hasNextPage"]?.GetValue<bool>() ?? false;
+                string? endCursor = pageInfo?["endCursor"]?.GetValue<string>();
+
+                return (projects, hasNextPage, endCursor);
+            }
+        }
+    }
+
+    /// <summary>
     /// Releases all resources used by the WizClient.
     /// </summary>
     public void Dispose() {
