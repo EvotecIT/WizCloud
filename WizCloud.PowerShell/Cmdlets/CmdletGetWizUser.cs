@@ -1,7 +1,6 @@
 using System;
 using System.Management.Automation;
 using System.Threading.Tasks;
-using ISUID.PowerShell;
 using WizCloud;
 
 namespace WizCloud.PowerShell
