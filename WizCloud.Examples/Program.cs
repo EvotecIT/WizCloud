@@ -6,5 +6,6 @@ internal class Program {
         await ClientCredentialSample.RunAsync();
         await MultiClientSample.RunAsync();
         await StreamingSample.RunAsync();
+        await ErrorHandlingSample.RunAsync();
     }
 }

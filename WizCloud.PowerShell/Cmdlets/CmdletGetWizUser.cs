@@ -1,5 +1,6 @@
 using System;
 using System.Management.Automation;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using WizCloud;
@@ -75,6 +76,12 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
 
             _wizClient = new WizClient(Token!, Region ?? "eu17");
             WriteVerbose($"Connected to Wiz region: {Region}");
+        } catch (HttpRequestException ex) {
+            WriteError(new ErrorRecord(
+                ex,
+                "WizApiHttpError",
+                ErrorCategory.ConnectionError,
+                null));
         } catch (Exception ex) {
             WriteError(new ErrorRecord(
                 ex,
@@ -117,6 +124,12 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
             progressRecord.PercentComplete = 100;
             progressRecord.RecordType = ProgressRecordType.Completed;
             WriteProgress(progressRecord);
+        } catch (HttpRequestException ex) {
+            WriteError(new ErrorRecord(
+                ex,
+                "WizApiHttpError",
+                ErrorCategory.ReadError,
+                null));
         } catch (Exception ex) {
             WriteError(new ErrorRecord(
                 ex,
