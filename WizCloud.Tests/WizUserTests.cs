@@ -67,7 +67,7 @@ public sealed class WizUserTests {
 
         Assert.AreEqual("1", user.Id);
         Assert.AreEqual("John Doe", user.Name);
-        Assert.AreEqual("USER_ACCOUNT", user.Type);
+        Assert.AreEqual(WizUserType.USER_ACCOUNT, user.Type);
         Assert.AreEqual("AADUser", user.NativeType);
         Assert.AreEqual(DateTime.Parse("2024-05-01T00:00:00Z"), user.DeletedAt);
 

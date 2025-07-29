@@ -18,9 +18,9 @@ public class WizUser {
     public string Name { get; set; } = string.Empty;
 
     /// <summary>
-    /// Gets or sets the type of the user (e.g., USER_ACCOUNT, SERVICE_ACCOUNT).
+    /// Gets or sets the type of the user.
     /// </summary>
-    public string Type { get; set; } = string.Empty;
+    public WizUserType Type { get; set; } = WizUserType.USER_ACCOUNT;
 
     /// <summary>
     /// Gets or sets the native type in the cloud provider.
@@ -102,7 +102,7 @@ public class WizUser {
         var user = new WizUser {
             Id = json["id"]?.GetValue<string>() ?? string.Empty,
             Name = json["name"]?.GetValue<string>() ?? string.Empty,
-            Type = json["type"]?.GetValue<string>() ?? string.Empty,
+            Type = Enum.TryParse(json["type"]?.GetValue<string>(), true, out WizUserType tmpType) ? tmpType : WizUserType.USER_ACCOUNT,
             NativeType = json["nativeType"]?.GetValue<string>(),
             DeletedAt = json["deletedAt"]?.GetValue<DateTime?>()?.ToLocalTime(),
 
