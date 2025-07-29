@@ -20,7 +20,6 @@
         <Authors>Przemyslaw Klys</Authors>
         <Copyright>(c) 2011 - 2025 Przemyslaw Klys @ Evotec. All rights reserved.</Copyright>
         <LangVersion>Latest</LangVersion>
-        <Nullable>enable</Nullable>
     </PropertyGroup>
 
 
