@@ -113,24 +113,7 @@ public class WizClient : IDisposable {
     /// <param name="after">The cursor for pagination, if retrieving subsequent pages.</param>
     /// <returns>A tuple containing the users, whether there's a next page, and the cursor for the next page.</returns>
     private async Task<(List<WizUser> Users, bool HasNextPage, string? EndCursor)> GetUsersPageAsync(int first, string? after = null) {
-        var query = @"query CloudIdentityPrincipals($first: Int, $after: String, $filterBy: CloudResourceV2Filters) { 
-            cloudResourcesV2(first: $first, after: $after, filterBy: $filterBy) { 
-                pageInfo { hasNextPage endCursor } 
-                nodes { ...PrincipalDetails } 
-            }
-        } 
-        fragment PrincipalDetails on CloudResourceV2 { 
-            id name type nativeType deletedAt 
-            graphEntity { id type properties } 
-            hasAccessToSensitiveData hasAdminPrivileges hasHighPrivileges hasSensitiveData 
-            projects { id name slug isFolder } 
-            technology { id icon name categories { id name } description } 
-            cloudAccount { id name cloudProvider externalId } 
-            issueAnalytics { 
-                issueCount informationalSeverityCount lowSeverityCount 
-                mediumSeverityCount highSeverityCount criticalSeverityCount 
-            }
-        }";
+        var query = GraphQlQueries.UsersQuery;
 
         var variables = new {
             first,
@@ -217,12 +200,7 @@ public class WizClient : IDisposable {
     /// <param name="after">The cursor for pagination, if retrieving subsequent pages.</param>
     /// <returns>A tuple containing the projects, whether there's a next page, and the cursor for the next page.</returns>
     private async Task<(List<WizProject> Projects, bool HasNextPage, string? EndCursor)> GetProjectsPageAsync(int first, string? after = null) {
-        const string query = @"query Projects($first: Int, $after: String) {
-            projects(first: $first, after: $after) {
-                pageInfo { hasNextPage endCursor }
-                nodes { id name slug isFolder }
-            }
-        }";
+        const string query = GraphQlQueries.ProjectsQuery;
 
         var variables = new {
             first,

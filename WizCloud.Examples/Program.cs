@@ -7,5 +7,6 @@ internal class Program {
         await MultiClientSample.RunAsync();
         await StreamingSample.RunAsync();
         await ErrorHandlingSample.RunAsync();
+        await GraphQlQueriesSample.RunAsync();
     }
 }
