@@ -16,5 +16,8 @@ internal static class ClientCredentialSample {
         using var client = new WizClient(token);
         var users = await client.GetUsersAsync(pageSize: 1);
         Console.WriteLine($"Client credentials sample retrieved {users.Count} user(s).");
+        if (users.Count > 0) {
+            Console.WriteLine($"First user type: {users[0].Type}");
+        }
     }
 }

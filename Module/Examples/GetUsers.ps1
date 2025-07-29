@@ -25,18 +25,22 @@ $usUsers = Get-WizUser -Region "us1" -Token "your-us-token"
 $adminUsers = Get-WizUser | Where-Object { $_.HasAdminPrivileges -eq $true }
 Write-Host "Found $($adminUsers.Count) admin users"
 
-# Example 5: Export users to CSV
+# Example 5: Filter only service accounts using the WizUserType enum
+$serviceAccounts = Get-WizUser | Where-Object { $_.Type -eq [WizUserType]::SERVICE_ACCOUNT }
+Write-Host "Found $($serviceAccounts.Count) service accounts"
+
+# Example 6: Export users to CSV
 Get-WizUser | Select-Object Name, Type, HasAdminPrivileges, @{N='Projects';E={$_.Projects.Count}} | Export-Csv -Path "WizUsers.csv" -NoTypeInformation
 
-# Example 6: Show users with critical issues
+# Example 7: Show users with critical issues
 $criticalUsers = Get-WizUser | Where-Object { $_.IssueAnalytics.CriticalSeverityCount -gt 0 }
 $criticalUsers | ForEach-Object {
     Write-Host "$($_.Name) has $($_.IssueAnalytics.CriticalSeverityCount) critical issues"
 }
 
-# Example 7: Use Verbose to display progress and ensure it completes
+# Example 8: Use Verbose to display progress and ensure it completes
 $null = Get-WizUser -Verbose
 
-# Example 8: Connect using client credentials
+# Example 9: Connect using client credentials
 $null = Connect-Wiz -ClientId $env:WIZ_CLIENT_ID -ClientSecret $env:WIZ_CLIENT_SECRET -TestConnection
 
