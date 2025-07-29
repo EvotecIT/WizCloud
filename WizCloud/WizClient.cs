@@ -242,10 +242,10 @@ public class WizClient : IDisposable {
                 "application/json"
             );
 
-            using (var response = await _httpClient.SendAsync(request)) {
+            using (var response = await _httpClient.SendAsync(request).ConfigureAwait(false)) {
                 response.EnsureSuccessStatusCode();
 
-                var content = await response.Content.ReadAsStringAsync();
+                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var jsonResponse = JsonNode.Parse(content);
 
                 if (jsonResponse == null)
