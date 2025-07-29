@@ -108,7 +108,7 @@ namespace WizCloud.Models
                 Name = json["name"]?.GetValue<string>() ?? string.Empty,
                 Type = json["type"]?.GetValue<string>() ?? string.Empty,
                 NativeType = json["nativeType"]?.GetValue<string>(),
-                DeletedAt = json["deletedAt"]?.GetValue<DateTime?>(),
+                DeletedAt = json["deletedAt"]?.GetValue<DateTime?>()?.ToLocalTime(),
                 
                 HasAccessToSensitiveData = json["hasAccessToSensitiveData"]?.GetValue<bool>() ?? false,
                 HasAdminPrivileges = json["hasAdminPrivileges"]?.GetValue<bool>() ?? false,
