@@ -8,6 +8,7 @@ using WizCloud;
 namespace WizCloud.Tests;
 
 [TestClass]
+[DoNotParallelize]
 public sealed class WizRegionServiceTests {
     private sealed class FakeHandler : HttpMessageHandler {
         private readonly HttpResponseMessage _response;
@@ -63,4 +64,5 @@ public sealed class WizRegionServiceTests {
         var field = typeof(WizRegionService).GetField("_cachedRegions", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.NonPublic);
         Assert.IsNotNull(field);
         field!.SetValue(null, null);
-    }}
+    }
+}
