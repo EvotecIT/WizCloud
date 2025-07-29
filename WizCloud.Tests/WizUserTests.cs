@@ -110,4 +110,28 @@ public sealed class WizUserTests {
         Assert.AreEqual(4, user.IssueAnalytics!.HighSeverityCount);
         Assert.AreEqual(0, user.IssueAnalytics!.CriticalSeverityCount);
     }
+
+    [TestMethod]
+    public void FromJson_IncompleteJson_DoesNotThrow() {
+        string jsonString = """
+        {
+          "id": "2",
+          "name": "Jane",
+          "graphEntity": "invalid",
+          "projects": ["bad"],
+          "technology": 5,
+          "issueAnalytics": true
+        }
+        """;
+
+        JsonNode json = JsonNode.Parse(jsonString)!;
+
+        WizUser user = WizUser.FromJson(json);
+
+        Assert.AreEqual("2", user.Id);
+        Assert.AreEqual("Jane", user.Name);
+        Assert.AreEqual(0, user.Projects.Count);
+        Assert.IsNull(user.Technology);
+        Assert.IsNull(user.IssueAnalytics);
+    }
 }
