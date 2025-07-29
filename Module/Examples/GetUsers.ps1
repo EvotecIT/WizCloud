@@ -37,3 +37,6 @@ $criticalUsers | ForEach-Object {
 # Example 7: Use Verbose to display progress and ensure it completes
 $null = Get-WizUser -Verbose
 
+# Example 8: Connect using client credentials
+$null = Connect-Wiz -ClientId $env:WIZ_CLIENT_ID -ClientSecret $env:WIZ_CLIENT_SECRET -TestConnection
+
