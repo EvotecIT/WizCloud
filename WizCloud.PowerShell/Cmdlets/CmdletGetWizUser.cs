@@ -121,6 +121,7 @@ namespace WizCloud.PowerShell.Cmdlets
 
                 progressRecord.StatusDescription = $"Retrieved {users.Count} users";
                 progressRecord.PercentComplete = 100;
+                progressRecord.RecordType = ProgressRecordType.Completed;
                 WriteProgress(progressRecord);
 
                 WriteVerbose($"Successfully retrieved {users.Count} users");

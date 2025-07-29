@@ -33,3 +33,7 @@ $criticalUsers = Get-WizUser | Where-Object { $_.IssueAnalytics.CriticalSeverity
 $criticalUsers | ForEach-Object {
     Write-Host "$($_.Name) has $($_.IssueAnalytics.CriticalSeverityCount) critical issues"
 }
+
+# Example 7: Use Verbose to display progress and ensure it completes
+$null = Get-WizUser -Verbose
+
