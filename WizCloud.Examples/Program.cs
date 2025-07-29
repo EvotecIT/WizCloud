@@ -5,5 +5,6 @@ internal class Program {
         await TokenAuthSample.RunAsync();
         await ClientCredentialSample.RunAsync();
         await MultiClientSample.RunAsync();
+        await StreamingSample.RunAsync();
     }
 }

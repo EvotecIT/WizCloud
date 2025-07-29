@@ -5,7 +5,7 @@ namespace WizCloud.Tests;
 public sealed class WizClientConstructorTests {
     [TestMethod]
     public void Constructor_WithNullRegionString_ThrowsArgumentNullException() {
-        Assert.ThrowsException<ArgumentNullException>(() => new WizClient("token", (string?)null));
+        Assert.ThrowsException<ArgumentNullException>(() => new WizClient("token", (string)null!));
     }
 
     [TestMethod]

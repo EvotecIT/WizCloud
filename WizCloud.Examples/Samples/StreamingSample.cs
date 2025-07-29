@@ -1,9 +1,8 @@
 using System;
 using System.Threading.Tasks;
-using WizCloud;
 
 namespace WizCloud.Examples;
-internal static class TokenAuthSample {
+internal static class StreamingSample {
     public static async Task RunAsync() {
         var token = Environment.GetEnvironmentVariable("WIZ_SERVICE_ACCOUNT_TOKEN");
         if (string.IsNullOrEmpty(token)) {
@@ -12,10 +11,9 @@ internal static class TokenAuthSample {
         }
 
         using var client = new WizClient(token);
-        var users = await client.GetUsersAsync(pageSize: 1);
-        Console.WriteLine($"Token auth sample retrieved {users.Count} user(s).");
-        if (users.Count > 0) {
-            Console.WriteLine($"First user type: {users[0].Type}");
+        await foreach (var user in client.GetUsersAsyncEnumerable(pageSize: 1)) {
+            Console.WriteLine($"Streaming user: {user.Name}");
+            break;
         }
     }
 }

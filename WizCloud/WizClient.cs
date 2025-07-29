@@ -5,7 +5,9 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 
 namespace WizCloud;
@@ -77,6 +79,31 @@ public class WizClient : IDisposable {
         }
 
         return users;
+    }
+
+    /// <summary>
+    /// Streams users from Wiz asynchronously as an <see cref="IAsyncEnumerable{WizUser}"/>.
+    /// </summary>
+    /// <param name="pageSize">The number of users to retrieve per page. Defaults to 20.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>An async enumerable sequence of users.</returns>
+    public async IAsyncEnumerable<WizUser> GetUsersAsyncEnumerable(int pageSize = 20, [EnumeratorCancellation] CancellationToken cancellationToken = default) {
+        string? endCursor = null;
+        bool hasNextPage = true;
+
+        while (!cancellationToken.IsCancellationRequested && hasNextPage) {
+            var result = await GetUsersPageAsync(pageSize, endCursor).ConfigureAwait(false);
+
+            foreach (var user in result.Users) {
+                if (cancellationToken.IsCancellationRequested)
+                    yield break;
+
+                yield return user;
+            }
+
+            hasNextPage = result.HasNextPage;
+            endCursor = result.EndCursor;
+        }
     }
 
     /// <summary>
