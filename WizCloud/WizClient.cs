@@ -156,10 +156,16 @@ public class WizClient : IDisposable {
                 "application/json"
             );
 
-            using (var response = await _httpClient.SendAsync(request)) {
-                response.EnsureSuccessStatusCode();
+            using (var response = await _httpClient.SendAsync(request).ConfigureAwait(false)) {
+                if (!response.IsSuccessStatusCode) {
+                    var errorBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    var message = $"Request failed with status code {(int)response.StatusCode} ({response.ReasonPhrase}).";
+                    if (!string.IsNullOrWhiteSpace(errorBody))
+                        message += $" Body: {errorBody}";
+                    throw new HttpRequestException(message);
+                }
 
-                var content = await response.Content.ReadAsStringAsync();
+                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                 var jsonResponse = JsonNode.Parse(content);
 
                 if (jsonResponse == null)

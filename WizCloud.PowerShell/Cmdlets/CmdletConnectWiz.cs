@@ -107,6 +107,13 @@ public class CmdletConnectWiz : AsyncPSCmdlet {
             }
 
             WriteObject(true);
+        } catch (HttpRequestException ex) {
+            WriteError(new ErrorRecord(
+                ex,
+                "WizApiHttpError",
+                ErrorCategory.ConnectionError,
+                null));
+            WriteObject(false);
         } catch (Exception ex) {
             WriteError(new ErrorRecord(
                 ex,
