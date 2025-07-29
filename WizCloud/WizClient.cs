@@ -15,9 +15,16 @@ namespace WizCloud;
 /// Provides a client for interacting with the Wiz GraphQL API.
 /// </summary>
 public class WizClient : IDisposable {
-    private readonly HttpClient _httpClient;
+    private static readonly HttpClient _httpClient = CreateClient();
     private readonly string _apiEndpoint;
+    private readonly string _token;
     private bool _disposed;
+
+    private static HttpClient CreateClient() {
+        var client = new HttpClient();
+        client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+        return client;
+    }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="WizClient"/> class with a token and region string.
@@ -32,10 +39,8 @@ public class WizClient : IDisposable {
         if (region is null)
             throw new ArgumentNullException(nameof(region));
 
+        _token = token;
         _apiEndpoint = $"https://api.{region}.app.wiz.io/graphql";
-        _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
 
     /// <summary>
@@ -52,10 +57,8 @@ public class WizClient : IDisposable {
             throw new ArgumentNullException(nameof(region));
 
         var regionString = WizRegionHelper.ToApiString(region.Value);
+        _token = token;
         _apiEndpoint = $"https://api.{regionString}.app.wiz.io/graphql";
-        _httpClient = new HttpClient();
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-        _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
     }
 
     /// <summary>
@@ -146,6 +149,7 @@ public class WizClient : IDisposable {
         };
 
         using (var request = new HttpRequestMessage(HttpMethod.Post, _apiEndpoint)) {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             request.Content = new StringContent(
                 JsonSerializer.Serialize(requestBody),
                 Encoding.UTF8,
@@ -194,10 +198,6 @@ public class WizClient : IDisposable {
     /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
     protected virtual void Dispose(bool disposing) {
         if (_disposed) return;
-
-        if (disposing) {
-            _httpClient?.Dispose();
-        }
 
         _disposed = true;
     }
