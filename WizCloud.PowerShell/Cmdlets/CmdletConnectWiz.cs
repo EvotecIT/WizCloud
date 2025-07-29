@@ -3,6 +3,8 @@ using System.Management.Automation;
 using System.Threading.Tasks;
 using ISUID.PowerShell;
 using WizCloud;
+using WizCloud.Authentication;
+using WizCloud.Helpers;
 
 namespace WizCloud.PowerShell.Cmdlets
 {
@@ -35,6 +37,20 @@ namespace WizCloud.PowerShell.Cmdlets
         public string? Token { get; set; }
 
         /// <summary>
+        /// <para type="description">The service account client ID.</para>
+        /// </summary>
+        [Parameter(Mandatory = false, HelpMessage = "The Wiz service account client ID.")]
+        [ValidateNotNullOrEmpty]
+        public string? ClientId { get; set; }
+
+        /// <summary>
+        /// <para type="description">The service account client secret.</para>
+        /// </summary>
+        [Parameter(Mandatory = false, HelpMessage = "The Wiz service account client secret.")]
+        [ValidateNotNullOrEmpty]
+        public string? ClientSecret { get; set; }
+
+        /// <summary>
         /// <para type="description">The Wiz region to connect to. Default is 'eu17'.</para>
         /// </summary>
         [Parameter(Mandatory = false, HelpMessage = "The Wiz region to connect to (e.g., 'eu17', 'us1', 'us2').")]
@@ -55,20 +71,36 @@ namespace WizCloud.PowerShell.Cmdlets
         {
             try
             {
-                // If no token provided, check environment variable
+                // If no token provided, attempt to retrieve one
                 if (string.IsNullOrEmpty(Token))
                 {
                     Token = Environment.GetEnvironmentVariable("WIZ_SERVICE_ACCOUNT_TOKEN");
+
+                    if (string.IsNullOrEmpty(Token) && !string.IsNullOrEmpty(ClientId) && !string.IsNullOrEmpty(ClientSecret))
+                    {
+                        WriteVerbose("Retrieving token using client credentials");
+                        var regionEnum = WizRegionHelper.FromString(Region);
+                        Token = await WizAuthentication.AcquireTokenAsync(ClientId!, ClientSecret!, regionEnum);
+                    }
+
                     if (string.IsNullOrEmpty(Token))
                     {
                         WriteError(new ErrorRecord(
-                            new ArgumentException("No token provided and WIZ_SERVICE_ACCOUNT_TOKEN environment variable is not set."),
+                            new ArgumentException("No token or client credentials provided."),
                             "NoTokenProvided",
                             ErrorCategory.AuthenticationError,
                             null));
                         return;
                     }
-                    WriteVerbose("Using token from WIZ_SERVICE_ACCOUNT_TOKEN environment variable");
+
+                    if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WIZ_SERVICE_ACCOUNT_TOKEN")))
+                    {
+                        WriteVerbose("Token acquired using client credentials");
+                    }
+                    else
+                    {
+                        WriteVerbose("Using token from WIZ_SERVICE_ACCOUNT_TOKEN environment variable");
+                    }
                 }
 
                 // Store the credentials in the module state
