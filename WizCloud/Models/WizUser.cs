@@ -116,36 +116,36 @@ public class WizUser {
         };
 
         // Parse graph entity
-        var graphEntity = json["graphEntity"];
+        var graphEntity = json["graphEntity"] as JsonObject;
         if (graphEntity != null) {
             user.GraphEntityId = graphEntity["id"]?.GetValue<string>();
             user.GraphEntityType = graphEntity["type"]?.GetValue<string>();
 
-            var properties = graphEntity["properties"];
-            if (properties != null && properties is JsonObject propsObj) {
-                foreach (var prop in propsObj) {
+            var properties = graphEntity["properties"] as JsonObject;
+            if (properties != null) {
+                foreach (var prop in properties) {
                     user.GraphEntityProperties[prop.Key] = prop.Value?.ToString();
                 }
             }
         }
 
         // Parse projects
-        var projects = json["projects"];
-        if (projects != null && projects is JsonArray projectsArray) {
-            foreach (var project in projectsArray) {
-                if (project != null) {
+        var projects = json["projects"] as JsonArray;
+        if (projects != null) {
+            foreach (var project in projects) {
+                if (project is JsonObject projObj) {
                     user.Projects.Add(new WizProject {
-                        Id = project["id"]?.GetValue<string>() ?? string.Empty,
-                        Name = project["name"]?.GetValue<string>() ?? string.Empty,
-                        Slug = project["slug"]?.GetValue<string>() ?? string.Empty,
-                        IsFolder = project["isFolder"]?.GetValue<bool>() ?? false
+                        Id = projObj["id"]?.GetValue<string>() ?? string.Empty,
+                        Name = projObj["name"]?.GetValue<string>() ?? string.Empty,
+                        Slug = projObj["slug"]?.GetValue<string>() ?? string.Empty,
+                        IsFolder = projObj["isFolder"]?.GetValue<bool>() ?? false
                     });
                 }
             }
         }
 
         // Parse technology
-        var tech = json["technology"];
+        var tech = json["technology"] as JsonObject;
         if (tech != null) {
             user.Technology = new WizTechnology {
                 Id = tech["id"]?.GetValue<string>() ?? string.Empty,
@@ -155,13 +155,13 @@ public class WizUser {
                 Categories = new List<WizCategory>()
             };
 
-            var categories = tech["categories"];
-            if (categories != null && categories is JsonArray categoriesArray) {
-                foreach (var cat in categoriesArray) {
-                    if (cat != null) {
+            var categories = tech["categories"] as JsonArray;
+            if (categories != null) {
+                foreach (var cat in categories) {
+                    if (cat is JsonObject catObj) {
                         user.Technology.Categories.Add(new WizCategory {
-                            Id = cat["id"]?.GetValue<string>() ?? string.Empty,
-                            Name = cat["name"]?.GetValue<string>() ?? string.Empty
+                            Id = catObj["id"]?.GetValue<string>() ?? string.Empty,
+                            Name = catObj["name"]?.GetValue<string>() ?? string.Empty
                         });
                     }
                 }
@@ -180,7 +180,7 @@ public class WizUser {
         }
 
         // Parse issue analytics
-        var issueAnalytics = json["issueAnalytics"];
+        var issueAnalytics = json["issueAnalytics"] as JsonObject;
         if (issueAnalytics != null) {
             user.IssueAnalytics = new WizIssueAnalytics {
                 IssueCount = issueAnalytics["issueCount"]?.GetValue<int>() ?? 0,
