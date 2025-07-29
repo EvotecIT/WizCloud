@@ -39,6 +39,9 @@ public class WizClient : IDisposable {
         if (region is null)
             throw new ArgumentNullException(nameof(region));
 
+        if (string.IsNullOrWhiteSpace(region))
+            throw new ArgumentException("Region cannot be empty or whitespace", nameof(region));
+
         _token = token;
         _apiEndpoint = $"https://api.{region}.app.wiz.io/graphql";
     }
