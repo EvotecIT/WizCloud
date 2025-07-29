@@ -45,11 +45,6 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
     [ValidateRange(1, 500)]
     public int PageSize { get; set; } = 20;
 
-    /// <summary>
-    /// <para type="description">Stream results as they are retrieved.</para>
-    /// </summary>
-    [Parameter(Mandatory = false, HelpMessage = "Stream results as they are retrieved.")]
-    public SwitchParameter Stream { get; set; }
 
     private WizClient? _wizClient;
 
@@ -110,28 +105,14 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
             var progressRecord = new ProgressRecord(1, "Get-WizUser", "Retrieving users from Wiz...");
             WriteProgress(progressRecord);
 
-            if (Stream) {
-                await foreach (var user in _wizClient.GetUsersAsyncEnumerable(PageSize, CancelToken)) {
-                    if (CancelToken.IsCancellationRequested)
-                        break;
+            await foreach (var user in _wizClient.GetUsersAsyncEnumerable(PageSize, CancelToken)) {
+                if (CancelToken.IsCancellationRequested)
+                    break;
 
-                    WriteObject(user);
-                }
-
-                progressRecord.StatusDescription = "Streaming completed";
-            } else {
-                var users = await _wizClient.GetUsersAsync(PageSize);
-                progressRecord.StatusDescription = $"Retrieved {users.Count} users";
-
-                WriteVerbose($"Successfully retrieved {users.Count} users");
-
-                foreach (var user in users) {
-                    if (CancelToken.IsCancellationRequested)
-                        break;
-
-                    WriteObject(user);
-                }
+                WriteObject(user);
             }
+
+            progressRecord.StatusDescription = "Completed";
 
             progressRecord.PercentComplete = 100;
             progressRecord.RecordType = ProgressRecordType.Completed;
