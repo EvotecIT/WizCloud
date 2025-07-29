@@ -13,6 +13,14 @@ public sealed class WizClientConstructorTests {
         Assert.ThrowsException<ArgumentNullException>(() => new WizClient("token", (WizRegion?)null));
     }
 
+    [DataTestMethod]
+    [DataRow("")]
+    [DataRow(" ")]
+    [DataRow("   ")]
+    public void Constructor_WithEmptyOrWhitespaceRegionString_ThrowsArgumentException(string region) {
+        Assert.ThrowsException<ArgumentException>(() => new WizClient("token", region));
+    }
+
     [TestMethod]
     public void HttpClient_IsSharedAcrossInstances() {
         using var first = new WizClient("token");
