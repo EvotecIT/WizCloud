@@ -8,5 +8,6 @@ internal class Program {
         await StreamingSample.RunAsync();
         await ErrorHandlingSample.RunAsync();
         await GraphQlQueriesSample.RunAsync();
+        await CloudAccountsSample.RunAsync();
     }
 }

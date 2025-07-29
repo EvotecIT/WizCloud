@@ -13,5 +13,6 @@ public sealed class WizClientGraphQlQueriesTests {
         var source = File.ReadAllText(filePath);
         StringAssert.Contains(source, "GraphQlQueries.UsersQuery");
         StringAssert.Contains(source, "GraphQlQueries.ProjectsQuery");
+        StringAssert.Contains(source, "GraphQlQueries.CloudAccountsQuery");
     }
 }
