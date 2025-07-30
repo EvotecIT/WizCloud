@@ -30,8 +30,8 @@ To run unit tests:
 ```csharp
 using WizCloud;
 
-var token = Environment.GetEnvironmentVariable("WIZ_SERVICE_ACCOUNT_TOKEN");
-using var client = new WizClient(token!, WizRegion.EU17);
+var token = await WizAuthentication.AcquireTokenAsync("clientId", "clientSecret", WizRegion.EU17);
+using var client = new WizClient(token, WizRegion.EU17);
 var projects = await client.GetProjectsAsync();
 Console.WriteLine($"Retrieved {projects.Count} projects");
 ```
@@ -42,8 +42,8 @@ Console.WriteLine($"Retrieved {projects.Count} projects");
 # Import the module from the repository
 Import-Module ./Module/WizCloud.psd1 -Force
 
-# Connect using an environment variable or provide a token
-Connect-Wiz -TestConnection
+# Connect using client credentials
+Connect-Wiz -ClientId "clientId" -ClientSecret "clientSecret" -TestConnection
 
 # Retrieve users
 Get-WizUser -PageSize 50 | Select-Object Name, Type

@@ -4,12 +4,7 @@ using System.Threading.Tasks;
 namespace WizCloud.Examples;
 internal static class MultiClientSample {
     public static async Task RunAsync() {
-        var token = Environment.GetEnvironmentVariable("WIZ_SERVICE_ACCOUNT_TOKEN");
-        if (string.IsNullOrEmpty(token)) {
-            Console.WriteLine("WIZ_SERVICE_ACCOUNT_TOKEN environment variable is not set.");
-            return;
-        }
-
+        var token = await WizAuthentication.AcquireTokenAsync("clientId", "clientSecret");
         using var first = new WizClient(token);
         using var second = new WizClient(token);
         var users1 = await first.GetUsersAsync(pageSize: 1);

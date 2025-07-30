@@ -17,9 +17,8 @@ namespace WizCloud.PowerShell;
 /// <code>Connect-Wiz -Token "your-service-account-token" -Region "us1"</code>
 /// </example>
 /// <example>
-/// <para>Connect using environment variable:</para>
-/// <code>$env:WIZ_SERVICE_ACCOUNT_TOKEN = "your-token"
-/// Connect-Wiz</code>
+/// <para>Connect using client credentials:</para>
+/// <code>Connect-Wiz -ClientId "id" -ClientSecret "secret"</code>
 /// </example>
 /// </summary>
 [Cmdlet(VerbsCommunications.Connect, "Wiz")]
@@ -64,11 +63,9 @@ public class CmdletConnectWiz : AsyncPSCmdlet {
     /// <returns>A task representing the asynchronous operation.</returns>
     protected override async Task ProcessRecordAsync() {
         try {
-            // If no token provided, attempt to retrieve one
+            // If no token provided, attempt to retrieve one using client credentials
             if (string.IsNullOrEmpty(Token)) {
-                Token = Environment.GetEnvironmentVariable("WIZ_SERVICE_ACCOUNT_TOKEN");
-
-                if (string.IsNullOrEmpty(Token) && !string.IsNullOrEmpty(ClientId) && !string.IsNullOrEmpty(ClientSecret)) {
+                if (!string.IsNullOrEmpty(ClientId) && !string.IsNullOrEmpty(ClientSecret)) {
                     WriteVerbose("Retrieving token using client credentials");
                     Token = await WizAuthentication.AcquireTokenAsync(ClientId!, ClientSecret!, Region);
                 }
@@ -82,15 +79,13 @@ public class CmdletConnectWiz : AsyncPSCmdlet {
                     return;
                 }
 
-                if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("WIZ_SERVICE_ACCOUNT_TOKEN"))) {
-                    WriteVerbose("Token acquired using client credentials");
-                } else {
-                    WriteVerbose("Using token from WIZ_SERVICE_ACCOUNT_TOKEN environment variable");
-                }
+                WriteVerbose("Token acquired using client credentials");
             }
 
             // Store the credentials in the module state
             ModuleInitialization.DefaultToken = Token;
+            ModuleInitialization.DefaultClientId = ClientId;
+            ModuleInitialization.DefaultClientSecret = ClientSecret;
             ModuleInitialization.DefaultRegion = Region;
 
             // Test the connection if requested

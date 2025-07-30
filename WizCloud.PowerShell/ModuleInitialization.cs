@@ -14,6 +14,22 @@ public class ModuleInitialization : IModuleAssemblyInitializer, IModuleAssemblyC
     }
 
     /// <summary>
+    /// Gets or sets the default Wiz client id for the session
+    /// </summary>
+    public static string? DefaultClientId {
+        get => WizSession.DefaultClientId;
+        set => WizSession.DefaultClientId = value;
+    }
+
+    /// <summary>
+    /// Gets or sets the default Wiz client secret for the session
+    /// </summary>
+    public static string? DefaultClientSecret {
+        get => WizSession.DefaultClientSecret;
+        set => WizSession.DefaultClientSecret = value;
+    }
+
+    /// <summary>
     /// Gets or sets the default Wiz region for the session
     /// </summary>
     public static WizRegion DefaultRegion {
@@ -25,16 +41,7 @@ public class ModuleInitialization : IModuleAssemblyInitializer, IModuleAssemblyC
     /// Called when the module is imported
     /// </summary>
     public void OnImport() {
-        // Check for environment variable on import
-        var envToken = System.Environment.GetEnvironmentVariable("WIZ_SERVICE_ACCOUNT_TOKEN");
-        if (!string.IsNullOrEmpty(envToken)) {
-            DefaultToken = envToken;
-        }
-
-        var envRegion = System.Environment.GetEnvironmentVariable("WIZ_REGION");
-        if (!string.IsNullOrEmpty(envRegion)) {
-            DefaultRegion = WizRegionHelper.FromString(envRegion);
-        }
+        // Nothing to do on import
     }
 
     /// <summary>
@@ -42,6 +49,8 @@ public class ModuleInitialization : IModuleAssemblyInitializer, IModuleAssemblyC
     /// </summary>
     public void OnRemove(PSModuleInfo psModuleInfo) {
         DefaultToken = null;
+        DefaultClientId = null;
+        DefaultClientSecret = null;
         DefaultRegion = WizRegion.EU17;
     }
 }
