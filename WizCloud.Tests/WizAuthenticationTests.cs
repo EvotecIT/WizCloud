@@ -18,4 +18,12 @@ public sealed class WizAuthenticationTests {
         await Assert.ThrowsExceptionAsync<ArgumentException>(async () =>
             await WizAuthentication.AcquireTokenAsync("id", null!, WizRegion.EU17));
     }
+
+    [TestMethod]
+    public void AcquireTokenAsync_ContainsDetailedErrorMessage() {
+        var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
+        var filePath = Path.Combine(repoRoot, "WizCloud", "Authentication", "WizAuthentication.cs");
+        var source = File.ReadAllText(filePath);
+        StringAssert.Contains(source, "Authentication failed with status code");
+    }
 }
