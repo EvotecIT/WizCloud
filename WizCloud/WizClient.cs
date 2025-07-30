@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
@@ -17,7 +18,10 @@ namespace WizCloud;
 public class WizClient : IDisposable {
     private static readonly HttpClient _httpClient = CreateClient();
     private readonly string _apiEndpoint;
-    private readonly string _token;
+    private readonly string? _clientId;
+    private readonly string? _clientSecret;
+    private readonly WizRegion _region;
+    private string _token;
     private bool _disposed;
 
     private static HttpClient CreateClient() {
@@ -32,7 +36,7 @@ public class WizClient : IDisposable {
     /// <param name="token">The Wiz service account token for authentication.</param>
     /// <param name="region">The Wiz region identifier (e.g., "eu17", "us1"). Defaults to "eu17".</param>
     /// <exception cref="ArgumentException">Thrown when the token is null or empty.</exception>
-    public WizClient(string token, string region = "eu17") {
+    public WizClient(string token, string region = "eu17", string? clientId = null, string? clientSecret = null) {
         if (string.IsNullOrWhiteSpace(token))
             throw new ArgumentException("Token cannot be null or empty", nameof(token));
 
@@ -43,6 +47,9 @@ public class WizClient : IDisposable {
             throw new ArgumentException("Region cannot be empty or whitespace", nameof(region));
 
         _token = token;
+        _clientId = clientId;
+        _clientSecret = clientSecret;
+        _region = WizRegionHelper.FromString(region);
         _apiEndpoint = $"https://api.{region}.app.wiz.io/graphql";
     }
 
@@ -52,7 +59,7 @@ public class WizClient : IDisposable {
     /// <param name="token">The Wiz service account token for authentication.</param>
     /// <param name="region">The Wiz region enumeration value.</param>
     /// <exception cref="ArgumentException">Thrown when the token is null or empty.</exception>
-    public WizClient(string token, WizRegion? region) {
+    public WizClient(string token, WizRegion? region, string? clientId = null, string? clientSecret = null) {
         if (string.IsNullOrWhiteSpace(token))
             throw new ArgumentException("Token cannot be null or empty", nameof(token));
 
@@ -61,7 +68,50 @@ public class WizClient : IDisposable {
 
         var regionString = WizRegionHelper.ToApiString(region.Value);
         _token = token;
+        _clientId = clientId;
+        _clientSecret = clientSecret;
+        _region = region.Value;
         _apiEndpoint = $"https://api.{regionString}.app.wiz.io/graphql";
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WizClient"/> class using client credentials.
+    /// </summary>
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WizClient"/> class using client credentials.
+    /// </summary>
+    /// <param name="clientId">The Wiz service account client ID.</param>
+    /// <param name="clientSecret">The Wiz service account client secret.</param>
+    /// <param name="region">The Wiz region enumeration value.</param>
+    public WizClient(string clientId, string clientSecret, WizRegion region)
+        : this(AcquireToken(clientId, clientSecret, region), region, clientId, clientSecret) { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="WizClient"/> class using client credentials.
+    /// </summary>
+    /// <param name="clientId">The Wiz service account client ID.</param>
+    /// <param name="clientSecret">The Wiz service account client secret.</param>
+    /// <param name="region">The Wiz region identifier.</param>
+    public WizClient(string clientId, string clientSecret, string region)
+        : this(clientId, clientSecret, WizRegionHelper.FromString(region)) { }
+
+    private static string AcquireToken(string clientId, string clientSecret, WizRegion region)
+        => WizAuthentication.AcquireTokenAsync(clientId, clientSecret, region).GetAwaiter().GetResult();
+
+    private async Task<HttpResponseMessage> SendWithRefreshAsync(HttpRequestMessage request) {
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+        var response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized &&
+            !string.IsNullOrEmpty(_clientId) &&
+            !string.IsNullOrEmpty(_clientSecret)) {
+            response.Dispose();
+            _token = await WizAuthentication.AcquireTokenAsync(_clientId, _clientSecret, _region).ConfigureAwait(false);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+            response = await _httpClient.SendAsync(request).ConfigureAwait(false);
+        }
+
+        return response;
     }
 
     /// <summary>
@@ -135,14 +185,13 @@ public class WizClient : IDisposable {
         };
 
         using (var request = new HttpRequestMessage(HttpMethod.Post, _apiEndpoint)) {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             request.Content = new StringContent(
                 JsonSerializer.Serialize(requestBody),
                 Encoding.UTF8,
                 "application/json"
             );
 
-            using (var response = await _httpClient.SendAsync(request).ConfigureAwait(false)) {
+            using (var response = await SendWithRefreshAsync(request).ConfigureAwait(false)) {
                 if (!response.IsSuccessStatusCode) {
                     var errorBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
                     var message = $"Request failed with status code {(int)response.StatusCode} ({response.ReasonPhrase}).";
@@ -216,14 +265,13 @@ public class WizClient : IDisposable {
         };
 
         using (var request = new HttpRequestMessage(HttpMethod.Post, _apiEndpoint)) {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             request.Content = new StringContent(
                 JsonSerializer.Serialize(requestBody),
                 Encoding.UTF8,
                 "application/json"
             );
 
-            using (var response = await _httpClient.SendAsync(request).ConfigureAwait(false)) {
+            using (var response = await SendWithRefreshAsync(request).ConfigureAwait(false)) {
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
