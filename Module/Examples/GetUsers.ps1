@@ -2,11 +2,8 @@
 Import-Module .\WizCloud.psd1 -Force
 
 # Example 1: Connect to Wiz and get all users
-# First, set your token as an environment variable or pass it directly
-# $env:WIZ_SERVICE_ACCOUNT_TOKEN = "your-token-here"
-
-# Connect to Wiz (uses environment variable if token not provided)
-Connect-Wiz -TestConnection
+# Provide client credentials to acquire a token and store it for the session
+Connect-Wiz -ClientId "clientId" -ClientSecret "clientSecret" -TestConnection
 
 # Get all users
 $users = Get-WizUser
