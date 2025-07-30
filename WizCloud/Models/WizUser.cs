@@ -25,7 +25,7 @@ public class WizUser {
     /// <summary>
     /// Gets or sets the native type in the cloud provider.
     /// </summary>
-    public string? NativeType { get; set; }
+    public WizNativeType? NativeType { get; set; }
 
     /// <summary>
     /// Gets or sets the date and time when the user was deleted, if applicable.
@@ -42,7 +42,7 @@ public class WizUser {
     /// <summary>
     /// Gets or sets the graph entity type.
     /// </summary>
-    public string? GraphEntityType { get; set; }
+    public WizGraphEntityType? GraphEntityType { get; set; }
 
     /// <summary>
     /// Gets or sets additional properties from the graph entity.
@@ -103,7 +103,9 @@ public class WizUser {
             Id = json["id"]?.GetValue<string>() ?? string.Empty,
             Name = json["name"]?.GetValue<string>() ?? string.Empty,
             Type = Enum.TryParse(json["type"]?.GetValue<string>(), true, out WizUserType tmpType) ? tmpType : WizUserType.USER_ACCOUNT,
-            NativeType = json["nativeType"]?.GetValue<string>(),
+            NativeType = Enum.TryParse(json["nativeType"]?.GetValue<string>(), true, out WizNativeType tmpNative)
+                ? tmpNative
+                : null,
             DeletedAt = json["deletedAt"]?.GetValue<DateTime?>()?.ToLocalTime(),
 
             HasAccessToSensitiveData = json["hasAccessToSensitiveData"]?.GetValue<bool>() ?? false,
@@ -119,7 +121,9 @@ public class WizUser {
         var graphEntity = json["graphEntity"] as JsonObject;
         if (graphEntity != null) {
             user.GraphEntityId = graphEntity["id"]?.GetValue<string>();
-            user.GraphEntityType = graphEntity["type"]?.GetValue<string>();
+            var geTypeStr = graphEntity["type"]?.GetValue<string>();
+            if (Enum.TryParse(geTypeStr, true, out WizGraphEntityType tmpGeType))
+                user.GraphEntityType = tmpGeType;
 
             var properties = graphEntity["properties"] as JsonObject;
             if (properties != null) {
@@ -174,7 +178,9 @@ public class WizUser {
             user.CloudAccount = new WizCloudAccount {
                 Id = cloudAccount["id"]?.GetValue<string>() ?? string.Empty,
                 Name = cloudAccount["name"]?.GetValue<string>() ?? string.Empty,
-                CloudProvider = cloudAccount["cloudProvider"]?.GetValue<string>() ?? string.Empty,
+                CloudProvider = Enum.TryParse(cloudAccount["cloudProvider"]?.GetValue<string>(), true, out WizCloudProvider tmpProvider)
+                    ? tmpProvider
+                    : WizCloudProvider.AWS,
                 ExternalId = cloudAccount["externalId"]?.GetValue<string>()
             };
         }

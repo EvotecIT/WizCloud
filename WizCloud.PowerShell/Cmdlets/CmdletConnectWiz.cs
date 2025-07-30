@@ -50,8 +50,7 @@ public class CmdletConnectWiz : AsyncPSCmdlet {
     /// <para type="description">The Wiz region to connect to. Default is 'eu17'.</para>
     /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "The Wiz region to connect to (e.g., 'eu17', 'us1', 'us2').")]
-    [ValidateNotNullOrEmpty]
-    public string Region { get; set; } = "eu17";
+    public WizRegion Region { get; set; } = WizRegion.EU17;
 
     /// <summary>
     /// <para type="description">Test the connection to Wiz.</para>
@@ -71,8 +70,7 @@ public class CmdletConnectWiz : AsyncPSCmdlet {
 
                 if (string.IsNullOrEmpty(Token) && !string.IsNullOrEmpty(ClientId) && !string.IsNullOrEmpty(ClientSecret)) {
                     WriteVerbose("Retrieving token using client credentials");
-                    var regionEnum = WizRegionHelper.FromString(Region);
-                    Token = await WizAuthentication.AcquireTokenAsync(ClientId!, ClientSecret!, regionEnum);
+                    Token = await WizAuthentication.AcquireTokenAsync(ClientId!, ClientSecret!, Region);
                 }
 
                 if (string.IsNullOrEmpty(Token)) {
