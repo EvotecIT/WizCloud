@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Runtime.CompilerServices;
 
 
 namespace WizCloud;
@@ -194,6 +194,31 @@ public class WizClient : IDisposable {
         }
 
         return projects;
+    }
+
+    /// <summary>
+    /// Streams projects from Wiz asynchronously as an <see cref="IAsyncEnumerable{WizProject}"/>.
+    /// </summary>
+    /// <param name="pageSize">The number of projects to retrieve per page. Defaults to 20.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>An async enumerable sequence of projects.</returns>
+    public async IAsyncEnumerable<WizProject> GetProjectsAsyncEnumerable(int pageSize = 20, [EnumeratorCancellation] CancellationToken cancellationToken = default) {
+        string? endCursor = null;
+        bool hasNextPage = true;
+
+        while (!cancellationToken.IsCancellationRequested && hasNextPage) {
+            var result = await GetProjectsPageAsync(pageSize, endCursor).ConfigureAwait(false);
+
+            foreach (var project in result.Projects) {
+                if (cancellationToken.IsCancellationRequested)
+                    yield break;
+
+                yield return project;
+            }
+
+            hasNextPage = result.HasNextPage;
+            endCursor = result.EndCursor;
+        }
     }
 
     /// <summary>

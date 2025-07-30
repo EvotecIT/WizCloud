@@ -15,5 +15,10 @@ internal static class StreamingSample {
             Console.WriteLine($"Streaming user: {user.Name}");
             break;
         }
+
+        await foreach (var project in client.GetProjectsAsyncEnumerable(pageSize: 1)) {
+            Console.WriteLine($"Streaming project: {project.Name}");
+            break;
+        }
     }
 }
