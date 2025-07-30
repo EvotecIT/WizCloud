@@ -28,10 +28,20 @@ public static class GraphQlQueries {
     /// <summary>
     /// Query for retrieving projects.
     /// </summary>
-    public const string ProjectsQuery = @"query Projects($first: Int, $after: String) {
+        public const string ProjectsQuery = @"query Projects($first: Int, $after: String) {
             projects(first: $first, after: $after) {
                 pageInfo { hasNextPage endCursor }
                 nodes { id name slug isFolder }
+            }
+        }";
+
+    /// <summary>
+    /// Query for retrieving cloud accounts.
+    /// </summary>
+    public const string CloudAccountsQuery = @"query CloudAccounts($first: Int, $after: String) {
+            cloudAccounts(first: $first, after: $after) {
+                pageInfo { hasNextPage endCursor }
+                nodes { id name cloudProvider externalId }
             }
         }";
 }

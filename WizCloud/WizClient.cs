@@ -283,6 +283,87 @@ public class WizClient : IDisposable {
     }
 
     /// <summary>
+    /// Retrieves all cloud accounts from Wiz asynchronously.
+    /// </summary>
+    /// <param name="pageSize">The number of cloud accounts to retrieve per page. Defaults to 20.</param>
+    /// <returns>A task that represents the asynchronous operation. The task result contains a list of all cloud accounts.</returns>
+    public async Task<List<WizCloudAccount>> GetCloudAccountsAsync(int pageSize = 20) {
+        var accounts = new List<WizCloudAccount>();
+        string? endCursor = null;
+        bool hasNextPage = true;
+
+        while (hasNextPage) {
+            var result = await GetCloudAccountsPageAsync(pageSize, endCursor).ConfigureAwait(false);
+            accounts.AddRange(result.Accounts);
+            hasNextPage = result.HasNextPage;
+            endCursor = result.EndCursor;
+        }
+
+        return accounts;
+    }
+
+    /// <summary>
+    /// Retrieves a single page of cloud accounts from the Wiz API.
+    /// </summary>
+    /// <param name="first">The number of cloud accounts to retrieve.</param>
+    /// <param name="after">The cursor for pagination, if retrieving subsequent pages.</param>
+    /// <returns>A tuple containing the cloud accounts, whether there's a next page, and the cursor for the next page.</returns>
+    private async Task<(List<WizCloudAccount> Accounts, bool HasNextPage, string? EndCursor)> GetCloudAccountsPageAsync(int first, string? after = null) {
+        const string query = GraphQlQueries.CloudAccountsQuery;
+
+        var variables = new {
+            first,
+            after
+        };
+
+        var requestBody = new {
+            query,
+            variables
+        };
+
+        using (var request = new HttpRequestMessage(HttpMethod.Post, _apiEndpoint)) {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+            request.Content = new StringContent(
+                JsonSerializer.Serialize(requestBody),
+                Encoding.UTF8,
+                "application/json"
+            );
+
+            using (var response = await _httpClient.SendAsync(request).ConfigureAwait(false)) {
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                var jsonResponse = JsonNode.Parse(content);
+
+                if (jsonResponse == null)
+                    throw new InvalidOperationException("Received null response from API");
+
+                var accounts = new List<WizCloudAccount>();
+                var nodes = jsonResponse["data"]?["cloudAccounts"]?["nodes"]?.AsArray();
+
+                if (nodes != null) {
+                    foreach (var node in nodes) {
+                        if (node != null) {
+                            accounts.Add(new WizCloudAccount {
+                                Id = node["id"]?.GetValue<string>() ?? string.Empty,
+                                Name = node["name"]?.GetValue<string>() ?? string.Empty,
+                                CloudProvider = node["cloudProvider"]?.GetValue<string>() ?? string.Empty,
+                                ExternalId = node["externalId"]?.GetValue<string>()
+                            });
+                        }
+                    }
+                }
+
+                var pageInfo = jsonResponse["data"]?["cloudAccounts"]?["pageInfo"];
+                bool hasNextPage = pageInfo?["hasNextPage"]?.GetValue<bool>() ?? false;
+                string? endCursor = pageInfo?["endCursor"]?.GetValue<string>();
+
+                return (accounts, hasNextPage, endCursor);
+            }
+        }
+    }
+
+    /// <summary>
     /// Releases all resources used by the WizClient.
     /// </summary>
     public void Dispose() {
