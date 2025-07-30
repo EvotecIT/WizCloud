@@ -68,7 +68,7 @@ public sealed class WizUserTests {
         Assert.AreEqual("1", user.Id);
         Assert.AreEqual("John Doe", user.Name);
         Assert.AreEqual(WizUserType.USER_ACCOUNT, user.Type);
-        Assert.AreEqual("AADUser", user.NativeType);
+        Assert.AreEqual(WizNativeType.AADUser, user.NativeType);
         Assert.AreEqual(DateTime.Parse("2024-05-01T00:00:00Z"), user.DeletedAt);
 
         Assert.IsTrue(user.HasAccessToSensitiveData);
@@ -77,7 +77,7 @@ public sealed class WizUserTests {
         Assert.IsTrue(user.HasSensitiveData);
 
         Assert.AreEqual("ge1", user.GraphEntityId);
-        Assert.AreEqual("user", user.GraphEntityType);
+        Assert.AreEqual(WizGraphEntityType.USER, user.GraphEntityType);
         Assert.AreEqual("value1", user.GraphEntityProperties["prop1"]);
 
         Assert.AreEqual(1, user.Projects.Count);
@@ -99,7 +99,7 @@ public sealed class WizUserTests {
         Assert.IsNotNull(user.CloudAccount);
         Assert.AreEqual("acc1", user.CloudAccount!.Id);
         Assert.AreEqual("Account 1", user.CloudAccount!.Name);
-        Assert.AreEqual("AWS", user.CloudAccount!.CloudProvider);
+        Assert.AreEqual(WizCloudProvider.AWS, user.CloudAccount!.CloudProvider);
         Assert.AreEqual("123", user.CloudAccount!.ExternalId);
 
         Assert.IsNotNull(user.IssueAnalytics);

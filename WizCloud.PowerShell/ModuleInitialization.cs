@@ -5,23 +5,20 @@ namespace WizCloud.PowerShell;
 /// Module initialization and cleanup
 /// </summary>
 public class ModuleInitialization : IModuleAssemblyInitializer, IModuleAssemblyCleanup {
-    private static string? _defaultToken = null;
-    private static string? _defaultRegion = "eu17";
-
     /// <summary>
     /// Gets or sets the default Wiz token for the session
     /// </summary>
     public static string? DefaultToken {
-        get => _defaultToken;
-        set => _defaultToken = value;
+        get => WizSession.DefaultToken;
+        set => WizSession.DefaultToken = value;
     }
 
     /// <summary>
     /// Gets or sets the default Wiz region for the session
     /// </summary>
-    public static string? DefaultRegion {
-        get => _defaultRegion;
-        set => _defaultRegion = value;
+    public static WizRegion DefaultRegion {
+        get => WizSession.DefaultRegion;
+        set => WizSession.DefaultRegion = value;
     }
 
     /// <summary>
@@ -36,7 +33,7 @@ public class ModuleInitialization : IModuleAssemblyInitializer, IModuleAssemblyC
 
         var envRegion = System.Environment.GetEnvironmentVariable("WIZ_REGION");
         if (!string.IsNullOrEmpty(envRegion)) {
-            DefaultRegion = envRegion;
+            DefaultRegion = WizRegionHelper.FromString(envRegion);
         }
     }
 
@@ -45,6 +42,6 @@ public class ModuleInitialization : IModuleAssemblyInitializer, IModuleAssemblyC
     /// </summary>
     public void OnRemove(PSModuleInfo psModuleInfo) {
         DefaultToken = null;
-        DefaultRegion = "eu17";
+        DefaultRegion = WizRegion.EU17;
     }
 }

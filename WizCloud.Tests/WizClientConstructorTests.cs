@@ -3,23 +3,6 @@ using WizCloud;
 namespace WizCloud.Tests;
 [TestClass]
 public sealed class WizClientConstructorTests {
-    [TestMethod]
-    public void Constructor_WithNullRegionString_ThrowsArgumentNullException() {
-        Assert.ThrowsException<ArgumentNullException>(() => new WizClient("token", (string)null!));
-    }
-
-    [TestMethod]
-    public void Constructor_WithNullRegionEnum_ThrowsArgumentNullException() {
-        Assert.ThrowsException<ArgumentNullException>(() => new WizClient("token", (WizRegion?)null));
-    }
-
-    [DataTestMethod]
-    [DataRow("")]
-    [DataRow(" ")]
-    [DataRow("   ")]
-    public void Constructor_WithEmptyOrWhitespaceRegionString_ThrowsArgumentException(string region) {
-        Assert.ThrowsException<ArgumentException>(() => new WizClient("token", region));
-    }
 
     [TestMethod]
     public void HttpClient_IsSharedAcrossInstances() {
@@ -32,5 +15,14 @@ public sealed class WizClientConstructorTests {
         Assert.IsNotNull(sharedInstance);
         var secondShared = firstClientField.GetValue(null);
         Assert.AreSame(sharedInstance, secondShared);
+    }
+
+    [TestMethod]
+    public void Constructor_SetsRegionAndEndpoint() {
+        using var client = new WizClient("token", WizRegion.US1);
+        var endpointField = typeof(WizClient).GetField("_apiEndpoint", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        Assert.IsNotNull(endpointField);
+        string value = (string)endpointField!.GetValue(client)!;
+        StringAssert.Contains(value, "us1");
     }
 }
