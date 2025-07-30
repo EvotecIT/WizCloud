@@ -16,7 +16,7 @@ public class WizCloudAccount {
     /// <summary>
     /// Gets or sets the cloud provider (e.g., AWS, Azure, GCP).
     /// </summary>
-    public string CloudProvider { get; set; } = string.Empty;
+    public WizCloudProvider CloudProvider { get; set; }
 
     /// <summary>
     /// Gets or sets the external identifier for the cloud account (e.g., AWS Account ID).

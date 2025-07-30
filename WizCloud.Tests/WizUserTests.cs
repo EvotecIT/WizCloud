@@ -68,7 +68,7 @@ public sealed class WizUserTests {
         Assert.AreEqual("1", user.Id);
         Assert.AreEqual("John Doe", user.Name);
         Assert.AreEqual(WizUserType.USER_ACCOUNT, user.Type);
-        Assert.AreEqual("AADUser", user.NativeType);
+        Assert.AreEqual(WizNativeIdentityType.AAD_USER, user.NativeType);
         Assert.AreEqual(DateTime.Parse("2024-05-01T00:00:00Z"), user.DeletedAt);
 
         Assert.IsTrue(user.HasAccessToSensitiveData);
@@ -77,7 +77,7 @@ public sealed class WizUserTests {
         Assert.IsTrue(user.HasSensitiveData);
 
         Assert.AreEqual("ge1", user.GraphEntityId);
-        Assert.AreEqual("user", user.GraphEntityType);
+        Assert.AreEqual(WizGraphEntityType.USER, user.GraphEntityType);
         Assert.AreEqual("value1", user.GraphEntityProperties["prop1"]);
 
         Assert.AreEqual(1, user.Projects.Count);
@@ -99,16 +99,16 @@ public sealed class WizUserTests {
         Assert.IsNotNull(user.CloudAccount);
         Assert.AreEqual("acc1", user.CloudAccount!.Id);
         Assert.AreEqual("Account 1", user.CloudAccount!.Name);
-        Assert.AreEqual("AWS", user.CloudAccount!.CloudProvider);
+        Assert.AreEqual(WizCloudProvider.AWS, user.CloudAccount!.CloudProvider);
         Assert.AreEqual("123", user.CloudAccount!.ExternalId);
 
         Assert.IsNotNull(user.IssueAnalytics);
         Assert.AreEqual(10, user.IssueAnalytics!.IssueCount);
-        Assert.AreEqual(1, user.IssueAnalytics!.InformationalSeverityCount);
-        Assert.AreEqual(2, user.IssueAnalytics!.LowSeverityCount);
-        Assert.AreEqual(3, user.IssueAnalytics!.MediumSeverityCount);
-        Assert.AreEqual(4, user.IssueAnalytics!.HighSeverityCount);
-        Assert.AreEqual(0, user.IssueAnalytics!.CriticalSeverityCount);
+        Assert.AreEqual(1, user.IssueAnalytics!.SeverityCounts[WizSeverity.INFORMATIONAL]);
+        Assert.AreEqual(2, user.IssueAnalytics!.SeverityCounts[WizSeverity.LOW]);
+        Assert.AreEqual(3, user.IssueAnalytics!.SeverityCounts[WizSeverity.MEDIUM]);
+        Assert.AreEqual(4, user.IssueAnalytics!.SeverityCounts[WizSeverity.HIGH]);
+        Assert.AreEqual(0, user.IssueAnalytics!.SeverityCounts[WizSeverity.CRITICAL]);
     }
 
     [TestMethod]

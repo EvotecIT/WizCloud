@@ -35,9 +35,8 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
     /// <summary>
     /// <para type="description">The Wiz region to connect to. If not provided, uses the region from Connect-Wiz or defaults to 'eu17'.</para>
     /// </summary>
-    [Parameter(Mandatory = false, HelpMessage = "The Wiz region to connect to (e.g., 'eu17', 'us1', 'us2').")]
-    [ValidateNotNullOrEmpty]
-    public string? Region { get; set; }
+    [Parameter(Mandatory = false, HelpMessage = "The Wiz region to connect to.")]
+    public WizRegion? Region { get; set; }
 
     /// <summary>
     /// <para type="description">The number of users to retrieve per page. Default is 20.</para>
@@ -56,7 +55,7 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
         try {
             // Use stored token if not provided
             if (string.IsNullOrEmpty(Token)) {
-                Token = ModuleInitialization.DefaultToken;
+                Token = WizSession.DefaultToken;
                 if (string.IsNullOrEmpty(Token)) {
                     WriteError(new ErrorRecord(
                         new InvalidOperationException("No token provided. Please use Connect-Wiz first or provide a token parameter."),
@@ -69,12 +68,12 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
             }
 
             // Use stored region if not provided
-            if (string.IsNullOrEmpty(Region)) {
-                Region = ModuleInitialization.DefaultRegion ?? "eu17";
+            if (Region is null) {
+                Region = WizSession.DefaultRegion;
                 WriteVerbose($"Using region: {Region}");
             }
 
-            _wizClient = new WizClient(Token!, Region ?? "eu17");
+            _wizClient = new WizClient(Token!, Region!.Value);
             WriteVerbose($"Connected to Wiz region: {Region}");
         } catch (HttpRequestException ex) {
             WriteError(new ErrorRecord(

@@ -25,7 +25,7 @@ public class WizUser {
     /// <summary>
     /// Gets or sets the native type in the cloud provider.
     /// </summary>
-    public string? NativeType { get; set; }
+    public WizNativeIdentityType? NativeType { get; set; }
 
     /// <summary>
     /// Gets or sets the date and time when the user was deleted, if applicable.
@@ -42,7 +42,7 @@ public class WizUser {
     /// <summary>
     /// Gets or sets the graph entity type.
     /// </summary>
-    public string? GraphEntityType { get; set; }
+    public WizGraphEntityType? GraphEntityType { get; set; }
 
     /// <summary>
     /// Gets or sets additional properties from the graph entity.
@@ -103,7 +103,7 @@ public class WizUser {
             Id = json["id"]?.GetValue<string>() ?? string.Empty,
             Name = json["name"]?.GetValue<string>() ?? string.Empty,
             Type = Enum.TryParse(json["type"]?.GetValue<string>(), true, out WizUserType tmpType) ? tmpType : WizUserType.USER_ACCOUNT,
-            NativeType = json["nativeType"]?.GetValue<string>(),
+            NativeType = ParseNativeType(json["nativeType"]?.GetValue<string>()),
             DeletedAt = json["deletedAt"]?.GetValue<DateTime?>()?.ToLocalTime(),
 
             HasAccessToSensitiveData = json["hasAccessToSensitiveData"]?.GetValue<bool>() ?? false,
@@ -119,7 +119,8 @@ public class WizUser {
         var graphEntity = json["graphEntity"] as JsonObject;
         if (graphEntity != null) {
             user.GraphEntityId = graphEntity["id"]?.GetValue<string>();
-            user.GraphEntityType = graphEntity["type"]?.GetValue<string>();
+            if (Enum.TryParse(graphEntity["type"]?.GetValue<string>(), true, out WizGraphEntityType geType))
+                user.GraphEntityType = geType;
 
             var properties = graphEntity["properties"] as JsonObject;
             if (properties != null) {
@@ -174,7 +175,7 @@ public class WizUser {
             user.CloudAccount = new WizCloudAccount {
                 Id = cloudAccount["id"]?.GetValue<string>() ?? string.Empty,
                 Name = cloudAccount["name"]?.GetValue<string>() ?? string.Empty,
-                CloudProvider = cloudAccount["cloudProvider"]?.GetValue<string>() ?? string.Empty,
+                CloudProvider = Enum.TryParse(cloudAccount["cloudProvider"]?.GetValue<string>(), true, out WizCloudProvider cp) ? cp : WizCloudProvider.AWS,
                 ExternalId = cloudAccount["externalId"]?.GetValue<string>()
             };
         }
@@ -183,15 +184,29 @@ public class WizUser {
         var issueAnalytics = json["issueAnalytics"] as JsonObject;
         if (issueAnalytics != null) {
             user.IssueAnalytics = new WizIssueAnalytics {
-                IssueCount = issueAnalytics["issueCount"]?.GetValue<int>() ?? 0,
-                InformationalSeverityCount = issueAnalytics["informationalSeverityCount"]?.GetValue<int>() ?? 0,
-                LowSeverityCount = issueAnalytics["lowSeverityCount"]?.GetValue<int>() ?? 0,
-                MediumSeverityCount = issueAnalytics["mediumSeverityCount"]?.GetValue<int>() ?? 0,
-                HighSeverityCount = issueAnalytics["highSeverityCount"]?.GetValue<int>() ?? 0,
-                CriticalSeverityCount = issueAnalytics["criticalSeverityCount"]?.GetValue<int>() ?? 0
+                IssueCount = issueAnalytics["issueCount"]?.GetValue<int>() ?? 0
             };
+
+            user.IssueAnalytics.SeverityCounts[WizSeverity.INFORMATIONAL] = issueAnalytics["informationalSeverityCount"]?.GetValue<int>() ?? 0;
+            user.IssueAnalytics.SeverityCounts[WizSeverity.LOW] = issueAnalytics["lowSeverityCount"]?.GetValue<int>() ?? 0;
+            user.IssueAnalytics.SeverityCounts[WizSeverity.MEDIUM] = issueAnalytics["mediumSeverityCount"]?.GetValue<int>() ?? 0;
+            user.IssueAnalytics.SeverityCounts[WizSeverity.HIGH] = issueAnalytics["highSeverityCount"]?.GetValue<int>() ?? 0;
+            user.IssueAnalytics.SeverityCounts[WizSeverity.CRITICAL] = issueAnalytics["criticalSeverityCount"]?.GetValue<int>() ?? 0;
         }
 
         return user;
+    }
+
+    private static WizNativeIdentityType? ParseNativeType(string? value) {
+        if (string.IsNullOrWhiteSpace(value))
+            return null;
+
+        return value.ToUpperInvariant() switch {
+            "AADUSER" => WizNativeIdentityType.AAD_USER,
+            "AADSERVICEPRINCIPAL" => WizNativeIdentityType.AAD_SERVICE_PRINCIPAL,
+            "AWSIAMUSER" => WizNativeIdentityType.AWS_IAM_USER,
+            "AWSIAMROLE" => WizNativeIdentityType.AWS_IAM_ROLE,
+            _ => WizNativeIdentityType.OTHER
+        };
     }
 }

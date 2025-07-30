@@ -4,21 +4,9 @@ namespace WizCloud.Tests;
 [TestClass]
 public sealed class WizClientConstructorTests {
     [TestMethod]
-    public void Constructor_WithNullRegionString_ThrowsArgumentNullException() {
-        Assert.ThrowsException<ArgumentNullException>(() => new WizClient("token", (string)null!));
-    }
-
-    [TestMethod]
-    public void Constructor_WithNullRegionEnum_ThrowsArgumentNullException() {
-        Assert.ThrowsException<ArgumentNullException>(() => new WizClient("token", (WizRegion?)null));
-    }
-
-    [DataTestMethod]
-    [DataRow("")]
-    [DataRow(" ")]
-    [DataRow("   ")]
-    public void Constructor_WithEmptyOrWhitespaceRegionString_ThrowsArgumentException(string region) {
-        Assert.ThrowsException<ArgumentException>(() => new WizClient("token", region));
+    public void Constructor_WithValidRegion_Succeeds() {
+        using var client = new WizClient("token", WizRegion.US1);
+        Assert.IsNotNull(client);
     }
 
     [TestMethod]

@@ -27,39 +27,16 @@ public class WizClient : IDisposable {
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="WizClient"/> class with a token and region string.
+    /// Initializes a new instance of the <see cref="WizClient"/> class with a token and region.
     /// </summary>
     /// <param name="token">The Wiz service account token for authentication.</param>
-    /// <param name="region">The Wiz region identifier (e.g., "eu17", "us1"). Defaults to "eu17".</param>
+    /// <param name="region">The Wiz region enumeration value. Defaults to <see cref="WizRegion.EU17"/>.</param>
     /// <exception cref="ArgumentException">Thrown when the token is null or empty.</exception>
-    public WizClient(string token, string region = "eu17") {
+    public WizClient(string token, WizRegion region = WizRegion.EU17) {
         if (string.IsNullOrWhiteSpace(token))
             throw new ArgumentException("Token cannot be null or empty", nameof(token));
 
-        if (region is null)
-            throw new ArgumentNullException(nameof(region));
-
-        if (string.IsNullOrWhiteSpace(region))
-            throw new ArgumentException("Region cannot be empty or whitespace", nameof(region));
-
-        _token = token;
-        _apiEndpoint = $"https://api.{region}.app.wiz.io/graphql";
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="WizClient"/> class with a token and region enum.
-    /// </summary>
-    /// <param name="token">The Wiz service account token for authentication.</param>
-    /// <param name="region">The Wiz region enumeration value.</param>
-    /// <exception cref="ArgumentException">Thrown when the token is null or empty.</exception>
-    public WizClient(string token, WizRegion? region) {
-        if (string.IsNullOrWhiteSpace(token))
-            throw new ArgumentException("Token cannot be null or empty", nameof(token));
-
-        if (region is null)
-            throw new ArgumentNullException(nameof(region));
-
-        var regionString = WizRegionHelper.ToApiString(region.Value);
+        var regionString = WizRegionHelper.ToApiString(region);
         _token = token;
         _apiEndpoint = $"https://api.{regionString}.app.wiz.io/graphql";
     }
@@ -347,7 +324,7 @@ public class WizClient : IDisposable {
                             accounts.Add(new WizCloudAccount {
                                 Id = node["id"]?.GetValue<string>() ?? string.Empty,
                                 Name = node["name"]?.GetValue<string>() ?? string.Empty,
-                                CloudProvider = node["cloudProvider"]?.GetValue<string>() ?? string.Empty,
+                                CloudProvider = Enum.TryParse(node["cloudProvider"]?.GetValue<string>(), true, out WizCloudProvider cp) ? cp : WizCloudProvider.AWS,
                                 ExternalId = node["externalId"]?.GetValue<string>()
                             });
                         }

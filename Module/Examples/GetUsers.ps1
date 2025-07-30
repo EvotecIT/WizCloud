@@ -19,7 +19,7 @@ $users | Select-Object Name, Type, HasAdminPrivileges, HasHighPrivileges | Forma
 $users = Get-WizUser -PageSize 50
 
 # Example 3: Get users from a specific region
-$usUsers = Get-WizUser -Region "us1" -Token "your-us-token"
+$usUsers = Get-WizUser -Region [WizRegion]::US1 -Token "your-us-token"
 
 # Example 4: Filter users with admin privileges
 $adminUsers = Get-WizUser | Where-Object { $_.HasAdminPrivileges -eq $true }
