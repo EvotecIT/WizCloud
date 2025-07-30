@@ -36,9 +36,15 @@ public static class WizAuthentication {
         });
 
         using var response = await httpClient.PostAsync(authEndpoint, content).ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
-
         var responseString = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+        if (!response.IsSuccessStatusCode) {
+            var message = $"Authentication failed with status code {(int)response.StatusCode} ({response.ReasonPhrase}).";
+            if (!string.IsNullOrWhiteSpace(responseString))
+                message += $" Body: {responseString}";
+            throw new HttpRequestException(message);
+        }
+
         using var document = JsonDocument.Parse(responseString);
         if (!document.RootElement.TryGetProperty("access_token", out JsonElement tokenElement))
             throw new InvalidOperationException("Token was not found in the authentication response.");
