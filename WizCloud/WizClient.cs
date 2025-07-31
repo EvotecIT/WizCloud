@@ -119,12 +119,8 @@ public class WizClient : IDisposable {
         bool hasNextPage = true;
 
         while (!cancellationToken.IsCancellationRequested && hasNextPage) {
-            (List<WizUser> Users, bool HasNextPage, string? EndCursor) result;
-            try {
-                result = await GetUsersPageAsync(pageSize, endCursor).ConfigureAwait(false);
-            } catch (HttpRequestException) {
-                yield break;
-            }
+            (List<WizUser> Users, bool HasNextPage, string? EndCursor) result =
+                await GetUsersPageAsync(pageSize, endCursor).ConfigureAwait(false);
 
             foreach (var user in result.Users) {
                 if (cancellationToken.IsCancellationRequested)

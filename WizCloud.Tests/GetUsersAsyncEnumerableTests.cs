@@ -16,14 +16,13 @@ public sealed class GetUsersAsyncEnumerableTests {
     }
 
     [TestMethod]
-    public void MethodContainsErrorHandling() {
+    public void MethodDoesNotSuppressHttpRequestExceptions() {
         var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
         var filePath = Path.Combine(repoRoot, "WizCloud", "WizClient.cs");
         var source = File.ReadAllText(filePath);
         var index = source.IndexOf("GetUsersAsyncEnumerable", StringComparison.Ordinal);
         Assert.IsTrue(index >= 0, "GetUsersAsyncEnumerable method not found");
         var snippet = source.Substring(index, Math.Min(800, source.Length - index));
-        StringAssert.Contains(snippet, "catch (HttpRequestException)");
-        StringAssert.Contains(snippet, "yield break");
+        Assert.IsFalse(snippet.Contains("catch (HttpRequestException)"));
     }
 }
