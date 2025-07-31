@@ -73,7 +73,12 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
                 WriteVerbose($"Using region: {Region}");
             }
 
-            _wizClient = new WizClient(Token!, Region.Value);
+            var clientId = ModuleInitialization.DefaultClientId;
+            var clientSecret = ModuleInitialization.DefaultClientSecret;
+
+            _wizClient = !string.IsNullOrEmpty(clientId) && !string.IsNullOrEmpty(clientSecret)
+                ? new WizClient(Token!, Region.Value, clientId, clientSecret)
+                : new WizClient(Token!, Region.Value);
             WriteVerbose($"Connected to Wiz region: {Region}");
         } catch (HttpRequestException ex) {
             WriteError(new ErrorRecord(

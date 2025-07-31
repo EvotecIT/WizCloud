@@ -25,5 +25,18 @@ public sealed class TokenRefreshTests {
         var callIndex = source.IndexOf("SendWithRefreshAsync", index, StringComparison.Ordinal);
         Assert.IsTrue(callIndex >= 0, "SendWithRefreshAsync not used in GetCloudAccountsPageAsync");
     }
+
+    [TestMethod]
+    public void GetWizUserCmdlet_PassesClientCredentials() {
+        var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
+        var filePath = Path.Combine(repoRoot, "WizCloud.PowerShell", "Cmdlets", "CmdletGetWizUser.cs");
+        var source = File.ReadAllText(filePath);
+        StringAssert.Contains(source, "ModuleInitialization.DefaultClientId");
+        StringAssert.Contains(source, "ModuleInitialization.DefaultClientSecret");
+        var ctorIndex = source.IndexOf("new WizClient", StringComparison.Ordinal);
+        Assert.IsTrue(ctorIndex >= 0, "WizClient constructor call not found");
+        var paramIndex = source.IndexOf("clientId, clientSecret", ctorIndex, StringComparison.Ordinal);
+        Assert.IsTrue(paramIndex >= 0, "Client credentials not supplied to WizClient constructor");
+    }
 }
 
