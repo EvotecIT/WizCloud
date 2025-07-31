@@ -119,7 +119,12 @@ public class WizClient : IDisposable {
         bool hasNextPage = true;
 
         while (!cancellationToken.IsCancellationRequested && hasNextPage) {
-            var result = await GetUsersPageAsync(pageSize, endCursor).ConfigureAwait(false);
+            (List<WizUser> Users, bool HasNextPage, string? EndCursor) result;
+            try {
+                result = await GetUsersPageAsync(pageSize, endCursor).ConfigureAwait(false);
+            } catch (HttpRequestException) {
+                yield break;
+            }
 
             foreach (var user in result.Users) {
                 if (cancellationToken.IsCancellationRequested)
@@ -194,7 +199,7 @@ public class WizClient : IDisposable {
                 bool hasNextPage = pageInfo?["hasNextPage"]?.GetValue<bool>() ?? false;
                 string? endCursor = pageInfo?["endCursor"]?.GetValue<string>();
 
-                return (users, hasNextPage, endCursor);
+                return (users ?? new List<WizUser>(), hasNextPage, endCursor);
             }
         }
     }
