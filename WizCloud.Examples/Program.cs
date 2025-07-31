@@ -9,5 +9,6 @@ internal class Program {
         await ErrorHandlingSample.RunAsync();
         await GraphQlQueriesSample.RunAsync();
         await CloudAccountsSample.RunAsync();
+        await FilterUsersSample.RunAsync();
     }
 }

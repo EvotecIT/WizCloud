@@ -10,4 +10,11 @@ Describe 'Get-WizUser cmdlet' {
         $source = Get-Content -Path (Join-Path $repoRoot 'WizCloud.PowerShell/Cmdlets/CmdletGetWizUser.cs') -Raw
         $source | Should -Match 'HttpRequestException'
     }
+
+    It 'defines Type and ProjectId parameters' {
+        $repoRoot = Resolve-Path -Path "$PSScriptRoot/../.."
+        $source = Get-Content -Path (Join-Path $repoRoot 'WizCloud.PowerShell/Cmdlets/CmdletGetWizUser.cs') -Raw
+        $source | Should -Match 'ProjectId'
+        $source | Should -Match 'WizUserType\[]'
+    }
 }

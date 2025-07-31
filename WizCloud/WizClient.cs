@@ -7,6 +7,7 @@ using System.Text;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -93,13 +94,16 @@ public class WizClient : IDisposable {
     /// </summary>
     /// <param name="pageSize">The number of users to retrieve per page. Defaults to 20.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of all users.</returns>
-    public async Task<List<WizUser>> GetUsersAsync(int pageSize = 20) {
+    public async Task<List<WizUser>> GetUsersAsync(
+        int pageSize = 20,
+        IEnumerable<WizUserType>? types = null,
+        string? projectId = null) {
         var users = new List<WizUser>();
         string? endCursor = null;
         bool hasNextPage = true;
 
         while (hasNextPage) {
-            var result = await GetUsersPageAsync(pageSize, endCursor);
+            var result = await GetUsersPageAsync(pageSize, endCursor, types, projectId);
             users.AddRange(result.Users);
             hasNextPage = result.HasNextPage;
             endCursor = result.EndCursor;
@@ -114,14 +118,18 @@ public class WizClient : IDisposable {
     /// <param name="pageSize">The number of users to retrieve per page. Defaults to 20.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>An async enumerable sequence of users.</returns>
-    public async IAsyncEnumerable<WizUser> GetUsersAsyncEnumerable(int pageSize = 20, [EnumeratorCancellation] CancellationToken cancellationToken = default) {
+    public async IAsyncEnumerable<WizUser> GetUsersAsyncEnumerable(
+        int pageSize = 20,
+        IEnumerable<WizUserType>? types = null,
+        string? projectId = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default) {
         string? endCursor = null;
         bool hasNextPage = true;
 
         while (!cancellationToken.IsCancellationRequested && hasNextPage) {
             (List<WizUser> Users, bool HasNextPage, string? EndCursor) result;
             try {
-                result = await GetUsersPageAsync(pageSize, endCursor).ConfigureAwait(false);
+                result = await GetUsersPageAsync(pageSize, endCursor, types, projectId).ConfigureAwait(false);
             } catch (HttpRequestException) {
                 yield break;
             }
@@ -144,17 +152,27 @@ public class WizClient : IDisposable {
     /// <param name="first">The number of users to retrieve.</param>
     /// <param name="after">The cursor for pagination, if retrieving subsequent pages.</param>
     /// <returns>A tuple containing the users, whether there's a next page, and the cursor for the next page.</returns>
-    private async Task<(List<WizUser> Users, bool HasNextPage, string? EndCursor)> GetUsersPageAsync(int first, string? after = null) {
+    private async Task<(List<WizUser> Users, bool HasNextPage, string? EndCursor)> GetUsersPageAsync(
+        int first,
+        string? after = null,
+        IEnumerable<WizUserType>? types = null,
+        string? projectId = null) {
         var query = GraphQlQueries.UsersQuery;
+
+        var typeFilter = types != null && types.Any()
+            ? types.Select(t => t.ToString())
+            : new[] { "USER_ACCOUNT", "SERVICE_ACCOUNT", "GROUP", "ACCESS_KEY" };
+
+        var propertyFilter = projectId != null
+            ? new object[] { new { name = "projectId", equals = new[] { projectId } } }
+            : Array.Empty<object>();
 
         var variables = new {
             first,
             after,
             filterBy = new {
-                type = new {
-                    equals = new[] { "USER_ACCOUNT", "SERVICE_ACCOUNT", "GROUP", "ACCESS_KEY" }
-                },
-                property = new object[] { }
+                type = new { equals = typeFilter },
+                property = propertyFilter
             }
         };
 
