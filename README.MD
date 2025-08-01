@@ -230,7 +230,7 @@ foreach (var user in users) {
     // Access basic properties
     Console.WriteLine($"Name: {user.Name}");
     Console.WriteLine($"Type: {user.Type}");
-    
+
     // Access GraphEntityProperties directly
     if (user.GraphEntityProperties.TryGetValue("department", out var dept)) {
         Console.WriteLine($"Department: {dept}");
@@ -331,9 +331,3 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - Built on top of the Wiz.io GraphQL API
 - Inspired by modern .NET practices and PowerShell standards
 - Uses async/await patterns for optimal performance
-
-## 📮 Contact
-
-- **Blog**: [evotec.xyz](https://evotec.xyz)
-- **Twitter**: [@PrzemyslawKlys](https://twitter.com/PrzemyslawKlys)
-- **LinkedIn**: [pklys](https://www.linkedin.com/in/pklys)
