@@ -78,7 +78,13 @@ public sealed class WizUserTests {
 
         Assert.AreEqual("ge1", user.GraphEntityId);
         Assert.AreEqual(WizGraphEntityType.USER, user.GraphEntityType);
-        Assert.AreEqual("value1", user.GraphEntityProperties["prop1"]);
+        var prop1Value = user.GraphEntityProperties["prop1"];
+        Assert.IsNotNull(prop1Value);
+        if (prop1Value is System.Text.Json.JsonElement jsonElement) {
+            Assert.AreEqual("value1", jsonElement.GetString());
+        } else {
+            Assert.AreEqual("value1", prop1Value.ToString());
+        }
 
         Assert.AreEqual(1, user.Projects.Count);
         WizProject project = user.Projects[0];
