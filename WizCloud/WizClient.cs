@@ -348,6 +348,31 @@ public class WizClient : IDisposable {
     }
 
     /// <summary>
+    /// Streams cloud accounts from Wiz asynchronously as an <see cref="IAsyncEnumerable{WizCloudAccount}"/>.
+    /// </summary>
+    /// <param name="pageSize">The number of cloud accounts to retrieve per page. Defaults to 20.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>An async enumerable sequence of cloud accounts.</returns>
+    public async IAsyncEnumerable<WizCloudAccount> GetCloudAccountsAsyncEnumerable(int pageSize = 20, [EnumeratorCancellation] CancellationToken cancellationToken = default) {
+        string? endCursor = null;
+        bool hasNextPage = true;
+
+        while (!cancellationToken.IsCancellationRequested && hasNextPage) {
+            var result = await GetCloudAccountsPageAsync(pageSize, endCursor).ConfigureAwait(false);
+
+            foreach (var account in result.Accounts) {
+                if (cancellationToken.IsCancellationRequested)
+                    yield break;
+
+                yield return account;
+            }
+
+            hasNextPage = result.HasNextPage;
+            endCursor = result.EndCursor;
+        }
+    }
+
+    /// <summary>
     /// Retrieves a single page of cloud accounts from the Wiz API.
     /// </summary>
     /// <param name="first">The number of cloud accounts to retrieve.</param>
@@ -389,14 +414,7 @@ public class WizClient : IDisposable {
                 if (nodes != null) {
                     foreach (var node in nodes) {
                         if (node != null) {
-                            accounts.Add(new WizCloudAccount {
-                                Id = node["id"]?.GetValue<string>() ?? string.Empty,
-                                Name = node["name"]?.GetValue<string>() ?? string.Empty,
-                                CloudProvider = Enum.TryParse(node["cloudProvider"]?.GetValue<string>(), true, out WizCloudProvider provider)
-                                    ? provider
-                                    : WizCloudProvider.AWS,
-                                ExternalId = node["externalId"]?.GetValue<string>()
-                            });
+                            accounts.Add(WizCloudAccount.FromJson(node));
                         }
                     }
                 }
