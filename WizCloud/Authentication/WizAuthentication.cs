@@ -15,7 +15,7 @@ public static class WizAuthentication {
     /// </summary>
     /// <param name="clientId">The service account client ID.</param>
     /// <param name="clientSecret">The service account client secret.</param>
-    /// <param name="region">The Wiz region to authenticate against. Defaults to <c>eu17</c>.</param>
+    /// <param name="region">The Wiz region parameter (currently not used for authentication endpoint).</param>
     /// <returns>The service account token.</returns>
     public static async Task<string> AcquireTokenAsync(string clientId, string clientSecret, WizRegion region = WizRegion.EU17) {
         if (string.IsNullOrWhiteSpace(clientId))
@@ -23,8 +23,7 @@ public static class WizAuthentication {
         if (string.IsNullOrWhiteSpace(clientSecret))
             throw new ArgumentException("Client secret cannot be null or empty", nameof(clientSecret));
 
-        string regionString = WizRegionHelper.ToApiString(region);
-        string authEndpoint = $"https://auth.{regionString}.app.wiz.io/oauth/token";
+        string authEndpoint = "https://auth.app.wiz.io/oauth/token";
 
         using var httpClient = new HttpClient();
         using var content = new FormUrlEncodedContent(new Dictionary<string, string>
