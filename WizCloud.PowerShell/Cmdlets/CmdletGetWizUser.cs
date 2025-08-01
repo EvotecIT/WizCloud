@@ -45,6 +45,12 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
     [ValidateRange(1, 500)]
     public int PageSize { get; set; } = 20;
 
+    [Parameter(Mandatory = false, HelpMessage = "Filter by Wiz user types.")]
+    public WizUserType[] Type { get; set; } = Array.Empty<WizUserType>();
+
+    [Parameter(Mandatory = false, HelpMessage = "Filter by project identifier.")]
+    public string? ProjectId { get; set; }
+
 
     private WizClient? _wizClient;
 
@@ -116,7 +122,7 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
             var progressRecord = new ProgressRecord(1, "Get-WizUser", "Retrieving users from Wiz...");
             WriteProgress(progressRecord);
 
-            await foreach (var user in _wizClient.GetUsersAsyncEnumerable(PageSize, CancelToken)) {
+            await foreach (var user in _wizClient.GetUsersAsyncEnumerable(PageSize, Type, ProjectId, CancelToken)) {
                 if (CancelToken.IsCancellationRequested)
                     break;
 

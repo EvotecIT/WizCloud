@@ -44,3 +44,7 @@ $null = Connect-Wiz -ClientId $env:WIZ_CLIENT_ID -ClientSecret $env:WIZ_CLIENT_S
 # Example 10: Stream users as they are retrieved
 Get-WizUser | Select-Object Name, Type | Format-Table
 
+# Example 10: Get only service accounts from a specific project
+$serviceAccounts = Get-WizUser -Type SERVICE_ACCOUNT -ProjectId "project1"
+Write-Host "Found $($serviceAccounts.Count) service accounts in project1"
+
