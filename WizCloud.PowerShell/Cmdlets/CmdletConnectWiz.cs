@@ -24,24 +24,26 @@ namespace WizCloud.PowerShell;
 [Cmdlet(VerbsCommunications.Connect, "Wiz")]
 [OutputType(typeof(bool))]
 public class CmdletConnectWiz : AsyncPSCmdlet {
+    private const string TokenParameterSet = nameof(TokenParameterSet);
+    private const string ClientCredentialParameterSet = nameof(ClientCredentialParameterSet);
     /// <summary>
     /// <para type="description">The Wiz service account token for authentication.</para>
     /// </summary>
-    [Parameter(Mandatory = false, Position = 0, HelpMessage = "The Wiz service account token for authentication.")]
+    [Parameter(Mandatory = true, Position = 0, ParameterSetName = TokenParameterSet, HelpMessage = "The Wiz service account token for authentication.")]
     [ValidateNotNullOrEmpty]
     public string? Token { get; set; }
 
     /// <summary>
     /// <para type="description">The service account client ID.</para>
     /// </summary>
-    [Parameter(Mandatory = false, HelpMessage = "The Wiz service account client ID.")]
+    [Parameter(Mandatory = true, ParameterSetName = ClientCredentialParameterSet, HelpMessage = "The Wiz service account client ID.")]
     [ValidateNotNullOrEmpty]
     public string? ClientId { get; set; }
 
     /// <summary>
     /// <para type="description">The service account client secret.</para>
     /// </summary>
-    [Parameter(Mandatory = false, HelpMessage = "The Wiz service account client secret.")]
+    [Parameter(Mandatory = true, ParameterSetName = ClientCredentialParameterSet, HelpMessage = "The Wiz service account client secret.")]
     [ValidateNotNullOrEmpty]
     public string? ClientSecret { get; set; }
 
@@ -63,29 +65,16 @@ public class CmdletConnectWiz : AsyncPSCmdlet {
     /// <returns>A task representing the asynchronous operation.</returns>
     protected override async Task ProcessRecordAsync() {
         try {
-            // If no token provided, attempt to retrieve one using client credentials
-            if (string.IsNullOrEmpty(Token)) {
-                if (!string.IsNullOrEmpty(ClientId) && !string.IsNullOrEmpty(ClientSecret)) {
-                    WriteVerbose("Retrieving token using client credentials");
-                    Token = await WizAuthentication.AcquireTokenAsync(ClientId!, ClientSecret!, Region);
-                }
-
-                if (string.IsNullOrEmpty(Token)) {
-                    WriteError(new ErrorRecord(
-                        new ArgumentException("No token or client credentials provided."),
-                        "NoTokenProvided",
-                        ErrorCategory.AuthenticationError,
-                        null));
-                    return;
-                }
-
+            if (ParameterSetName == ClientCredentialParameterSet) {
+                WriteVerbose("Retrieving token using client credentials");
+                Token = await WizAuthentication.AcquireTokenAsync(ClientId!, ClientSecret!, Region);
                 WriteVerbose("Token acquired using client credentials");
             }
 
             // Store the credentials in the module state
             ModuleInitialization.DefaultToken = Token;
-            ModuleInitialization.DefaultClientId = ClientId;
-            ModuleInitialization.DefaultClientSecret = ClientSecret;
+            ModuleInitialization.DefaultClientId = ParameterSetName == ClientCredentialParameterSet ? ClientId : null;
+            ModuleInitialization.DefaultClientSecret = ParameterSetName == ClientCredentialParameterSet ? ClientSecret : null;
             ModuleInitialization.DefaultRegion = Region;
 
             // Test the connection if requested
