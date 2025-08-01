@@ -7,7 +7,7 @@ using WizCloud;
 namespace WizCloud.PowerShell;
 /// <summary>
 /// <para type="synopsis">Connects to Wiz.io and stores authentication for the session.</para>
-/// <para type="description">The Connect-Wiz cmdlet establishes a connection to Wiz.io and stores the authentication token for use in other Wiz cmdlets during the session.</para>
+/// <para type="description">The Connect-Wiz cmdlet establishes a connection to Wiz.io and stores the authentication token for use in other Wiz cmdlets during the session. Returns true on success, false on failure.</para>
 /// <example>
 /// <para>Connect using a token:</para>
 /// <code>Connect-Wiz -Token "your-service-account-token"</code>
@@ -60,6 +60,12 @@ public class CmdletConnectWiz : AsyncPSCmdlet {
     public SwitchParameter TestConnection { get; set; }
 
     /// <summary>
+    /// <para type="description">Suppress the output (returns only true/false).</para>
+    /// </summary>
+    [Parameter(Mandatory = false, HelpMessage = "Suppress the output messages.")]
+    public SwitchParameter Suppress { get; set; }
+
+    /// <summary>
     /// Processes the Connect-Wiz command asynchronously.
     /// </summary>
     /// <returns>A task representing the asynchronous operation.</returns>
@@ -82,11 +88,22 @@ public class CmdletConnectWiz : AsyncPSCmdlet {
                 WriteVerbose($"Testing connection to Wiz region: {Region}");
 
                 using var testClient = new WizClient(Token!, Region);
-                var users = await testClient.GetUsersAsync(1); // Get just 1 user to test
-
-                WriteObject($"Successfully connected to Wiz region '{Region}'. Found {(users.Count > 0 ? "at least 1 user" : "no users")}.");
+                
+                // Just test if we can make a successful API call by checking for projects
+                // We use GetProjectsAsyncEnumerable with immediate break to avoid fetching all data
+                var hasProjects = false;
+                await foreach (var project in testClient.GetProjectsAsyncEnumerable(1)) {
+                    hasProjects = true;
+                    break; // Exit after first project to avoid loading all data
+                }
+                
+                if (!Suppress) {
+                    WriteInformation($"Successfully connected to Wiz region '{Region}'. API connection verified.", new string[] { "WizConnect" });
+                }
             } else {
-                WriteObject($"Connected to Wiz region '{Region}'. Token stored for session.");
+                if (!Suppress) {
+                    WriteInformation($"Connected to Wiz region '{Region}'. Token stored for session.", new string[] { "WizConnect" });
+                }
             }
 
             WriteObject(true);

@@ -8,42 +8,34 @@ using WizCloud;
 namespace WizCloud.PowerShell;
 /// <summary>
 /// <para type="synopsis">Gets users from Wiz.io with all their properties.</para>
-/// <para type="description">The Get-WizUser cmdlet retrieves users from Wiz.io including their security properties, projects, cloud accounts, and issue analytics.</para>
+/// <para type="description">The Get-WizUser cmdlet retrieves users from Wiz.io including their security properties, projects, cloud accounts, and issue analytics. By default, returns enhanced user objects with all properties exposed. Use -Raw to get the original API response.</para>
 /// <example>
 /// <para>Get all users from Wiz:</para>
-/// <code>Get-WizUser -Token $token</code>
+/// <code>Get-WizUser</code>
 /// </example>
 /// <example>
-/// <para>Get users with a specific page size:</para>
-/// <code>Get-WizUser -Token $token -PageSize 100</code>
+/// <para>Get limited number of users:</para>
+/// <code>Get-WizUser -MaxResults 1000 -PageSize 500</code>
 /// </example>
 /// <example>
 /// <para>Get users from a specific region:</para>
-/// <code>Get-WizUser -Token $token -Region "us1"</code>
+/// <code>Get-WizUser -Region "us1"</code>
+/// </example>
+/// <example>
+/// <para>Get raw API response objects:</para>
+/// <code>Get-WizUser -Raw -MaxResults 10</code>
 /// </example>
 /// </summary>
 [Cmdlet(VerbsCommon.Get, "WizUser")]
-[OutputType(typeof(WizUser))]
+[OutputType(typeof(WizUserComprehensive), typeof(WizUser))]
 public class CmdletGetWizUser : AsyncPSCmdlet {
-    /// <summary>
-    /// <para type="description">The Wiz service account token for authentication. If not provided, uses the token from Connect-Wiz.</para>
-    /// </summary>
-    [Parameter(Mandatory = false, Position = 0, HelpMessage = "The Wiz service account token for authentication.")]
-    [ValidateNotNullOrEmpty]
-    public string? Token { get; set; }
-
-    /// <summary>
-    /// <para type="description">The Wiz region to connect to. If not provided, uses the region from Connect-Wiz or defaults to 'eu17'.</para>
-    /// </summary>
-    [Parameter(Mandatory = false, HelpMessage = "The Wiz region to connect to (e.g., 'eu17', 'us1', 'us2').")]
-    public WizRegion? Region { get; set; }
 
     /// <summary>
     /// <para type="description">The number of users to retrieve per page. Default is 20.</para>
     /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "The number of users to retrieve per page.")]
-    [ValidateRange(1, 500)]
-    public int PageSize { get; set; } = 20;
+    [ValidateRange(1, 5000)]
+    public int PageSize { get; set; } = 500;
 
     [Parameter(Mandatory = false, HelpMessage = "Filter by Wiz user types.")]
     public WizUserType[] Type { get; set; } = Array.Empty<WizUserType>();
@@ -51,41 +43,50 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
     [Parameter(Mandatory = false, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
 
+    /// <summary>
+    /// <para type="description">The maximum number of users to retrieve. Use this to limit results when dealing with large datasets.</para>
+    /// </summary>
+    [Parameter(Mandatory = false, HelpMessage = "Maximum number of users to retrieve. Default is unlimited.")]
+    [ValidateRange(1, int.MaxValue)]
+    public int? MaxResults { get; set; }
+
+    /// <summary>
+    /// <para type="description">Return raw API response objects without additional property expansion.</para>
+    /// </summary>
+    [Parameter(Mandatory = false, HelpMessage = "Return raw API response objects.")]
+    public SwitchParameter Raw { get; set; }
 
     private WizClient? _wizClient;
+    private int _retrievedCount = 0;
 
     /// <summary>
     /// Initialize the Wiz client.
     /// </summary>
     protected override Task BeginProcessingAsync() {
         try {
-            // Use stored token if not provided
-            if (string.IsNullOrEmpty(Token)) {
-                Token = ModuleInitialization.DefaultToken;
-                if (string.IsNullOrEmpty(Token)) {
-                    WriteError(new ErrorRecord(
-                        new InvalidOperationException("No token provided. Please use Connect-Wiz first or provide a token parameter."),
-                        "NoTokenAvailable",
-                        ErrorCategory.AuthenticationError,
-                        null));
-                    return Task.CompletedTask;
-                }
-                WriteVerbose("Using stored token from Connect-Wiz");
+            // Use stored token from Connect-Wiz
+            var token = ModuleInitialization.DefaultToken;
+            if (string.IsNullOrEmpty(token)) {
+                WriteError(new ErrorRecord(
+                    new InvalidOperationException("No authentication found. Please use Connect-Wiz first."),
+                    "NoTokenAvailable",
+                    ErrorCategory.AuthenticationError,
+                    null));
+                return Task.CompletedTask;
             }
+            WriteVerbose("Using stored token from Connect-Wiz");
 
-            // Use stored region if not provided
-            if (Region is null) {
-                Region = ModuleInitialization.DefaultRegion;
-                WriteVerbose($"Using region: {Region}");
-            }
+            // Use stored region from Connect-Wiz
+            var region = ModuleInitialization.DefaultRegion;
+            WriteVerbose($"Using region from Connect-Wiz: {region}");
 
             var clientId = ModuleInitialization.DefaultClientId;
             var clientSecret = ModuleInitialization.DefaultClientSecret;
 
             _wizClient = !string.IsNullOrEmpty(clientId) && !string.IsNullOrEmpty(clientSecret)
-                ? new WizClient(Token!, Region.Value, clientId, clientSecret)
-                : new WizClient(Token!, Region.Value);
-            WriteVerbose($"Connected to Wiz region: {Region}");
+                ? new WizClient(token, region, clientId, clientSecret)
+                : new WizClient(token, region);
+            WriteVerbose($"Connected to Wiz region: {region}");
         } catch (HttpRequestException ex) {
             WriteError(new ErrorRecord(
                 ex,
@@ -117,7 +118,8 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
         }
 
         try {
-            WriteVerbose($"Retrieving Wiz users with page size: {PageSize}");
+            WriteVerbose($"Retrieving Wiz users with page size: {PageSize}" + 
+                (MaxResults.HasValue ? $", max results: {MaxResults.Value}" : ""));
 
             var progressRecord = new ProgressRecord(1, "Get-WizUser", "Retrieving users from Wiz...");
             WriteProgress(progressRecord);
@@ -126,7 +128,32 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
                 if (CancelToken.IsCancellationRequested)
                     break;
 
-                WriteObject(user);
+                // Return raw or enhanced object based on parameter
+                if (Raw) {
+                    WriteObject(user);
+                } else {
+                    // Return comprehensive typed object with all properties
+                    var comprehensiveUser = WizUserComprehensive.FromWizUser(user);
+                    WriteObject(comprehensiveUser);
+                }
+                _retrievedCount++;
+
+                // Update progress
+                if (MaxResults.HasValue) {
+                    var percentComplete = (int)((double)_retrievedCount / MaxResults.Value * 100);
+                    progressRecord.StatusDescription = $"Retrieved {_retrievedCount} of {MaxResults.Value} users...";
+                    progressRecord.PercentComplete = percentComplete;
+                    WriteProgress(progressRecord);
+                } else if (_retrievedCount % 100 == 0) {
+                    progressRecord.StatusDescription = $"Retrieved {_retrievedCount} users...";
+                    WriteProgress(progressRecord);
+                }
+
+                // Check if we've reached the maximum results
+                if (MaxResults.HasValue && _retrievedCount >= MaxResults.Value) {
+                    WriteVerbose($"Reached maximum result limit of {MaxResults.Value} users");
+                    break;
+                }
             }
 
             progressRecord.StatusDescription = "Completed";

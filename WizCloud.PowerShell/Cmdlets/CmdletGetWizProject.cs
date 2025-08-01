@@ -11,59 +11,59 @@ namespace WizCloud.PowerShell;
 /// <para type="description">The Get-WizProject cmdlet retrieves projects from Wiz.io using streaming enumeration.</para>
 /// <example>
 /// <para>Get all projects from Wiz:</para>
-/// <code>Get-WizProject -Token $token</code>
+/// <code>Get-WizProject</code>
 /// </example>
 /// <example>
 /// <para>Get projects with a specific page size:</para>
-/// <code>Get-WizProject -Token $token -PageSize 100</code>
+/// <code>Get-WizProject -PageSize 100</code>
 /// </example>
 /// <example>
 /// <para>Get projects from a specific region:</para>
-/// <code>Get-WizProject -Token $token -Region "us1"</code>
+/// <code>Get-WizProject -Region "us1"</code>
 /// </example>
 /// </summary>
 [Cmdlet(VerbsCommon.Get, "WizProject")]
 [OutputType(typeof(WizProject))]
 public class CmdletGetWizProject : AsyncPSCmdlet {
     /// <summary>
-    /// <para type="description">The Wiz service account token for authentication. If not provided, uses the token from Connect-Wiz.</para>
-    /// </summary>
-    [Parameter(Mandatory = false, Position = 0, HelpMessage = "The Wiz service account token for authentication.")]
-    [ValidateNotNullOrEmpty]
-    public string? Token { get; set; }
-
-    /// <summary>
     /// <para type="description">The Wiz region to connect to. If not provided, uses the region from Connect-Wiz or defaults to 'eu17'.</para>
     /// </summary>
-    [Parameter(Mandatory = false, HelpMessage = "The Wiz region to connect to (e.g., 'eu17', 'us1', 'us2').")]
+    [Parameter(Mandatory = false, Position = 0, HelpMessage = "The Wiz region to connect to (e.g., 'eu17', 'us1', 'us2').")]
     public WizRegion? Region { get; set; }
 
     /// <summary>
     /// <para type="description">The number of projects to retrieve per page. Default is 20.</para>
     /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "The number of projects to retrieve per page.")]
-    [ValidateRange(1, 500)]
-    public int PageSize { get; set; } = 20;
+    [ValidateRange(1, 5000)]
+    public int PageSize { get; set; } = 500;
+
+    /// <summary>
+    /// <para type="description">The maximum number of projects to retrieve. Use this to limit results when dealing with large datasets.</para>
+    /// </summary>
+    [Parameter(Mandatory = false, HelpMessage = "Maximum number of projects to retrieve. Default is unlimited.")]
+    [ValidateRange(1, int.MaxValue)]
+    public int? MaxResults { get; set; }
 
     private WizClient? _wizClient;
+    private int _retrievedCount = 0;
 
     /// <summary>
     /// Initialize the Wiz client.
     /// </summary>
     protected override Task BeginProcessingAsync() {
         try {
-            if (string.IsNullOrEmpty(Token)) {
-                Token = ModuleInitialization.DefaultToken;
-                if (string.IsNullOrEmpty(Token)) {
-                    WriteError(new ErrorRecord(
-                        new InvalidOperationException("No token provided. Please use Connect-Wiz first or provide a token parameter."),
-                        "NoTokenAvailable",
-                        ErrorCategory.AuthenticationError,
-                        null));
-                    return Task.CompletedTask;
-                }
-                WriteVerbose("Using stored token from Connect-Wiz");
+            // Use stored token from Connect-Wiz
+            var token = ModuleInitialization.DefaultToken;
+            if (string.IsNullOrEmpty(token)) {
+                WriteError(new ErrorRecord(
+                    new InvalidOperationException("No authentication found. Please use Connect-Wiz first."),
+                    "NoTokenAvailable",
+                    ErrorCategory.AuthenticationError,
+                    null));
+                return Task.CompletedTask;
             }
+            WriteVerbose("Using stored token from Connect-Wiz");
 
             if (Region is null) {
                 Region = ModuleInitialization.DefaultRegion;
@@ -74,8 +74,8 @@ public class CmdletGetWizProject : AsyncPSCmdlet {
             var clientSecret = ModuleInitialization.DefaultClientSecret;
 
             _wizClient = !string.IsNullOrEmpty(clientId) && !string.IsNullOrEmpty(clientSecret)
-                ? new WizClient(Token!, Region.Value, clientId, clientSecret)
-                : new WizClient(Token!, Region.Value);
+                ? new WizClient(token, Region.Value, clientId, clientSecret)
+                : new WizClient(token, Region.Value);
             WriteVerbose($"Connected to Wiz region: {Region}");
         } catch (HttpRequestException ex) {
             WriteError(new ErrorRecord(
@@ -108,7 +108,8 @@ public class CmdletGetWizProject : AsyncPSCmdlet {
         }
 
         try {
-            WriteVerbose($"Retrieving Wiz projects with page size: {PageSize}");
+            WriteVerbose($"Retrieving Wiz projects with page size: {PageSize}" + 
+                (MaxResults.HasValue ? $", max results: {MaxResults.Value}" : ""));
 
             var progressRecord = new ProgressRecord(1, "Get-WizProject", "Retrieving projects from Wiz...");
             WriteProgress(progressRecord);
@@ -118,6 +119,24 @@ public class CmdletGetWizProject : AsyncPSCmdlet {
                     break;
 
                 WriteObject(project);
+                _retrievedCount++;
+
+                // Update progress
+                if (MaxResults.HasValue) {
+                    var percentComplete = (int)((double)_retrievedCount / MaxResults.Value * 100);
+                    progressRecord.StatusDescription = $"Retrieved {_retrievedCount} of {MaxResults.Value} projects...";
+                    progressRecord.PercentComplete = percentComplete;
+                    WriteProgress(progressRecord);
+                } else if (_retrievedCount % 100 == 0) {
+                    progressRecord.StatusDescription = $"Retrieved {_retrievedCount} projects...";
+                    WriteProgress(progressRecord);
+                }
+
+                // Check if we've reached the maximum results
+                if (MaxResults.HasValue && _retrievedCount >= MaxResults.Value) {
+                    WriteVerbose($"Reached maximum result limit of {MaxResults.Value} projects");
+                    break;
+                }
             }
 
             progressRecord.StatusDescription = "Completed";

@@ -128,7 +128,27 @@ public class WizUser {
             var properties = graphEntity["properties"] as JsonObject;
             if (properties != null) {
                 foreach (var prop in properties) {
-                    user.GraphEntityProperties[prop.Key] = prop.Value?.ToString();
+                    // Keep the raw JsonNode value to preserve arrays and complex types
+                    if (prop.Value is JsonArray jsonArray) {
+                        // Convert JsonArray to List<object>
+                        var list = new List<object?>();
+                        foreach (var item in jsonArray) {
+                            if (item != null) {
+                                list.Add(item.GetValue<object>());
+                            }
+                        }
+                        user.GraphEntityProperties[prop.Key] = list;
+                    } else if (prop.Value is JsonObject jsonObject) {
+                        // For complex objects, store as dictionary
+                        var dict = new Dictionary<string, object?>();
+                        foreach (var kvp in jsonObject) {
+                            dict[kvp.Key] = kvp.Value?.GetValue<object>();
+                        }
+                        user.GraphEntityProperties[prop.Key] = dict;
+                    } else {
+                        // For simple types, get the actual value
+                        user.GraphEntityProperties[prop.Key] = prop.Value?.GetValue<object>();
+                    }
                 }
             }
         }
