@@ -36,4 +36,12 @@ public sealed class GraphQlQueriesTests {
         Assert.IsNotNull(field);
         Assert.AreEqual(typeof(string), field!.FieldType);
     }
+
+    [TestMethod]
+    public void ResourcesQuery_ConstantExists() {
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.Static;
+        var field = typeof(GraphQlQueries).GetField("ResourcesQuery", flags);
+        Assert.IsNotNull(field);
+        Assert.AreEqual(typeof(string), field!.FieldType);
+    }
 }

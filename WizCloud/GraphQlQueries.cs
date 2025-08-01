@@ -81,4 +81,35 @@ public static class GraphQlQueries {
                 }
             }
         }";
+
+    /// <summary>
+    /// Query for retrieving cloud resources.
+    /// </summary>
+    public const string ResourcesQuery = @"query Resources($first: Int, $after: String, $filterBy: ResourceFilters) {
+            resources(first: $first, after: $after, filterBy: $filterBy) {
+                pageInfo { hasNextPage endCursor }
+                nodes {
+                    id
+                    name
+                    type
+                    nativeType
+                    cloudPlatform
+                    cloudAccount { id name }
+                    region
+                    tags
+                    createdAt
+                    status
+                    publiclyAccessible
+                    hasPublicIpAddress
+                    isInternetFacing
+                    securityGroups
+                    issues {
+                        criticalCount
+                        highCount
+                        mediumCount
+                        lowCount
+                    }
+                }
+            }
+        }";
 }
