@@ -44,4 +44,41 @@ public static class GraphQlQueries {
                 nodes { id name cloudProvider externalId }
             }
         }";
+
+    /// <summary>
+    /// Query for retrieving security issues.
+    /// </summary>
+    public const string IssuesQuery = @"query Issues($first: Int, $after: String, $filterBy: IssueFilters) {
+            issues(first: $first, after: $after, filterBy: $filterBy) {
+                pageInfo { hasNextPage endCursor }
+                nodes {
+                    id
+                    name
+                    type
+                    severity
+                    status
+                    createdAt
+                    updatedAt
+                    resolvedAt
+                    dueAt
+                    projects { id name }
+                    resource {
+                        id
+                        name
+                        type
+                        cloudPlatform
+                        region
+                        subscriptionId
+                    }
+                    control {
+                        id
+                        name
+                        description
+                        severity
+                    }
+                    evidence
+                    remediation
+                }
+            }
+        }";
 }

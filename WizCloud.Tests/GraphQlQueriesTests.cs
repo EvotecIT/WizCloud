@@ -28,4 +28,12 @@ public sealed class GraphQlQueriesTests {
         Assert.IsNotNull(field);
         Assert.AreEqual(typeof(string), field!.FieldType);
     }
+
+    [TestMethod]
+    public void IssuesQuery_ConstantExists() {
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.Static;
+        var field = typeof(GraphQlQueries).GetField("IssuesQuery", flags);
+        Assert.IsNotNull(field);
+        Assert.AreEqual(typeof(string), field!.FieldType);
+    }
 }
