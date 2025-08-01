@@ -41,6 +41,6 @@ $null = Get-WizUser -Verbose
 # Example 9: Connect using client credentials
 $null = Connect-Wiz -ClientId $env:WIZ_CLIENT_ID -ClientSecret $env:WIZ_CLIENT_SECRET -TestConnection
 
-# Example 9: Stream users as they are retrieved
+# Example 10: Stream users as they are retrieved
 Get-WizUser | Select-Object Name, Type | Format-Table
 
