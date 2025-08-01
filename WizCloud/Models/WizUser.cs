@@ -195,14 +195,7 @@ public class WizUser {
         // Parse cloud account
         var cloudAccount = json["cloudAccount"];
         if (cloudAccount != null) {
-            user.CloudAccount = new WizCloudAccount {
-                Id = cloudAccount["id"]?.GetValue<string>() ?? string.Empty,
-                Name = cloudAccount["name"]?.GetValue<string>() ?? string.Empty,
-                CloudProvider = Enum.TryParse(cloudAccount["cloudProvider"]?.GetValue<string>(), true, out WizCloudProvider tmpProvider)
-                    ? tmpProvider
-                    : WizCloudProvider.AWS,
-                ExternalId = cloudAccount["externalId"]?.GetValue<string>()
-            };
+            user.CloudAccount = WizCloudAccount.FromJson(cloudAccount);
         }
 
         // Parse issue analytics

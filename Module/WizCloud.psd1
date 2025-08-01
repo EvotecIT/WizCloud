@@ -1,7 +1,7 @@
 ﻿@{
     AliasesToExport      = @()
     Author               = 'Przemyslaw Klys'
-    CmdletsToExport      = @('Connect-Wiz', 'Disconnect-Wiz', 'Get-WizProject', 'Get-WizUser')
+    CmdletsToExport      = @('Connect-Wiz', 'Disconnect-Wiz', 'Get-WizCloudAccount', 'Get-WizProject', 'Get-WizUser')
     CompanyName          = 'Evotec'
     CompatiblePSEditions = @('Desktop', 'Core')
     Copyright            = '(c) 2011 - 2025 Przemyslaw Klys @ Evotec. All rights reserved.'

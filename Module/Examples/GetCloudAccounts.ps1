@@ -1,7 +1,7 @@
 # Import the WizCloud module
 Import-Module $PSScriptRoot\..\WizCloud.psd1 -Force
 
-# Example 1: Connect to Wiz and get all projects
+# Connect to Wiz
 # NOTE: The region specified in Connect-Wiz will be used for all subsequent cmdlets
 $connectWizSplat = @{
     ClientId       = $Env:WizClientID
@@ -11,9 +11,8 @@ $connectWizSplat = @{
 }
 Connect-Wiz @connectWizSplat
 
-# Get all projects
-$Projects = Get-WizProject
-Write-Host "Found $($Projects.Count) projects"
-
-# Display project information
-$Projects | Select-Object Name, Slug, IsFolder | Format-Table
+# Get cloud accounts
+Write-Host "`nRetrieving cloud accounts..." -ForegroundColor Yellow
+$cloudAccounts = Get-WizCloudAccount -Verbose -MaxResults 50
+Write-Host "`nFound $($cloudAccounts.Count) cloud accounts" -ForegroundColor Green
+$cloudAccounts | Format-Table

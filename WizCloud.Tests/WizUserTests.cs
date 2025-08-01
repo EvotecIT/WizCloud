@@ -99,7 +99,7 @@ public sealed class WizUserTests {
         Assert.IsNotNull(user.CloudAccount);
         Assert.AreEqual("acc1", user.CloudAccount!.Id);
         Assert.AreEqual("Account 1", user.CloudAccount!.Name);
-        Assert.AreEqual(WizCloudProvider.AWS, user.CloudAccount!.CloudProvider);
+        Assert.AreEqual("AWS", user.CloudAccount!.CloudProvider);
         Assert.AreEqual("123", user.CloudAccount!.ExternalId);
 
         Assert.IsNotNull(user.IssueAnalytics);
