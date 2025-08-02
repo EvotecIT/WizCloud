@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Net;
@@ -79,7 +78,6 @@ public partial class WizClient {
         };
 
         using (var request = new HttpRequestMessage(HttpMethod.Post, _apiEndpoint)) {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             request.Content = new StringContent(
                 JsonSerializer.Serialize(requestBody),
                 Encoding.UTF8,
