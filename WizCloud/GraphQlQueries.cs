@@ -146,4 +146,106 @@ public static class GraphQlQueries {
                 }
             }
         }";
+
+    /// <summary>
+    /// Query for retrieving configuration findings.
+    /// </summary>
+    public const string ConfigurationFindingsQuery = @"query ConfigurationFindings($first: Int, $after: String, $filterBy: ConfigFindingFilters) {
+            configurationFindings(first: $first, after: $after, filterBy: $filterBy) {
+                pageInfo { hasNextPage endCursor }
+                nodes {
+                    id
+                    title
+                    description
+                    severity
+                    complianceFrameworks
+                    failedResources {
+                        count
+                        resources { id name type }
+                    }
+                    rule {
+                        id
+                        name
+                        category
+                    }
+                    remediation
+                }
+            }
+        }";
+
+    /// <summary>
+    /// Query for retrieving network exposure information.
+    /// </summary>
+    public const string NetworkExposureQuery = @"query NetworkExposure($first: Int, $after: String, $filterBy: ExposureFilters) {
+            networkExposure(first: $first, after: $after, filterBy: $filterBy) {
+                pageInfo { hasNextPage endCursor }
+                nodes {
+                    id
+                    resource {
+                        id
+                        name
+                        type
+                    }
+                    exposureType
+                    ports
+                    protocols
+                    sourceIpRanges
+                    internetFacing
+                    publicIpAddress
+                    dnsName
+                    certificate {
+                        issuer
+                        expiryDate
+                        isValid
+                    }
+                }
+            }
+        }";
+
+    /// <summary>
+    /// Query for retrieving audit logs.
+    /// </summary>
+    public const string AuditLogsQuery = @"query AuditLogs($first: Int, $after: String, $filterBy: AuditLogFilters) {
+            auditLogs(first: $first, after: $after, filterBy: $filterBy) {
+                pageInfo { hasNextPage endCursor }
+                nodes {
+                    id
+                    timestamp
+                    user {
+                        id
+                        name
+                        email
+                    }
+                    action
+                    resource {
+                        type
+                        id
+                        name
+                    }
+                    status
+                    ipAddress
+                    userAgent
+                    details
+                }
+            }
+        }";
+
+    /// <summary>
+    /// Query for retrieving compliance posture.
+    /// </summary>
+    public const string CompliancePostureQuery = @"query CompliancePosture($frameworks: [String!]) {
+            compliancePosture(frameworks: $frameworks) {
+                framework
+                overallScore
+                controls {
+                    id
+                    name
+                    status
+                    severity
+                    failedResourceCount
+                    passedResourceCount
+                }
+                lastAssessmentDate
+            }
+        }";
 }

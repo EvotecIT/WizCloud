@@ -52,4 +52,36 @@ public sealed class GraphQlQueriesTests {
         Assert.IsNotNull(field);
         Assert.AreEqual(typeof(string), field!.FieldType);
     }
+
+    [TestMethod]
+    public void ConfigurationFindingsQuery_ConstantExists() {
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.Static;
+        var field = typeof(GraphQlQueries).GetField("ConfigurationFindingsQuery", flags);
+        Assert.IsNotNull(field);
+        Assert.AreEqual(typeof(string), field!.FieldType);
+    }
+
+    [TestMethod]
+    public void NetworkExposureQuery_ConstantExists() {
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.Static;
+        var field = typeof(GraphQlQueries).GetField("NetworkExposureQuery", flags);
+        Assert.IsNotNull(field);
+        Assert.AreEqual(typeof(string), field!.FieldType);
+    }
+
+    [TestMethod]
+    public void AuditLogsQuery_ConstantExists() {
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.Static;
+        var field = typeof(GraphQlQueries).GetField("AuditLogsQuery", flags);
+        Assert.IsNotNull(field);
+        Assert.AreEqual(typeof(string), field!.FieldType);
+    }
+
+    [TestMethod]
+    public void CompliancePostureQuery_ConstantExists() {
+        const BindingFlags flags = BindingFlags.Public | BindingFlags.Static;
+        var field = typeof(GraphQlQueries).GetField("CompliancePostureQuery", flags);
+        Assert.IsNotNull(field);
+        Assert.AreEqual(typeof(string), field!.FieldType);
+    }
 }
