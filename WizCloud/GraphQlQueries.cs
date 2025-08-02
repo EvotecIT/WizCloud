@@ -83,6 +83,40 @@ public static class GraphQlQueries {
         }";
 
     /// <summary>
+    /// Query for retrieving vulnerabilities.
+    /// </summary>
+    public const string VulnerabilitiesQuery = @"query Vulnerabilities($first: Int, $after: String, $filterBy: VulnerabilityFilters) {
+            vulnerabilities(first: $first, after: $after, filterBy: $filterBy) {
+                pageInfo { hasNextPage endCursor }
+                nodes {
+                    id
+                    cve
+                    cvss {
+                        score
+                        severity
+                        vector
+                    }
+                    publishedDate
+                    modifiedDate
+                    description
+                    affectedPackages {
+                        name
+                        version
+                        fixVersion
+                    }
+                    resources {
+                        id
+                        name
+                        type
+                        cloudPlatform
+                    }
+                    exploitAvailable
+                    exploitInTheWild
+                }
+            }
+        }";
+
+    /// <summary>
     /// Query for retrieving cloud resources.
     /// </summary>
     public const string ResourcesQuery = @"query Resources($first: Int, $after: String, $filterBy: ResourceFilters) {
