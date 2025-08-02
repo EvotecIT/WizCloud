@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WizCloud;
@@ -19,8 +20,8 @@ public sealed class GetIssuesAsyncEnumerableTests {
     [TestMethod]
     public void MethodContainsErrorHandling() {
         var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
-        var filePath = Path.Combine(repoRoot, "WizCloud", "WizClient.cs");
-        var source = File.ReadAllText(filePath);
+        var directory = Path.Combine(repoRoot, "WizCloud");
+        var source = string.Concat(Directory.GetFiles(directory, "WizClient*.cs").Select(File.ReadAllText));
         var index = source.IndexOf("GetIssuesAsyncEnumerable", StringComparison.Ordinal);
         Assert.IsTrue(index >= 0, "GetIssuesAsyncEnumerable method not found");
         var snippet = source.Substring(index, Math.Min(800, source.Length - index));
