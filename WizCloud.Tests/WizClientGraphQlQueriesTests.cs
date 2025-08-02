@@ -12,9 +12,10 @@ public sealed class WizClientGraphQlQueriesTests {
         var filePath = Path.Combine(repoRoot, "WizCloud", "WizClient.cs");
         var source = File.ReadAllText(filePath);
         StringAssert.Contains(source, "GraphQlQueries.UsersQuery");
-        StringAssert.Contains(source, "GraphQlQueries.ProjectsQuery");
-        StringAssert.Contains(source, "GraphQlQueries.CloudAccountsQuery");
-        StringAssert.Contains(source, "GraphQlQueries.IssuesQuery");
+       StringAssert.Contains(source, "GraphQlQueries.ProjectsQuery");
+       StringAssert.Contains(source, "GraphQlQueries.CloudAccountsQuery");
+       StringAssert.Contains(source, "GraphQlQueries.IssuesQuery");
+        StringAssert.Contains(source, "GraphQlQueries.VulnerabilitiesQuery");
         StringAssert.Contains(source, "GraphQlQueries.ResourcesQuery");
     }
 }
