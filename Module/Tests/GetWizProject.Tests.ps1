@@ -61,4 +61,11 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
         $task.GetAwaiter().GetResult()
         $script:err.Exception | Should -BeOfType ([System.Net.Http.HttpRequestException])
     }
+
+    It 'does not expose a Region parameter' {
+        $repoRoot = Resolve-Path -Path "$PSScriptRoot/../.."
+        $source = Get-Content -Path (Join-Path $repoRoot 'WizCloud.PowerShell/Cmdlets/CmdletGetWizProject.cs') -Raw
+        $source | Should -Not -Match 'public\s+WizRegion'
+    }
 }
+

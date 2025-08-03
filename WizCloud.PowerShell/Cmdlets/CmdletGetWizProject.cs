@@ -18,18 +18,13 @@ namespace WizCloud.PowerShell;
 /// <code>Get-WizProject -PageSize 100</code>
 /// </example>
 /// <example>
-/// <para>Get projects from a specific region:</para>
-/// <code>Get-WizProject -Region "us1"</code>
+/// <para>Select a region using Connect-Wiz and then retrieve projects:</para>
+/// <code>Connect-Wiz -Region "us1"; Get-WizProject</code>
 /// </example>
 /// </summary>
 [Cmdlet(VerbsCommon.Get, "WizProject")]
 [OutputType(typeof(WizProject))]
 public class CmdletGetWizProject : AsyncPSCmdlet {
-    /// <summary>
-    /// <para type="description">The Wiz region to connect to. If not provided, uses the region from Connect-Wiz or defaults to 'eu17'.</para>
-    /// </summary>
-    [Parameter(Mandatory = false, Position = 0, HelpMessage = "The Wiz region to connect to (e.g., 'eu17', 'us1', 'us2').")]
-    public WizRegion? Region { get; set; }
 
     /// <summary>
     /// <para type="description">The number of projects to retrieve per page. Default is 20.</para>
@@ -65,18 +60,16 @@ public class CmdletGetWizProject : AsyncPSCmdlet {
             }
             WriteVerbose("Using stored token from Connect-Wiz");
 
-            if (Region is null) {
-                Region = ModuleInitialization.DefaultRegion;
-                WriteVerbose($"Using region: {Region}");
-            }
-
             var clientId = ModuleInitialization.DefaultClientId;
             var clientSecret = ModuleInitialization.DefaultClientSecret;
 
+            var region = ModuleInitialization.DefaultRegion;
+            WriteVerbose($"Using region: {region}");
+
             _wizClient = !string.IsNullOrEmpty(clientId) && !string.IsNullOrEmpty(clientSecret)
-                ? new WizClient(token, Region.Value, clientId, clientSecret)
-                : new WizClient(token, Region.Value);
-            WriteVerbose($"Connected to Wiz region: {Region}");
+                ? new WizClient(token, region, clientId, clientSecret)
+                : new WizClient(token, region);
+            WriteVerbose($"Connected to Wiz region: {region}");
         } catch (HttpRequestException ex) {
             WriteError(new ErrorRecord(
                 ex,
