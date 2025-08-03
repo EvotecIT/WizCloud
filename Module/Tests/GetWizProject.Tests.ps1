@@ -10,4 +10,11 @@ Describe 'Get-WizProject cmdlet' {
         $source = Get-Content -Path (Join-Path $repoRoot 'WizCloud.PowerShell/Cmdlets/CmdletGetWizProject.cs') -Raw
         $source | Should -Match 'HttpRequestException'
     }
+
+    It 'does not expose a Region parameter' {
+        $repoRoot = Resolve-Path -Path "$PSScriptRoot/../.."
+        $source = Get-Content -Path (Join-Path $repoRoot 'WizCloud.PowerShell/Cmdlets/CmdletGetWizProject.cs') -Raw
+        $source | Should -Not -Match 'public\s+WizRegion'
+    }
 }
+
