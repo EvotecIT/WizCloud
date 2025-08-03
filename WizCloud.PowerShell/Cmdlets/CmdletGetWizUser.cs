@@ -10,20 +10,16 @@ namespace WizCloud.PowerShell;
 /// <para type="synopsis">Gets users from Wiz.io with all their properties.</para>
 /// <para type="description">The Get-WizUser cmdlet retrieves users from Wiz.io including their security properties, projects, cloud accounts, and issue analytics. By default, returns enhanced user objects with all properties exposed. Use -Raw to get the original API response.</para>
 /// <example>
-/// <para>Get all users from Wiz:</para>
-/// <code>Get-WizUser</code>
+/// <para>Select a region using Connect-Wiz and get all users from Wiz:</para>
+/// <code>Connect-Wiz -Region "us1"; Get-WizUser</code>
 /// </example>
 /// <example>
-/// <para>Get limited number of users:</para>
-/// <code>Get-WizUser -MaxResults 1000 -PageSize 500</code>
+/// <para>Select a region using Connect-Wiz and retrieve a limited number of users:</para>
+/// <code>Connect-Wiz -Region "us1"; Get-WizUser -MaxResults 1000 -PageSize 500</code>
 /// </example>
 /// <example>
-/// <para>Get users from a specific region:</para>
-/// <code>Get-WizUser -Region "us1"</code>
-/// </example>
-/// <example>
-/// <para>Get raw API response objects:</para>
-/// <code>Get-WizUser -Raw -MaxResults 10</code>
+/// <para>Select a region using Connect-Wiz and get raw API response objects:</para>
+/// <code>Connect-Wiz -Region "us1"; Get-WizUser -Raw -MaxResults 10</code>
 /// </example>
 /// </summary>
 [Cmdlet(VerbsCommon.Get, "WizUser")]
