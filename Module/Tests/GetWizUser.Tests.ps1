@@ -1,20 +1,69 @@
 Describe 'Get-WizUser cmdlet' {
-    It 'streams results using await foreach' {
+    BeforeAll {
         $repoRoot = Resolve-Path -Path "$PSScriptRoot/../.."
-        $source = Get-Content -Path (Join-Path $repoRoot 'WizCloud.PowerShell/Cmdlets/CmdletGetWizUser.cs') -Raw
-        $source | Should -Match 'await foreach'
+        Import-Module (Join-Path $repoRoot 'Module/WizCloud.psd1') -Force
+        [WizCloud.PowerShell.ModuleInitialization]::DefaultToken = 'token'
+        if (-not ([System.Management.Automation.PSTypeName]'TestAsyncEnumerable`1').Type) {
+            Add-Type -Language CSharp @"
+using System.Collections.Generic;
+using System.Threading;
+public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
+    private readonly IEnumerable<T> _items;
+    public TestAsyncEnumerable(IEnumerable<T> items) => _items = items;
+    public async IAsyncEnumerator<T> GetAsyncEnumerator(CancellationToken cancellationToken = default) {
+        foreach (var item in _items) {
+            yield return item;
+        }
+        await System.Threading.Tasks.Task.CompletedTask;
+    }
+}
+"@
+        }
     }
 
-    It 'handles HttpRequestException' {
-        $repoRoot = Resolve-Path -Path "$PSScriptRoot/../.."
-        $source = Get-Content -Path (Join-Path $repoRoot 'WizCloud.PowerShell/Cmdlets/CmdletGetWizUser.cs') -Raw
-        $source | Should -Match 'HttpRequestException'
+    It 'passes parameters to WizClient and respects MaxResults' {
+        $cmdlet = [WizCloud.PowerShell.CmdletGetWizUser]::new()
+        $cmdlet.PageSize = 2
+        $cmdlet.MaxResults = 1
+        $cmdlet.Type = [WizCloud.WizUserType]::GROUP
+        $cmdlet.ProjectId = 'proj1'
+
+        $client = [WizCloud.WizClient]::new('token')
+        $list = [System.Collections.Generic.List[WizCloud.WizUser]]::new()
+        $list.Add([WizCloud.WizUser]::new())
+        $list.Add([WizCloud.WizUser]::new())
+        $captured = $null
+        Mock -MemberName GetUsersAsyncEnumerable -Instance $client -MockWith {
+            param($pageSize,$types,$projectId,$cancel)
+            $script:captured = [pscustomobject]@{PageSize=$pageSize; Types=$types; ProjectId=$projectId}
+            [TestAsyncEnumerable[WizCloud.WizUser]]::new($list)
+        }
+        $field = $cmdlet.GetType().GetField('_wizClient','NonPublic,Instance')
+        $field.SetValue($cmdlet,$client)
+        $script:output = @()
+        Mock -MemberName WriteObject -Instance $cmdlet -MockWith { param($obj) $script:output += $obj }
+        $method = $cmdlet.GetType().GetMethod('ProcessRecordAsync','NonPublic,Instance')
+        $task = $method.Invoke($cmdlet,@())
+        $task.GetAwaiter().GetResult()
+        $script:output | Should -HaveCount 1
+        $captured.PageSize | Should -Be 2
+        $captured.Types | Should -Be (@([WizCloud.WizUserType]::GROUP))
+        $captured.ProjectId | Should -Be 'proj1'
     }
 
-    It 'defines Type and ProjectId parameters' {
-        $repoRoot = Resolve-Path -Path "$PSScriptRoot/../.."
-        $source = Get-Content -Path (Join-Path $repoRoot 'WizCloud.PowerShell/Cmdlets/CmdletGetWizUser.cs') -Raw
-        $source | Should -Match 'ProjectId'
-        $source | Should -Match 'WizUserType\[]'
+    It 'writes an error when WizClient throws HttpRequestException' {
+        $cmdlet = [WizCloud.PowerShell.CmdletGetWizUser]::new()
+        $client = [WizCloud.WizClient]::new('token')
+        Mock -MemberName GetUsersAsyncEnumerable -Instance $client -MockWith {
+            throw [System.Net.Http.HttpRequestException]::new('fail')
+        }
+        $field = $cmdlet.GetType().GetField('_wizClient','NonPublic,Instance')
+        $field.SetValue($cmdlet,$client)
+        $script:err = $null
+        Mock -MemberName WriteError -Instance $cmdlet -MockWith { param($e) $script:err = $e }
+        $method = $cmdlet.GetType().GetMethod('ProcessRecordAsync','NonPublic,Instance')
+        $task = $method.Invoke($cmdlet,@())
+        $task.GetAwaiter().GetResult()
+        $script:err.Exception | Should -BeOfType ([System.Net.Http.HttpRequestException])
     }
 }
