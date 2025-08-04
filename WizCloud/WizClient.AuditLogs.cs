@@ -109,8 +109,11 @@ public partial class WizClient {
                 var nodes = jsonResponse["data"]?["auditLogs"]?["nodes"]?.AsArray();
                 if (nodes != null) {
                     foreach (var node in nodes) {
-                        if (node != null)
-                            logs.Add(WizAuditLogEntry.FromJson(node));
+                        if (node != null) {
+                            var log = node.Deserialize<WizAuditLogEntry>(s_jsonOptions);
+                            if (log != null)
+                                logs.Add(log);
+                        }
                     }
                 }
 

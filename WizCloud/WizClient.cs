@@ -7,6 +7,7 @@ using System.Text;
 using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,10 @@ namespace WizCloud;
 /// </summary>
 public partial class WizClient : IDisposable {
     private static readonly HttpClient _httpClient = CreateClient();
+    private static readonly JsonSerializerOptions s_jsonOptions = new() {
+        PropertyNameCaseInsensitive = true,
+        Converters = { new JsonStringEnumConverter() }
+    };
     private readonly string _apiEndpoint;
     private readonly string? _clientId;
     private readonly string? _clientSecret;

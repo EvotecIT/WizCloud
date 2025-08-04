@@ -1,4 +1,4 @@
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using WizCloud;
 
 namespace WizCloud.Tests;
@@ -6,7 +6,7 @@ namespace WizCloud.Tests;
 [TestClass]
 public sealed class WizResourceIssueCountsTests {
     [TestMethod]
-    public void FromJson_ParsesCounts() {
+    public void Deserialize_ParsesCounts() {
         string jsonString = """
         {
           "criticalCount": 1,
@@ -15,8 +15,7 @@ public sealed class WizResourceIssueCountsTests {
           "lowCount": 4
         }
         """;
-        JsonNode json = JsonNode.Parse(jsonString)!;
-        WizResourceIssueCounts counts = WizResourceIssueCounts.FromJson(json);
+        WizResourceIssueCounts counts = JsonSerializer.Deserialize<WizResourceIssueCounts>(jsonString, TestJson.Options)!;
 
         Assert.AreEqual(1, counts.CriticalCount);
         Assert.AreEqual(2, counts.HighCount);

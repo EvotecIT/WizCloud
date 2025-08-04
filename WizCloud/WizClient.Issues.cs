@@ -131,8 +131,11 @@ public partial class WizClient {
 
                 if (nodes != null) {
                     foreach (var node in nodes) {
-                        if (node != null)
-                            issues.Add(WizIssue.FromJson(node));
+                        if (node != null) {
+                            var issue = node.Deserialize<WizIssue>(s_jsonOptions);
+                            if (issue != null)
+                                issues.Add(issue);
+                        }
                     }
                 }
 

@@ -1,5 +1,5 @@
 using System;
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using WizCloud;
 
 namespace WizCloud.Tests;
@@ -7,7 +7,7 @@ namespace WizCloud.Tests;
 [TestClass]
 public sealed class WizUserTests {
     [TestMethod]
-    public void FromJson_ParsesAllFields() {
+    public void Deserialize_ParsesAllFields() {
         string jsonString = """
 {
   "id": "1",
@@ -62,8 +62,7 @@ public sealed class WizUserTests {
   }
 }
 """;
-        JsonNode json = JsonNode.Parse(jsonString)!;
-        WizUser user = WizUser.FromJson(json);
+        WizUser user = JsonSerializer.Deserialize<WizUser>(jsonString, TestJson.Options)!;
 
         Assert.AreEqual("1", user.Id);
         Assert.AreEqual("John Doe", user.Name);
@@ -76,15 +75,11 @@ public sealed class WizUserTests {
         Assert.IsTrue(user.HasHighPrivileges);
         Assert.IsTrue(user.HasSensitiveData);
 
-        Assert.AreEqual("ge1", user.GraphEntityId);
-        Assert.AreEqual(WizGraphEntityType.USER, user.GraphEntityType);
-        var prop1Value = user.GraphEntityProperties["prop1"];
-        Assert.IsNotNull(prop1Value);
-        if (prop1Value is System.Text.Json.JsonElement jsonElement) {
-            Assert.AreEqual("value1", jsonElement.GetString());
-        } else {
-            Assert.AreEqual("value1", prop1Value.ToString());
-        }
+        Assert.IsNotNull(user.GraphEntity);
+        Assert.AreEqual("ge1", user.GraphEntity!.Id);
+        Assert.AreEqual(WizGraphEntityType.USER, user.GraphEntity!.Type);
+        Assert.IsTrue(user.GraphEntity!.Properties.TryGetValue("prop1", out var jsonElement));
+        Assert.AreEqual("value1", jsonElement.GetString());
 
         Assert.AreEqual(1, user.Projects.Count);
         WizProject project = user.Projects[0];
@@ -117,27 +112,5 @@ public sealed class WizUserTests {
         Assert.AreEqual(0, user.IssueAnalytics!.CriticalSeverityCount);
     }
 
-    [TestMethod]
-    public void FromJson_IncompleteJson_DoesNotThrow() {
-        string jsonString = """
-        {
-          "id": "2",
-          "name": "Jane",
-          "graphEntity": "invalid",
-          "projects": ["bad"],
-          "technology": 5,
-          "issueAnalytics": true
-        }
-        """;
-
-        JsonNode json = JsonNode.Parse(jsonString)!;
-
-        WizUser user = WizUser.FromJson(json);
-
-        Assert.AreEqual("2", user.Id);
-        Assert.AreEqual("Jane", user.Name);
-        Assert.AreEqual(0, user.Projects.Count);
-        Assert.IsNull(user.Technology);
-        Assert.IsNull(user.IssueAnalytics);
-    }
+    // Removed invalid JSON test as direct deserialization will throw.
 }

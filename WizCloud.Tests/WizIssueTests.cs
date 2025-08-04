@@ -1,5 +1,5 @@
 using System;
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using WizCloud;
 
 namespace WizCloud.Tests;
@@ -7,7 +7,7 @@ namespace WizCloud.Tests;
 [TestClass]
 public sealed class WizIssueTests {
     [TestMethod]
-    public void FromJson_ParsesNestedObjects() {
+    public void Deserialize_ParsesNestedObjects() {
         string jsonString = """
         {
           "id": "iss1",
@@ -32,15 +32,14 @@ public sealed class WizIssueTests {
           "remediation": "fix"
         }
         """;
-        JsonNode json = JsonNode.Parse(jsonString)!;
-        WizIssue issue = WizIssue.FromJson(json);
+        WizIssue issue = JsonSerializer.Deserialize<WizIssue>(jsonString, TestJson.Options)!;
 
         Assert.AreEqual("iss1", issue.Id);
         Assert.AreEqual("Issue", issue.Name);
         Assert.AreEqual("VULNERABILITY", issue.Type);
         Assert.AreEqual(WizSeverity.MEDIUM, issue.Severity);
         Assert.AreEqual("OPEN", issue.Status);
-        Assert.AreEqual(DateTime.Parse("2024-05-01T00:00:00Z").ToLocalTime(), issue.CreatedAt);
+        Assert.AreEqual(DateTime.Parse("2024-05-01T00:00:00Z").ToUniversalTime(), issue.CreatedAt);
         Assert.AreEqual(1, issue.Projects.Count);
         Assert.IsNotNull(issue.Resource);
         Assert.AreEqual("res1", issue.Resource!.Id);

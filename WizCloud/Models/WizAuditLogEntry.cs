@@ -1,5 +1,4 @@
 using System;
-using System.Text.Json.Nodes;
 
 namespace WizCloud;
 
@@ -52,40 +51,6 @@ public class WizAuditLogEntry {
     /// </summary>
     public string? Details { get; set; }
 
-    /// <summary>
-    /// Creates a <see cref="WizAuditLogEntry"/> from JSON.
-    /// </summary>
-    public static WizAuditLogEntry FromJson(JsonNode node) {
-        var entry = new WizAuditLogEntry {
-            Id = node["id"]?.GetValue<string>() ?? string.Empty,
-            Timestamp = node["timestamp"]?.GetValue<DateTime?>()?.ToLocalTime(),
-            Action = node["action"]?.GetValue<string>(),
-            Status = node["status"]?.GetValue<string>(),
-            IpAddress = node["ipAddress"]?.GetValue<string>(),
-            UserAgent = node["userAgent"]?.GetValue<string>(),
-            Details = node["details"]?.GetValue<string>()
-        };
-
-        var user = node["user"];
-        if (user != null) {
-            entry.User = new WizAuditUser {
-                Id = user["id"]?.GetValue<string>() ?? string.Empty,
-                Name = user["name"]?.GetValue<string>() ?? string.Empty,
-                Email = user["email"]?.GetValue<string>() ?? string.Empty
-            };
-        }
-
-        var resource = node["resource"];
-        if (resource != null) {
-            entry.Resource = new WizAuditResource {
-                Type = resource["type"]?.GetValue<string>() ?? string.Empty,
-                Id = resource["id"]?.GetValue<string>() ?? string.Empty,
-                Name = resource["name"]?.GetValue<string>() ?? string.Empty
-            };
-        }
-
-        return entry;
-    }
 }
 
 /// <summary>

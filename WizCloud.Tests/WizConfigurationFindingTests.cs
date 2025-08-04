@@ -1,5 +1,5 @@
 using System;
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using WizCloud;
 
 namespace WizCloud.Tests;
@@ -7,7 +7,7 @@ namespace WizCloud.Tests;
 [TestClass]
 public sealed class WizConfigurationFindingTests {
     [TestMethod]
-    public void FromJson_ParsesFields() {
+    public void Deserialize_ParsesFields() {
         string jsonString = """
         {
             "id": "cf1",
@@ -23,13 +23,14 @@ public sealed class WizConfigurationFindingTests {
             "remediation": "fix"
         }
         """;
-        JsonNode json = JsonNode.Parse(jsonString)!;
-        WizConfigurationFinding finding = WizConfigurationFinding.FromJson(json);
+        WizConfigurationFinding finding = JsonSerializer.Deserialize<WizConfigurationFinding>(jsonString, TestJson.Options)!;
         Assert.AreEqual("cf1", finding.Id);
         Assert.AreEqual("Sample", finding.Title);
         Assert.AreEqual(WizSeverity.HIGH, finding.Severity);
         Assert.AreEqual(1, finding.ComplianceFrameworks.Count);
-        Assert.AreEqual(1, finding.FailedResourceCount);
+        Assert.IsNotNull(finding.FailedResources);
+        Assert.AreEqual(1, finding.FailedResources!.Count);
+        Assert.AreEqual(1, finding.FailedResources!.Resources.Count);
         Assert.IsNotNull(finding.Rule);
     }
 }

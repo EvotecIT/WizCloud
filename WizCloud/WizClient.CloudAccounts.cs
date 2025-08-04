@@ -99,7 +99,9 @@ public partial class WizClient {
                 if (nodes != null) {
                     foreach (var node in nodes) {
                         if (node != null) {
-                            accounts.Add(WizCloudAccount.FromJson(node));
+                            var account = node.Deserialize<WizCloudAccount>(s_jsonOptions);
+                            if (account != null)
+                                accounts.Add(account);
                         }
                     }
                 }

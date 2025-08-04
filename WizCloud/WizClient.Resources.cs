@@ -155,8 +155,11 @@ public partial class WizClient {
 
                 if (nodes != null) {
                     foreach (var node in nodes) {
-                        if (node != null)
-                            resources.Add(WizResource.FromJson(node));
+                        if (node != null) {
+                            var res = node.Deserialize<WizResource>(s_jsonOptions);
+                            if (res != null)
+                                resources.Add(res);
+                        }
                     }
                 }
 

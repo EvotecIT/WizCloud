@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text.Json.Nodes;
 
 namespace WizCloud;
 
@@ -58,64 +57,6 @@ public class WizNetworkExposure {
     /// </summary>
     public WizNetworkExposureCertificate? Certificate { get; set; }
 
-    /// <summary>
-    /// Creates a <see cref="WizNetworkExposure"/> from JSON.
-    /// </summary>
-    public static WizNetworkExposure FromJson(JsonNode node) {
-        var exposure = new WizNetworkExposure {
-            Id = node["id"]?.GetValue<string>() ?? string.Empty,
-            ExposureType = node["exposureType"]?.GetValue<string>(),
-            InternetFacing = node["internetFacing"]?.GetValue<bool?>(),
-            PublicIpAddress = node["publicIpAddress"]?.GetValue<string>(),
-            DnsName = node["dnsName"]?.GetValue<string>()
-        };
-
-        var resource = node["resource"];
-        if (resource != null) {
-            exposure.Resource = new WizNetworkExposureResource {
-                Id = resource["id"]?.GetValue<string>() ?? string.Empty,
-                Name = resource["name"]?.GetValue<string>() ?? string.Empty,
-                Type = resource["type"]?.GetValue<string>() ?? string.Empty
-            };
-        }
-
-        var ports = node["ports"]?.AsArray();
-        if (ports != null) {
-            foreach (var port in ports) {
-                if (port != null)
-                    exposure.Ports.Add(port.GetValue<int>());
-            }
-        }
-
-        var protocols = node["protocols"]?.AsArray();
-        if (protocols != null) {
-            foreach (var proto in protocols) {
-                var val = proto?.GetValue<string>();
-                if (val != null)
-                    exposure.Protocols.Add(val);
-            }
-        }
-
-        var ranges = node["sourceIpRanges"]?.AsArray();
-        if (ranges != null) {
-            foreach (var range in ranges) {
-                var val = range?.GetValue<string>();
-                if (val != null)
-                    exposure.SourceIpRanges.Add(val);
-            }
-        }
-
-        var cert = node["certificate"];
-        if (cert != null) {
-            exposure.Certificate = new WizNetworkExposureCertificate {
-                Issuer = cert["issuer"]?.GetValue<string>() ?? string.Empty,
-                ExpiryDate = cert["expiryDate"]?.GetValue<DateTime?>()?.ToLocalTime(),
-                IsValid = cert["isValid"]?.GetValue<bool?>()
-            };
-        }
-
-        return exposure;
-    }
 }
 
 /// <summary>

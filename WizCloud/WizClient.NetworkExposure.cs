@@ -110,8 +110,11 @@ public partial class WizClient {
                 var nodes = jsonResponse["data"]?["networkExposure"]?["nodes"]?.AsArray();
                 if (nodes != null) {
                     foreach (var node in nodes) {
-                        if (node != null)
-                            exposures.Add(WizNetworkExposure.FromJson(node));
+                        if (node != null) {
+                            var exposure = node.Deserialize<WizNetworkExposure>(s_jsonOptions);
+                            if (exposure != null)
+                                exposures.Add(exposure);
+                        }
                     }
                 }
 

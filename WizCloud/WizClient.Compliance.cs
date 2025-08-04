@@ -45,8 +45,8 @@ public partial class WizClient {
                 if (nodes != null) {
                     foreach (var node in nodes) {
                         if (node != null) {
-                            var result = WizComplianceResult.FromJson(node);
-                            if (!minScore.HasValue || (result.OverallScore ?? 0) >= minScore.Value)
+                            var result = node.Deserialize<WizComplianceResult>(s_jsonOptions);
+                            if (result != null && (!minScore.HasValue || (result.OverallScore ?? 0) >= minScore.Value))
                                 results.Add(result);
                         }
                     }

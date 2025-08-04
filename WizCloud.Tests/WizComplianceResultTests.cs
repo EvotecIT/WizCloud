@@ -1,5 +1,5 @@
 using System;
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using WizCloud;
 
 namespace WizCloud.Tests;
@@ -7,7 +7,7 @@ namespace WizCloud.Tests;
 [TestClass]
 public sealed class WizComplianceResultTests {
     [TestMethod]
-    public void FromJson_ParsesFields() {
+    public void Deserialize_ParsesFields() {
         string jsonString = """
         {
             "framework": "CIS",
@@ -18,8 +18,7 @@ public sealed class WizComplianceResultTests {
             "lastAssessmentDate": "2024-05-01T00:00:00Z"
         }
         """;
-        JsonNode json = JsonNode.Parse(jsonString)!;
-        WizComplianceResult result = WizComplianceResult.FromJson(json);
+        WizComplianceResult result = JsonSerializer.Deserialize<WizComplianceResult>(jsonString, TestJson.Options)!;
         Assert.AreEqual("CIS", result.Framework);
         Assert.AreEqual(0.9, result.OverallScore);
         Assert.AreEqual(1, result.Controls.Count);

@@ -139,8 +139,11 @@ public partial class WizClient {
 
                 if (nodes != null) {
                     foreach (var node in nodes) {
-                        if (node != null)
-                            vulnerabilities.Add(WizVulnerability.FromJson(node));
+                        if (node != null) {
+                            var vul = node.Deserialize<WizVulnerability>(s_jsonOptions);
+                            if (vul != null)
+                                vulnerabilities.Add(vul);
+                        }
                     }
                 }
 

@@ -1,5 +1,3 @@
-using System.Text.Json.Nodes;
-
 namespace WizCloud;
 /// <summary>
 /// Represents issue summary counts for a resource.
@@ -14,13 +12,4 @@ public class WizResourceIssueCounts {
     /// <summary>Gets or sets the low issue count.</summary>
     public int LowCount { get; set; }
 
-    /// <summary>Creates a <see cref="WizResourceIssueCounts"/> from JSON.</summary>
-    public static WizResourceIssueCounts FromJson(JsonNode node) {
-        return new WizResourceIssueCounts {
-            CriticalCount = node["criticalCount"]?.GetValue<int>() ?? 0,
-            HighCount = node["highCount"]?.GetValue<int>() ?? 0,
-            MediumCount = node["mediumCount"]?.GetValue<int>() ?? 0,
-            LowCount = node["lowCount"]?.GetValue<int>() ?? 0
-        };
-    }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 
 namespace WizCloud;
 
@@ -19,9 +20,7 @@ public partial class WizUserComprehensive : WizUser {
             Type = user.Type,
             NativeType = user.NativeType,
             DeletedAt = user.DeletedAt,
-            GraphEntityId = user.GraphEntityId,
-            GraphEntityType = user.GraphEntityType,
-            GraphEntityProperties = user.GraphEntityProperties,
+            GraphEntity = user.GraphEntity,
             HasAccessToSensitiveData = user.HasAccessToSensitiveData,
             HasAdminPrivileges = user.HasAdminPrivileges,
             HasHighPrivileges = user.HasHighPrivileges,
@@ -32,86 +31,87 @@ public partial class WizUserComprehensive : WizUser {
             IssueAnalytics = user.IssueAnalytics
         };
 
-        // Extract all properties from GraphEntityProperties
-        if (user.GraphEntityProperties != null) {
+        // Extract all properties from GraphEntity
+        if (user.GraphEntity?.Properties != null) {
+            var props = user.GraphEntity.Properties;
             // User identification
-            comprehensive.UserPrincipalName = GetStringValue(user.GraphEntityProperties, "userPrincipalName");
-            comprehensive.DisplayName = GetStringValue(user.GraphEntityProperties, "displayName");
-            comprehensive.GivenName = GetStringValue(user.GraphEntityProperties, "givenName");
-            comprehensive.Surname = GetStringValue(user.GraphEntityProperties, "surname");
-            comprehensive.Email = GetStringValue(user.GraphEntityProperties, "email");
-            comprehensive.Mail = GetStringValue(user.GraphEntityProperties, "mail");
-            comprehensive.MailNickname = GetStringValue(user.GraphEntityProperties, "mailNickname");
+            comprehensive.UserPrincipalName = GetStringValue(props, "userPrincipalName");
+            comprehensive.DisplayName = GetStringValue(props, "displayName");
+            comprehensive.GivenName = GetStringValue(props, "givenName");
+            comprehensive.Surname = GetStringValue(props, "surname");
+            comprehensive.Email = GetStringValue(props, "email");
+            comprehensive.Mail = GetStringValue(props, "mail");
+            comprehensive.MailNickname = GetStringValue(props, "mailNickname");
 
             // Organization
-            comprehensive.Company = GetStringValue(user.GraphEntityProperties, "company");
-            comprehensive.Department = GetStringValue(user.GraphEntityProperties, "department");
-            comprehensive.JobTitle = GetStringValue(user.GraphEntityProperties, "jobTitle");
-            comprehensive.Location = GetStringValue(user.GraphEntityProperties, "location");
-            comprehensive.Description = GetStringValue(user.GraphEntityProperties, "description");
+            comprehensive.Company = GetStringValue(props, "company");
+            comprehensive.Department = GetStringValue(props, "department");
+            comprehensive.JobTitle = GetStringValue(props, "jobTitle");
+            comprehensive.Location = GetStringValue(props, "location");
+            comprehensive.Description = GetStringValue(props, "description");
 
             // Account status
-            comprehensive.AccountEnabled = GetBoolValue(user.GraphEntityProperties, "accountEnabled");
-            comprehensive.Active = GetBoolValue(user.GraphEntityProperties, "active");
-            comprehensive.Enabled = GetBoolValue(user.GraphEntityProperties, "enabled");
-            comprehensive.Status = GetStringValue(user.GraphEntityProperties, "status");
-            comprehensive.UserType = GetStringValue(user.GraphEntityProperties, "userType");
-            comprehensive.HasMfa = GetBoolValue(user.GraphEntityProperties, "hasMfa");
-            comprehensive.InactiveInLast90Days = GetBoolValue(user.GraphEntityProperties, "inactiveInLast90Days");
-            comprehensive.InactiveTimeframe = GetStringValue(user.GraphEntityProperties, "inactiveTimeframe");
+            comprehensive.AccountEnabled = GetBoolValue(props, "accountEnabled");
+            comprehensive.Active = GetBoolValue(props, "active");
+            comprehensive.Enabled = GetBoolValue(props, "enabled");
+            comprehensive.Status = GetStringValue(props, "status");
+            comprehensive.UserType = GetStringValue(props, "userType");
+            comprehensive.HasMfa = GetBoolValue(props, "hasMfa");
+            comprehensive.InactiveInLast90Days = GetBoolValue(props, "inactiveInLast90Days");
+            comprehensive.InactiveTimeframe = GetStringValue(props, "inactiveTimeframe");
 
             // Directory
-            comprehensive.UserDirectory = GetStringValue(user.GraphEntityProperties, "userDirectory");
-            comprehensive.PremisesDistinguishedName = GetStringValue(user.GraphEntityProperties, "premisesDistinguishedName");
-            comprehensive.AadOnPremisesDomainName = GetStringValue(user.GraphEntityProperties, "aadOnPremisesDomainName");
-            comprehensive.AadOnPremisesSamAccountName = GetStringValue(user.GraphEntityProperties, "aadOnPremisesSamAccountName");
-            comprehensive.HomeDirectory = GetStringValue(user.GraphEntityProperties, "homeDirectory");
-            comprehensive.ShellPath = GetStringValue(user.GraphEntityProperties, "shellPath");
+            comprehensive.UserDirectory = GetStringValue(props, "userDirectory");
+            comprehensive.PremisesDistinguishedName = GetStringValue(props, "premisesDistinguishedName");
+            comprehensive.AadOnPremisesDomainName = GetStringValue(props, "aadOnPremisesDomainName");
+            comprehensive.AadOnPremisesSamAccountName = GetStringValue(props, "aadOnPremisesSamAccountName");
+            comprehensive.HomeDirectory = GetStringValue(props, "homeDirectory");
+            comprehensive.ShellPath = GetStringValue(props, "shellPath");
 
             // Credentials
-            comprehensive.CredentialId = GetStringValue(user.GraphEntityProperties, "credentialId");
-            comprehensive.CredentialType = GetStringValue(user.GraphEntityProperties, "credentialType");
-            comprehensive.EverUsed = GetBoolValue(user.GraphEntityProperties, "everUsed");
-            comprehensive.ValidAfter = GetDateTimeValue(user.GraphEntityProperties, "validAfter");
-            comprehensive.ValidBefore = GetDateTimeValue(user.GraphEntityProperties, "validBefore");
-            comprehensive.RotatedAt = GetDateTimeValue(user.GraphEntityProperties, "rotatedAt");
-            comprehensive.LastPasswordChange = GetDateTimeValue(user.GraphEntityProperties, "lastPasswordChange");
+            comprehensive.CredentialId = GetStringValue(props, "credentialId");
+            comprehensive.CredentialType = GetStringValue(props, "credentialType");
+            comprehensive.EverUsed = GetBoolValue(props, "everUsed");
+            comprehensive.ValidAfter = GetDateTimeValue(props, "validAfter");
+            comprehensive.ValidBefore = GetDateTimeValue(props, "validBefore");
+            comprehensive.RotatedAt = GetDateTimeValue(props, "rotatedAt");
+            comprehensive.LastPasswordChange = GetDateTimeValue(props, "lastPasswordChange");
 
             // Service account
-            comprehensive.ClientId = GetStringValue(user.GraphEntityProperties, "clientId");
-            comprehensive.AadAppId = GetStringValue(user.GraphEntityProperties, "aad_appId");
-            comprehensive.AadAppOwnerTenantId = GetStringValue(user.GraphEntityProperties, "aad_appOwnerTenantId");
-            comprehensive.AadObjectId = GetStringValue(user.GraphEntityProperties, "aad_objectId");
-            comprehensive.AadPublisherName = GetStringValue(user.GraphEntityProperties, "aad_publisherName");
-            comprehensive.AadSignInAudience = GetStringValue(user.GraphEntityProperties, "aad_signInAudience");
-            comprehensive.Managed = GetBoolValue(user.GraphEntityProperties, "managed");
+            comprehensive.ClientId = GetStringValue(props, "clientId");
+            comprehensive.AadAppId = GetStringValue(props, "aad_appId");
+            comprehensive.AadAppOwnerTenantId = GetStringValue(props, "aad_appOwnerTenantId");
+            comprehensive.AadObjectId = GetStringValue(props, "aad_objectId");
+            comprehensive.AadPublisherName = GetStringValue(props, "aad_publisherName");
+            comprehensive.AadSignInAudience = GetStringValue(props, "aad_signInAudience");
+            comprehensive.Managed = GetBoolValue(props, "managed");
 
             // Kubernetes
-            comprehensive.KubernetesClusterExternalId = GetStringValue(user.GraphEntityProperties, "kubernetes_clusterExternalId");
-            comprehensive.KubernetesClusterName = GetStringValue(user.GraphEntityProperties, "kubernetes_clusterName");
-            comprehensive.KubernetesFlavor = GetStringValue(user.GraphEntityProperties, "kubernetes_kubernetesFlavor");
-            comprehensive.Namespace = GetStringValue(user.GraphEntityProperties, "namespace");
+            comprehensive.KubernetesClusterExternalId = GetStringValue(props, "kubernetes_clusterExternalId");
+            comprehensive.KubernetesClusterName = GetStringValue(props, "kubernetes_clusterName");
+            comprehensive.KubernetesFlavor = GetStringValue(props, "kubernetes_kubernetesFlavor");
+            comprehensive.Namespace = GetStringValue(props, "namespace");
 
             // Resources
-            comprehensive.ExternalId = GetStringValue(user.GraphEntityProperties, "externalId");
-            comprehensive.ProviderUniqueId = GetStringValue(user.GraphEntityProperties, "providerUniqueId");
-            comprehensive.FullResourceName = GetStringValue(user.GraphEntityProperties, "fullResourceName");
-            comprehensive.CloudProviderUrl = GetStringValue(user.GraphEntityProperties, "cloudProviderURL");
-            comprehensive.Region = GetStringValue(user.GraphEntityProperties, "region");
-            comprehensive.SubscriptionExternalId = GetStringValue(user.GraphEntityProperties, "subscriptionExternalId");
+            comprehensive.ExternalId = GetStringValue(props, "externalId");
+            comprehensive.ProviderUniqueId = GetStringValue(props, "providerUniqueId");
+            comprehensive.FullResourceName = GetStringValue(props, "fullResourceName");
+            comprehensive.CloudProviderUrl = GetStringValue(props, "cloudProviderURL");
+            comprehensive.Region = GetStringValue(props, "region");
+            comprehensive.SubscriptionExternalId = GetStringValue(props, "subscriptionExternalId");
 
             // Timestamps
-            comprehensive.CreatedAt = GetDateTimeValue(user.GraphEntityProperties, "createdAt");
-            comprehensive.UpdatedAt = GetDateTimeValue(user.GraphEntityProperties, "updatedAt");
-            comprehensive.DirectoryLastSyncTime = GetDateTimeValue(user.GraphEntityProperties, "directoryLastSyncTime");
+            comprehensive.CreatedAt = GetDateTimeValue(props, "createdAt");
+            comprehensive.UpdatedAt = GetDateTimeValue(props, "updatedAt");
+            comprehensive.DirectoryLastSyncTime = GetDateTimeValue(props, "directoryLastSyncTime");
 
             // Special properties
-            comprehensive.VertexId = GetStringValue(user.GraphEntityProperties, "_vertexID");
+            comprehensive.VertexId = GetStringValue(props, "_vertexID");
 
             // Handle arrays
-            comprehensive.OtherMails = GetStringListValue(user.GraphEntityProperties, "otherMails");
-            comprehensive.ProxyAddresses = GetStringListValue(user.GraphEntityProperties, "proxyAddresses");
-            comprehensive.ProductIds = GetStringListValue(user.GraphEntityProperties, "_productIDs");
+            comprehensive.OtherMails = GetStringListValue(props, "otherMails");
+            comprehensive.ProxyAddresses = GetStringListValue(props, "proxyAddresses");
+            comprehensive.ProductIds = GetStringListValue(props, "_productIDs");
 
             // Parse proxy addresses to extract email addresses
             ParseProxyAddresses(comprehensive);
@@ -126,57 +126,46 @@ public partial class WizUserComprehensive : WizUser {
         return comprehensive;
     }
 
-    private static string? GetStringValue(Dictionary<string, object?> properties, string key) {
-        if (properties.TryGetValue(key, out var value) && value != null) {
-            return value.ToString();
+    private static string? GetStringValue(Dictionary<string, JsonElement> properties, string key) {
+        if (properties.TryGetValue(key, out var element)) {
+            if (element.ValueKind == JsonValueKind.String)
+                return element.GetString();
+            return element.ToString();
         }
         return null;
     }
 
-    private static bool? GetBoolValue(Dictionary<string, object?> properties, string key) {
-        if (properties.TryGetValue(key, out var value) && value != null) {
-            if (bool.TryParse(value.ToString(), out var boolValue)) {
+    private static bool? GetBoolValue(Dictionary<string, JsonElement> properties, string key) {
+        if (properties.TryGetValue(key, out var element)) {
+            if (element.ValueKind == JsonValueKind.True || element.ValueKind == JsonValueKind.False)
+                return element.GetBoolean();
+            if (element.ValueKind == JsonValueKind.String && bool.TryParse(element.GetString(), out var boolValue))
                 return boolValue;
-            }
         }
         return null;
     }
 
-    private static DateTime? GetDateTimeValue(Dictionary<string, object?> properties, string key) {
+    private static DateTime? GetDateTimeValue(Dictionary<string, JsonElement> properties, string key) {
         var stringValue = GetStringValue(properties, key);
         if (!string.IsNullOrEmpty(stringValue) && DateTime.TryParse(stringValue, out var dateValue)) {
-            return dateValue.ToLocalTime();
+            return dateValue;
         }
         return null;
     }
 
-    private static List<string> GetStringListValue(Dictionary<string, object?> properties, string key) {
+    private static List<string> GetStringListValue(Dictionary<string, JsonElement> properties, string key) {
         var list = new List<string>();
-        if (properties.TryGetValue(key, out var value) && value != null) {
-            if (value is List<object?> objectList) {
-                foreach (var item in objectList) {
-                    if (item != null) {
-                        list.Add(item.ToString()!);
-                    }
+        if (properties.TryGetValue(key, out var element)) {
+            if (element.ValueKind == JsonValueKind.Array) {
+                foreach (var item in element.EnumerateArray()) {
+                    var str = item.GetString();
+                    if (!string.IsNullOrEmpty(str))
+                        list.Add(str);
                 }
-            } else if (value is System.Text.Json.JsonElement jsonElement) {
-                // Handle JsonElement arrays
-                if (jsonElement.ValueKind == System.Text.Json.JsonValueKind.Array) {
-                    foreach (var item in jsonElement.EnumerateArray()) {
-                        var str = item.GetString();
-                        if (!string.IsNullOrEmpty(str)) {
-                            list.Add(str!);
-                        }
-                    }
-                } else if (jsonElement.ValueKind == System.Text.Json.JsonValueKind.String) {
-                    var str = jsonElement.GetString();
-                    if (!string.IsNullOrEmpty(str)) {
-                        list.Add(str!);
-                    }
-                }
-            } else if (value is string stringValue && !string.IsNullOrEmpty(stringValue)) {
-                // Single value as string
-                list.Add(stringValue);
+            } else if (element.ValueKind == JsonValueKind.String) {
+                var str = element.GetString();
+                if (!string.IsNullOrEmpty(str))
+                    list.Add(str);
             }
         }
         return list;

@@ -1,5 +1,3 @@
-using System.Text.Json.Nodes;
-
 namespace WizCloud;
 
 /// <summary>
@@ -26,15 +24,4 @@ public class WizCloudAccount {
     /// </summary>
     public string ExternalId { get; set; } = string.Empty;
 
-    /// <summary>
-    /// Creates a WizCloudAccount from JSON.
-    /// </summary>
-    public static WizCloudAccount FromJson(JsonNode node) {
-        return new WizCloudAccount {
-            Id = node["id"]?.GetValue<string>() ?? string.Empty,
-            Name = node["name"]?.GetValue<string>() ?? string.Empty,
-            CloudProvider = node["cloudProvider"]?.GetValue<string>() ?? string.Empty,
-            ExternalId = node["externalId"]?.GetValue<string>() ?? string.Empty
-        };
-    }
 }

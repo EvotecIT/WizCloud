@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text.Json.Nodes;
 
 namespace WizCloud;
 
@@ -78,49 +77,4 @@ public class WizIssue {
     /// </summary>
     public string? Remediation { get; set; }
 
-    /// <summary>
-    /// Creates a <see cref="WizIssue"/> from JSON.
-    /// </summary>
-    public static WizIssue FromJson(JsonNode node) {
-        var issue = new WizIssue {
-            Id = node["id"]?.GetValue<string>() ?? string.Empty,
-            Name = node["name"]?.GetValue<string>() ?? string.Empty,
-            Type = node["type"]?.GetValue<string>() ?? string.Empty,
-            Severity = Enum.TryParse(node["severity"]?.GetValue<string>(), true, out WizSeverity tmpSev) ? tmpSev : null,
-            Status = node["status"]?.GetValue<string>(),
-            CreatedAt = node["createdAt"]?.GetValue<DateTime?>()?.ToLocalTime(),
-            UpdatedAt = node["updatedAt"]?.GetValue<DateTime?>()?.ToLocalTime(),
-            ResolvedAt = node["resolvedAt"]?.GetValue<DateTime?>()?.ToLocalTime(),
-            DueAt = node["dueAt"]?.GetValue<DateTime?>()?.ToLocalTime()
-        };
-
-        var projects = node["projects"]?.AsArray();
-        if (projects != null) {
-            foreach (var proj in projects) {
-                if (proj is JsonObject obj) {
-                    issue.Projects.Add(new WizProject {
-                        Id = obj["id"]?.GetValue<string>() ?? string.Empty,
-                        Name = obj["name"]?.GetValue<string>() ?? string.Empty,
-                        Slug = string.Empty,
-                        IsFolder = false
-                    });
-                }
-            }
-        }
-
-        var resource = node["resource"];
-        if (resource != null) {
-            issue.Resource = WizIssueResource.FromJson(resource);
-        }
-
-        var control = node["control"];
-        if (control != null) {
-            issue.Control = WizIssueControl.FromJson(control);
-        }
-
-        issue.Evidence = node["evidence"]?.GetValue<string>();
-        issue.Remediation = node["remediation"]?.GetValue<string>();
-
-        return issue;
-    }
 }

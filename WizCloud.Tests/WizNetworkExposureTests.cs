@@ -1,5 +1,5 @@
 using System;
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using WizCloud;
 
 namespace WizCloud.Tests;
@@ -7,7 +7,7 @@ namespace WizCloud.Tests;
 [TestClass]
 public sealed class WizNetworkExposureTests {
     [TestMethod]
-    public void FromJson_ParsesFields() {
+    public void Deserialize_ParsesFields() {
         string jsonString = """
         {
             "id": "ne1",
@@ -22,8 +22,7 @@ public sealed class WizNetworkExposureTests {
             "certificate": { "issuer": "CA", "expiryDate": "2024-01-01T00:00:00Z", "isValid": true }
         }
         """;
-        JsonNode json = JsonNode.Parse(jsonString)!;
-        WizNetworkExposure exposure = WizNetworkExposure.FromJson(json);
+        WizNetworkExposure exposure = JsonSerializer.Deserialize<WizNetworkExposure>(jsonString, TestJson.Options)!;
         Assert.AreEqual("ne1", exposure.Id);
         Assert.IsNotNull(exposure.Resource);
         Assert.AreEqual("Direct", exposure.ExposureType);

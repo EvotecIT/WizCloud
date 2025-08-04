@@ -1,5 +1,4 @@
 using System;
-using System.Text.Json.Nodes;
 
 namespace WizCloud;
 
@@ -27,15 +26,4 @@ public class WizIssueControl {
     /// </summary>
     public WizSeverity? Severity { get; set; }
 
-    /// <summary>
-    /// Creates a <see cref="WizIssueControl"/> from JSON.
-    /// </summary>
-    public static WizIssueControl FromJson(JsonNode node) {
-        return new WizIssueControl {
-            Id = node["id"]?.GetValue<string>() ?? string.Empty,
-            Name = node["name"]?.GetValue<string>() ?? string.Empty,
-            Description = node["description"]?.GetValue<string>(),
-            Severity = Enum.TryParse(node["severity"]?.GetValue<string>(), true, out WizSeverity tmpSev) ? tmpSev : null
-        };
-    }
 }

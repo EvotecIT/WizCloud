@@ -133,8 +133,11 @@ public partial class WizClient {
 
                 if (nodes != null) {
                     foreach (var node in nodes) {
-                        if (node != null)
-                            users.Add(WizUser.FromJson(node));
+                        if (node != null) {
+                            var user = node.Deserialize<WizUser>(s_jsonOptions);
+                            if (user != null)
+                                users.Add(user);
+                        }
                     }
                 }
 

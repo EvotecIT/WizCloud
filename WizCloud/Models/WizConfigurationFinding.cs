@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Text.Json.Nodes;
 
 namespace WizCloud;
 
@@ -34,14 +33,9 @@ public class WizConfigurationFinding {
     public List<string> ComplianceFrameworks { get; set; } = new List<string>();
 
     /// <summary>
-    /// Gets or sets the count of failed resources.
+    /// Gets or sets information about failed resources.
     /// </summary>
-    public int FailedResourceCount { get; set; }
-
-    /// <summary>
-    /// Gets or sets the list of failed resources.
-    /// </summary>
-    public List<WizConfigurationFailedResource> FailedResources { get; set; } = new List<WizConfigurationFailedResource>();
+    public WizFailedResources? FailedResources { get; set; }
 
     /// <summary>
     /// Gets or sets the rule associated with the finding.
@@ -53,55 +47,17 @@ public class WizConfigurationFinding {
     /// </summary>
     public string? Remediation { get; set; }
 
-    /// <summary>
-    /// Creates a <see cref="WizConfigurationFinding"/> from JSON.
-    /// </summary>
-    public static WizConfigurationFinding FromJson(JsonNode node) {
-        var finding = new WizConfigurationFinding {
-            Id = node["id"]?.GetValue<string>() ?? string.Empty,
-            Title = node["title"]?.GetValue<string>() ?? string.Empty,
-            Description = node["description"]?.GetValue<string>(),
-            Severity = Enum.TryParse(node["severity"]?.GetValue<string>(), true, out WizSeverity tmpSev) ? tmpSev : null,
-            Remediation = node["remediation"]?.GetValue<string>()
-        };
+}
 
-        var frameworks = node["complianceFrameworks"]?.AsArray();
-        if (frameworks != null) {
-            foreach (var f in frameworks) {
-                var val = f?.GetValue<string>();
-                if (val != null)
-                    finding.ComplianceFrameworks.Add(val);
-            }
-        }
+/// <summary>
+/// Represents failed resource details for a configuration finding.
+/// </summary>
+public class WizFailedResources {
+    /// <summary>Gets or sets the count of failed resources.</summary>
+    public int Count { get; set; }
 
-        var failed = node["failedResources"];
-        if (failed != null) {
-            finding.FailedResourceCount = failed["count"]?.GetValue<int>() ?? 0;
-            var resources = failed["resources"]?.AsArray();
-            if (resources != null) {
-                foreach (var res in resources) {
-                    if (res != null) {
-                        finding.FailedResources.Add(new WizConfigurationFailedResource {
-                            Id = res["id"]?.GetValue<string>() ?? string.Empty,
-                            Name = res["name"]?.GetValue<string>() ?? string.Empty,
-                            Type = res["type"]?.GetValue<string>() ?? string.Empty
-                        });
-                    }
-                }
-            }
-        }
-
-        var rule = node["rule"];
-        if (rule != null) {
-            finding.Rule = new WizConfigRule {
-                Id = rule["id"]?.GetValue<string>() ?? string.Empty,
-                Name = rule["name"]?.GetValue<string>() ?? string.Empty,
-                Category = rule["category"]?.GetValue<string>() ?? string.Empty
-            };
-        }
-
-        return finding;
-    }
+    /// <summary>Gets or sets the list of failed resources.</summary>
+    public List<WizConfigurationFailedResource> Resources { get; set; } = new List<WizConfigurationFailedResource>();
 }
 
 /// <summary>

@@ -1,5 +1,5 @@
 using System;
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using WizCloud;
 
 namespace WizCloud.Tests;
@@ -7,7 +7,7 @@ namespace WizCloud.Tests;
 [TestClass]
 public sealed class WizResourceTests {
     [TestMethod]
-    public void FromJson_ParsesAllFields() {
+    public void Deserialize_ParsesAllFields() {
         string jsonString = """
         {
           "id": "res1",
@@ -37,8 +37,7 @@ public sealed class WizResourceTests {
           }
         }
         """;
-        JsonNode json = JsonNode.Parse(jsonString)!;
-        WizResource resource = WizResource.FromJson(json);
+        WizResource resource = JsonSerializer.Deserialize<WizResource>(jsonString, TestJson.Options)!;
 
         Assert.AreEqual("res1", resource.Id);
         Assert.AreEqual("Resource 1", resource.Name);
@@ -46,7 +45,7 @@ public sealed class WizResourceTests {
         Assert.AreEqual("virtualMachine", resource.NativeType);
         Assert.AreEqual(WizCloudProvider.AZURE, resource.CloudPlatform);
         Assert.AreEqual("eastus", resource.Region);
-        Assert.AreEqual(DateTime.Parse("2024-01-01T00:00:00Z").ToLocalTime(), resource.CreatedAt);
+        Assert.AreEqual(DateTime.Parse("2024-01-01T00:00:00Z").ToUniversalTime(), resource.CreatedAt);
         Assert.AreEqual("Active", resource.Status);
         Assert.IsTrue(resource.PubliclyAccessible);
         Assert.IsFalse(resource.HasPublicIpAddress);

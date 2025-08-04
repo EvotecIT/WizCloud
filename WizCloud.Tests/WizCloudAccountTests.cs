@@ -1,4 +1,4 @@
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using WizCloud;
 
 namespace WizCloud.Tests;
@@ -6,7 +6,7 @@ namespace WizCloud.Tests;
 [TestClass]
 public sealed class WizCloudAccountTests {
     [TestMethod]
-    public void FromJson_ParsesFields() {
+    public void Deserialize_ParsesFields() {
         string jsonString = """
         {
           "id": "acc1",
@@ -15,8 +15,7 @@ public sealed class WizCloudAccountTests {
           "externalId": "123456789012"
         }
         """;
-        JsonNode json = JsonNode.Parse(jsonString)!;
-        WizCloudAccount account = WizCloudAccount.FromJson(json);
+        WizCloudAccount account = JsonSerializer.Deserialize<WizCloudAccount>(jsonString, TestJson.Options)!;
 
         Assert.AreEqual("acc1", account.Id);
         Assert.AreEqual("Account 1", account.Name);

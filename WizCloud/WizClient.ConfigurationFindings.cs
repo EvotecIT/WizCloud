@@ -110,8 +110,11 @@ public partial class WizClient {
                 var nodes = jsonResponse["data"]?["configurationFindings"]?["nodes"]?.AsArray();
                 if (nodes != null) {
                     foreach (var node in nodes) {
-                        if (node != null)
-                            findings.Add(WizConfigurationFinding.FromJson(node));
+                        if (node != null) {
+                            var finding = node.Deserialize<WizConfigurationFinding>(s_jsonOptions);
+                            if (finding != null)
+                                findings.Add(finding);
+                        }
                     }
                 }
 

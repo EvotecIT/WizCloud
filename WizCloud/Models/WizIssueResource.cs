@@ -1,5 +1,4 @@
 using System;
-using System.Text.Json.Nodes;
 
 namespace WizCloud;
 
@@ -37,17 +36,4 @@ public class WizIssueResource {
     /// </summary>
     public string? SubscriptionId { get; set; }
 
-    /// <summary>
-    /// Creates a <see cref="WizIssueResource"/> from JSON.
-    /// </summary>
-    public static WizIssueResource FromJson(JsonNode node) {
-        return new WizIssueResource {
-            Id = node["id"]?.GetValue<string>() ?? string.Empty,
-            Name = node["name"]?.GetValue<string>() ?? string.Empty,
-            Type = node["type"]?.GetValue<string>() ?? string.Empty,
-            CloudPlatform = Enum.TryParse(node["cloudPlatform"]?.GetValue<string>(), true, out WizCloudProvider tmpCp) ? tmpCp : null,
-            Region = node["region"]?.GetValue<string>(),
-            SubscriptionId = node["subscriptionId"]?.GetValue<string>()
-        };
-    }
 }
