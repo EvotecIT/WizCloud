@@ -1,5 +1,5 @@
 using System;
-using System.Text.Json.Nodes;
+using System.Text.Json;
 using WizCloud;
 
 namespace WizCloud.Tests;
@@ -7,7 +7,7 @@ namespace WizCloud.Tests;
 [TestClass]
 public sealed class WizAuditLogEntryTests {
     [TestMethod]
-    public void FromJson_ParsesFields() {
+    public void Deserialize_ParsesFields() {
         string jsonString = """
         {
             "id": "a1",
@@ -21,9 +21,9 @@ public sealed class WizAuditLogEntryTests {
             "details": "detail"
         }
         """;
-        JsonNode json = JsonNode.Parse(jsonString)!;
-        WizAuditLogEntry entry = WizAuditLogEntry.FromJson(json);
-        Assert.AreEqual("a1", entry.Id);
+        WizAuditLogEntry? entry = JsonSerializer.Deserialize<WizAuditLogEntry>(jsonString);
+        Assert.IsNotNull(entry);
+        Assert.AreEqual("a1", entry!.Id);
         Assert.IsNotNull(entry.User);
         Assert.AreEqual("LOGIN", entry.Action);
         Assert.IsNotNull(entry.Resource);
