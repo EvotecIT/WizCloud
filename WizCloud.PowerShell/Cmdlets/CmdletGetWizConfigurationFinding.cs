@@ -30,7 +30,7 @@ public class CmdletGetWizConfigurationFinding : AsyncPSCmdlet {
     [Parameter(Mandatory = false, HelpMessage = "Filter by category.")]
     public string[] Category { get; set; } = Array.Empty<string>();
 
-    [Parameter(Mandatory = false, HelpMessage = "Filter by project identifier.")]
+    [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
 
     [Parameter(Mandatory = false, HelpMessage = "Maximum number of findings to retrieve. Default is unlimited.")]

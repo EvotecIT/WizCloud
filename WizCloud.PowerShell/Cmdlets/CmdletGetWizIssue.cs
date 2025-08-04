@@ -31,7 +31,7 @@ public class CmdletGetWizIssue : AsyncPSCmdlet {
     [Parameter(Mandatory = false, HelpMessage = "Filter by issue status.")]
     public string[] Status { get; set; } = Array.Empty<string>();
 
-    [Parameter(Mandatory = false, HelpMessage = "Filter by project identifier.")]
+    [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
 
     [Parameter(Mandatory = false, HelpMessage = "Filter by issue types.")]

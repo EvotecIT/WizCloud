@@ -30,7 +30,7 @@ public class CmdletGetWizNetworkExposure : AsyncPSCmdlet {
     [Parameter(Mandatory = false, HelpMessage = "Filter by internet facing status.")]
     public bool? InternetFacing { get; set; }
 
-    [Parameter(Mandatory = false, HelpMessage = "Filter by project identifier.")]
+    [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
 
     [Parameter(Mandatory = false, HelpMessage = "Maximum number of exposures to retrieve. Default is unlimited.")]

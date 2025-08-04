@@ -15,3 +15,6 @@ Write-Host "`nRetrieving issues..." -ForegroundColor Yellow
 $issues = Get-WizIssue -Verbose -MaxResults 50
 Write-Host "`nFound $($issues.Count) issues" -ForegroundColor Green
 $issues | Format-Table Id, Name, Severity, Status
+
+# Example: Use pipeline to get issues by project
+Get-WizProject | Get-WizIssue -MaxResults 10

@@ -36,7 +36,7 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
     [Parameter(Mandatory = false, HelpMessage = "Filter by Wiz user types.")]
     public WizUserType[] Type { get; set; } = Array.Empty<WizUserType>();
 
-    [Parameter(Mandatory = false, HelpMessage = "Filter by project identifier.")]
+    [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
 
     /// <summary>

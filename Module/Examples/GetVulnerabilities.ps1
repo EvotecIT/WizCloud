@@ -16,3 +16,6 @@ $vulnerabilities = Get-WizVulnerability -Verbose -MaxResults 50
 Write-Host "`nFound $($vulnerabilities.Count) vulnerabilities" -ForegroundColor Green
 $vulnerabilities | Select-Object Id, Cve, @{Name='Cvss';Expression={$_.Cvss.Score}}, ExploitAvailable | Format-Table
 
+# Example: Use pipeline to get vulnerabilities by project
+Get-WizProject | Get-WizVulnerability -MaxResults 10
+
