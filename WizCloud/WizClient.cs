@@ -50,28 +50,26 @@ public partial class WizClient : IDisposable {
     }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="WizClient"/> class using client credentials.
-    /// </summary>
-    /// <summary>
-    /// Initializes a new instance of the <see cref="WizClient"/> class using client credentials.
+    /// Creates a new instance of the <see cref="WizClient"/> class using client credentials.
     /// </summary>
     /// <param name="clientId">The Wiz service account client ID.</param>
     /// <param name="clientSecret">The Wiz service account client secret.</param>
     /// <param name="region">The Wiz region enumeration value.</param>
-    public WizClient(string clientId, string clientSecret, WizRegion region)
-        : this(AcquireToken(clientId, clientSecret, region), region, clientId, clientSecret) { }
+    /// <returns>A <see cref="WizClient"/> instance authenticated with the retrieved token.</returns>
+    public static async Task<WizClient> CreateAsync(string clientId, string clientSecret, WizRegion region = WizRegion.EU17) {
+        var token = await WizAuthentication.AcquireTokenAsync(clientId, clientSecret, region).ConfigureAwait(false);
+        return new WizClient(token, region, clientId, clientSecret);
+    }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="WizClient"/> class using client credentials.
+    /// Creates a new instance of the <see cref="WizClient"/> class using client credentials and a region identifier.
     /// </summary>
     /// <param name="clientId">The Wiz service account client ID.</param>
     /// <param name="clientSecret">The Wiz service account client secret.</param>
     /// <param name="region">The Wiz region identifier.</param>
-    public WizClient(string clientId, string clientSecret, string region)
-        : this(clientId, clientSecret, WizRegionHelper.FromString(region)) { }
-
-    private static string AcquireToken(string clientId, string clientSecret, WizRegion region)
-        => WizAuthentication.AcquireTokenAsync(clientId, clientSecret, region).GetAwaiter().GetResult();
+    /// <returns>A <see cref="WizClient"/> instance authenticated with the retrieved token.</returns>
+    public static Task<WizClient> CreateAsync(string clientId, string clientSecret, string region)
+        => CreateAsync(clientId, clientSecret, WizRegionHelper.FromString(region));
 
     private async Task<HttpResponseMessage> SendWithRefreshAsync(HttpRequestMessage request) {
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
