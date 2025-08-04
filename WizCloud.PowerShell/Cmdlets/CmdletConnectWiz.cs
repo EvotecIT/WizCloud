@@ -91,9 +91,7 @@ public class CmdletConnectWiz : AsyncPSCmdlet {
                 
                 // Just test if we can make a successful API call by checking for projects
                 // We use GetProjectsAsyncEnumerable with immediate break to avoid fetching all data
-                var hasProjects = false;
-                await foreach (var project in testClient.GetProjectsAsyncEnumerable(1)) {
-                    hasProjects = true;
+                await foreach (var _ in testClient.GetProjectsAsyncEnumerable(1)) {
                     break; // Exit after first project to avoid loading all data
                 }
                 
