@@ -13,5 +13,6 @@ public sealed class WizClientErrorHandlingTests {
         var directory = Path.Combine(repoRoot, "WizCloud");
         var source = string.Concat(Directory.GetFiles(directory, "WizClient*.cs").Select(File.ReadAllText));
         StringAssert.Contains(source, "Request failed with status code");
+        StringAssert.Contains(source, "Body:");
     }
 }

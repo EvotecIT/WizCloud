@@ -86,9 +86,14 @@ public partial class WizClient {
             );
 
             using (var response = await SendWithRefreshAsync(request).ConfigureAwait(false)) {
-                response.EnsureSuccessStatusCode();
-
                 var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                if (!response.IsSuccessStatusCode) {
+                    var message = $"Request failed with status code {(int)response.StatusCode} ({response.ReasonPhrase}).";
+                    if (!string.IsNullOrWhiteSpace(content))
+                        message += $" Body: {content}";
+                    throw new HttpRequestException(message);
+                }
+
                 var jsonResponse = JsonNode.Parse(content);
 
                 if (jsonResponse == null)

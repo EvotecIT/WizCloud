@@ -31,9 +31,14 @@ public static class WizRegionService {
 
     private static async Task<IReadOnlyList<WizRegion>> LoadRegionsAsync() {
         using var response = await _httpClient.GetAsync("https://auth.app.wiz.io/regions").ConfigureAwait(false);
-        response.EnsureSuccessStatusCode();
-
         var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        if (!response.IsSuccessStatusCode) {
+            var message = $"Request failed with status code {(int)response.StatusCode} ({response.ReasonPhrase}).";
+            if (!string.IsNullOrWhiteSpace(content))
+                message += $" Body: {content}";
+            throw new HttpRequestException(message);
+        }
+
         var json = JsonNode.Parse(content)?.AsArray() ?? throw new InvalidOperationException("Invalid regions response");
 
         var regions = new List<WizRegion>();

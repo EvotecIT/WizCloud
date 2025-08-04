@@ -25,6 +25,17 @@ public sealed class WizRegionServiceTests {
         }
     }
 
+    private sealed class ErrorHandler : HttpMessageHandler {
+        private readonly HttpResponseMessage _response;
+
+        public ErrorHandler(string content) {
+            _response = new HttpResponseMessage(HttpStatusCode.BadRequest) { Content = new StringContent(content) };
+        }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) =>
+            Task.FromResult(_response);
+    }
+
     [TestMethod]
     public async Task GetAvailableRegionsAsync_ReturnsParsedValues() {
         var handler = new FakeHandler("[\"eu1\",\"us1\"]");
@@ -70,6 +81,16 @@ public sealed class WizRegionServiceTests {
         }
 
         Assert.AreEqual(1, handler.CallCount);
+    }
+
+    [TestMethod]
+    public async Task GetAvailableRegionsAsync_FailureIncludesResponseBody() {
+        var handler = new ErrorHandler("boom");
+        SetHttpClient(new HttpClient(handler));
+        ClearCache();
+
+        var ex = await Assert.ThrowsExceptionAsync<HttpRequestException>(WizRegionService.GetAvailableRegionsAsync);
+        StringAssert.Contains(ex.Message, "boom");
     }
 
     private static void SetHttpClient(HttpClient client) {
