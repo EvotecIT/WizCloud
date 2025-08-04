@@ -36,6 +36,8 @@ public partial class WizClient : IDisposable {
     /// </summary>
     /// <param name="token">The Wiz service account token for authentication.</param>
     /// <param name="region">The Wiz region enumeration value. Defaults to <see cref="WizRegion.EU17"/>.</param>
+    /// <param name="clientId">Optional Wiz service account client ID used for token refresh.</param>
+    /// <param name="clientSecret">Optional Wiz service account client secret used for token refresh.</param>
     /// <exception cref="ArgumentException">Thrown when the token is null or empty.</exception>
     public WizClient(string token, WizRegion region = WizRegion.EU17, string? clientId = null, string? clientSecret = null) {
         if (string.IsNullOrWhiteSpace(token))
@@ -61,13 +63,10 @@ public partial class WizClient : IDisposable {
         return new WizClient(token, region, clientId, clientSecret);
     }
 
-    /// <summary>
-    /// Creates a new instance of the <see cref="WizClient"/> class using client credentials and a region identifier.
-    /// </summary>
+    /// <inheritdoc cref="CreateAsync(string, string, WizRegion)"/>
     /// <param name="clientId">The Wiz service account client ID.</param>
     /// <param name="clientSecret">The Wiz service account client secret.</param>
     /// <param name="region">The Wiz region identifier.</param>
-    /// <returns>A <see cref="WizClient"/> instance authenticated with the retrieved token.</returns>
     public static Task<WizClient> CreateAsync(string clientId, string clientSecret, string region)
         => CreateAsync(clientId, clientSecret, WizRegionHelper.FromString(region));
 
@@ -79,7 +78,7 @@ public partial class WizClient : IDisposable {
             !string.IsNullOrEmpty(_clientId) &&
             !string.IsNullOrEmpty(_clientSecret)) {
             response.Dispose();
-            _token = await WizAuthentication.AcquireTokenAsync(_clientId, _clientSecret, _region).ConfigureAwait(false);
+            _token = await WizAuthentication.AcquireTokenAsync(_clientId!, _clientSecret!, _region).ConfigureAwait(false);
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             response = await _httpClient.SendAsync(request).ConfigureAwait(false);
         }
