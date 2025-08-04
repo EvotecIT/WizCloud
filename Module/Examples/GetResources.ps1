@@ -15,3 +15,6 @@ Write-Host "`nRetrieving resources..." -ForegroundColor Yellow
 $resources = Get-WizResource -Verbose -MaxResults 50 -Type VM -CloudProvider AWS
 Write-Host "`nFound $($resources.Count) resources" -ForegroundColor Green
 $resources | Format-Table Id, Name, Type, CloudPlatform, Region
+
+# Example: Use pipeline to get resources by project
+Get-WizProject | Get-WizResource -MaxResults 10

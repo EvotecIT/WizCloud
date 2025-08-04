@@ -37,7 +37,7 @@ public class CmdletGetWizResource : AsyncPSCmdlet {
     [Parameter(Mandatory = false, HelpMessage = "Filter by tags.")]
     public Hashtable? Tag { get; set; }
 
-    [Parameter(Mandatory = false, HelpMessage = "Filter by project identifier.")]
+    [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
 
     [Parameter(Mandatory = false, HelpMessage = "Maximum number of resources to retrieve. Default is unlimited.")]

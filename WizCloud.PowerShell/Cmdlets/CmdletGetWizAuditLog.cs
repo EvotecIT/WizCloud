@@ -27,7 +27,7 @@ public class CmdletGetWizAuditLog : AsyncPSCmdlet {
     [Parameter(Mandatory = false, HelpMessage = "Filter by end date.")]
     public DateTime? EndDate { get; set; }
 
-    [Parameter(Mandatory = false, HelpMessage = "Filter by user.")]
+    [Parameter(Mandatory = false, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by user.")]
     public string? User { get; set; }
 
     [Parameter(Mandatory = false, HelpMessage = "Filter by action.")]
