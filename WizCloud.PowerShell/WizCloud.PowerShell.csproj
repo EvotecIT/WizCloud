@@ -57,7 +57,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\WizCloud\WizCloud.csproj" />
+        <ProjectReference Include="../WizCloud/WizCloud.csproj" />
     </ItemGroup>
 
 </Project>
