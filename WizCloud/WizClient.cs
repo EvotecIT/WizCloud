@@ -85,6 +85,33 @@ public partial class WizClient : IDisposable {
 
         return response;
     }
+
+    private async Task<JsonNode> SendGraphQlRequestAsync(object requestBody) {
+        using var request = new HttpRequestMessage(HttpMethod.Post, _apiEndpoint) {
+            Content = new StringContent(
+                JsonSerializer.Serialize(requestBody),
+                Encoding.UTF8,
+                "application/json"
+            )
+        };
+
+        using var response = await SendWithRefreshAsync(request).ConfigureAwait(false);
+        if (!response.IsSuccessStatusCode) {
+            var errorBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var message = $"Request failed with status code {(int)response.StatusCode} ({response.ReasonPhrase}).";
+            if (!string.IsNullOrWhiteSpace(errorBody))
+                message += $" Body: {errorBody}";
+            throw new HttpRequestException(message);
+        }
+
+        var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        var jsonResponse = JsonNode.Parse(content);
+
+        if (jsonResponse == null)
+            throw new InvalidOperationException("Received null response from API");
+
+        return jsonResponse;
+    }
     /// <summary>
     /// Releases all resources used by the WizClient.
     /// </summary>

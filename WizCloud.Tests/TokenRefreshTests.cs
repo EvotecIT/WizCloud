@@ -17,14 +17,14 @@ public sealed class TokenRefreshTests {
     }
 
     [TestMethod]
-    public void GetCloudAccounts_UsesSendWithRefreshAsync() {
+    public void GetCloudAccounts_UsesSendGraphQlRequestAsync() {
         var repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", ".."));
         var directory = Path.Combine(repoRoot, "WizCloud");
         var source = string.Concat(Directory.GetFiles(directory, "WizClient*.cs").Select(File.ReadAllText));
         var index = source.IndexOf("GetCloudAccountsPageAsync", StringComparison.Ordinal);
         Assert.IsTrue(index >= 0, "GetCloudAccountsPageAsync method not found");
-        var callIndex = source.IndexOf("SendWithRefreshAsync", index, StringComparison.Ordinal);
-        Assert.IsTrue(callIndex >= 0, "SendWithRefreshAsync not used in GetCloudAccountsPageAsync");
+        var callIndex = source.IndexOf("SendGraphQlRequestAsync", index, StringComparison.Ordinal);
+        Assert.IsTrue(callIndex >= 0, "SendGraphQlRequestAsync not used in GetCloudAccountsPageAsync");
     }
 
     [TestMethod]

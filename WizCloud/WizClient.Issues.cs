@@ -101,47 +101,24 @@ public partial class WizClient {
                 projectId = projectFilter
             }
         };
-
         var requestBody = new { query, variables };
 
-        using (var request = new HttpRequestMessage(HttpMethod.Post, _apiEndpoint)) {
-            request.Content = new StringContent(
-                JsonSerializer.Serialize(requestBody),
-                Encoding.UTF8,
-                "application/json"
-            );
+        var jsonResponse = await SendGraphQlRequestAsync(requestBody).ConfigureAwait(false);
 
-            using (var response = await SendWithRefreshAsync(request).ConfigureAwait(false)) {
-                if (!response.IsSuccessStatusCode) {
-                    var errorBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                    var message = $"Request failed with status code {(int)response.StatusCode} ({response.ReasonPhrase}).";
-                    if (!string.IsNullOrWhiteSpace(errorBody))
-                        message += $" Body: {errorBody}";
-                    throw new HttpRequestException(message);
-                }
+        var issues = new List<WizIssue>();
+        var nodes = jsonResponse["data"]?["issues"]?["nodes"]?.AsArray();
 
-                var content = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-                var jsonResponse = JsonNode.Parse(content);
-
-                if (jsonResponse == null)
-                    throw new InvalidOperationException("Received null response from API");
-
-                var issues = new List<WizIssue>();
-                var nodes = jsonResponse["data"]?["issues"]?["nodes"]?.AsArray();
-
-                if (nodes != null) {
-                    foreach (var node in nodes) {
-                        if (node != null)
-                            issues.Add(WizIssue.FromJson(node));
-                    }
-                }
-
-                var pageInfo = jsonResponse["data"]?["issues"]?["pageInfo"];
-                bool hasNextPage = pageInfo?["hasNextPage"]?.GetValue<bool>() ?? false;
-                string? endCursor = pageInfo?["endCursor"]?.GetValue<string>();
-
-                return (issues, hasNextPage, endCursor);
+        if (nodes != null) {
+            foreach (var node in nodes) {
+                if (node != null)
+                    issues.Add(WizIssue.FromJson(node));
             }
         }
+
+        var pageInfo = jsonResponse["data"]?["issues"]?["pageInfo"];
+        bool hasNextPage = pageInfo?["hasNextPage"]?.GetValue<bool>() ?? false;
+        string? endCursor = pageInfo?["endCursor"]?.GetValue<string>();
+
+        return (issues, hasNextPage, endCursor);
     }
 }
