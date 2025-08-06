@@ -38,6 +38,38 @@ public partial class WizClient {
     }
 
     /// <summary>
+    /// Retrieves all users from Wiz with progress reporting.
+    /// </summary>
+    /// <param name="progressCallback">Optional callback to report progress.</param>
+    /// <param name="pageSize">The number of users to retrieve per page. Defaults to 500.</param>
+    /// <param name="types">Optional filter for user types.</param>
+    /// <param name="projectId">Optional project ID filter.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>A list of all users matching the criteria.</returns>
+    public async Task<List<WizUser>> GetAllUsersAsync(
+        Action<int>? progressCallback = null,
+        int pageSize = 500,
+        IEnumerable<WizUserType>? types = null,
+        string? projectId = null,
+        CancellationToken cancellationToken = default) {
+        var users = new List<WizUser>();
+        string? endCursor = null;
+        bool hasNextPage = true;
+
+        while (!cancellationToken.IsCancellationRequested && hasNextPage) {
+            var result = await GetUsersPageAsync(pageSize, endCursor, types, projectId).ConfigureAwait(false);
+            
+            users.AddRange(result.Users);
+            progressCallback?.Invoke(users.Count);
+            
+            hasNextPage = result.HasNextPage;
+            endCursor = result.EndCursor;
+        }
+
+        return users;
+    }
+
+    /// <summary>
     /// Streams users from Wiz asynchronously as an <see cref="IAsyncEnumerable{WizUser}"/>.
     /// </summary>
     /// <param name="pageSize">The number of users to retrieve per page. Defaults to 20.</param>

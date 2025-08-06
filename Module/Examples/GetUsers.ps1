@@ -17,6 +17,3 @@ Write-Host "Found $($users.Count) users"
 $Users[1101] | Format-List
 
 $Users | Format-Table Name, UserPrincipalName, UserType, HasMfa, ProjectNames, Email, IsActive, CreatedAt, LastSeenAt, LastLoginAt, LastLoginIpAddress, ProductNames, ProductIds
-
-# Example 2: Get users for each project using the pipeline
-Get-WizProject | Get-WizUser -MaxResults 10
