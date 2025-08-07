@@ -5,7 +5,7 @@ using WizCloud;
 namespace WizCloud.Examples;
 internal static class ClientCredentialSample {
     public static async Task RunAsync() {
-        using var client = await WizClient.CreateAsync("clientId", "clientSecret");
+        using var client = await WizClient.CreateAsync("clientId", "clientSecret", retryCount: 5, retryDelay: TimeSpan.FromSeconds(2));
         var users = await client.GetUsersAsync(pageSize: 1);
         Console.WriteLine($"Client credentials sample retrieved {users.Count} user(s).");
         if (users.Count > 0) {
