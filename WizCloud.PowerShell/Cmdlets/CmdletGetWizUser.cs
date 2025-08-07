@@ -21,6 +21,10 @@ namespace WizCloud.PowerShell;
 /// <para>Select a region using Connect-Wiz and get raw API response objects:</para>
 /// <code>Connect-Wiz -Region "us1"; Get-WizUser -Raw -MaxResults 10</code>
 /// </example>
+/// <example>
+/// <para>Select a region using Connect-Wiz and report progress including total counts:</para>
+/// <code>Connect-Wiz -Region "us1"; Get-WizUser -IncludeTotal</code>
+/// </example>
 /// </summary>
 [Cmdlet(VerbsCommon.Get, "WizUser")]
 [OutputType(typeof(WizUserComprehensive), typeof(WizUser))]
@@ -51,6 +55,12 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
     /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Return raw API response objects.")]
     public SwitchParameter Raw { get; set; }
+
+    /// <summary>
+    /// <para type="description">Include total user count in progress output. This requires an additional API call.</para>
+    /// </summary>
+    [Parameter(Mandatory = false, HelpMessage = "Include total user count in progress output.")]
+    public SwitchParameter IncludeTotal { get; set; }
 
     private WizClient? _wizClient;
     private int _retrievedCount = 0;
@@ -114,11 +124,22 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
         }
 
         try {
-            WriteVerbose($"Retrieving Wiz users with page size: {PageSize}" + 
+            WriteVerbose($"Retrieving Wiz users with page size: {PageSize}" +
                 (MaxResults.HasValue ? $", max results: {MaxResults.Value}" : ""));
 
             var progressRecord = new ProgressRecord(1, "Get-WizUser", "Retrieving users from Wiz...");
+            int? totalUsers = null;
+            if (IncludeTotal) {
+                totalUsers = await _wizClient.GetUsersCountAsync(Type, ProjectId).ConfigureAwait(false);
+                var totalProp = progressRecord.GetType().GetProperty("Total");
+                totalProp?.SetValue(progressRecord, totalUsers);
+                progressRecord.StatusDescription = $"Retrieved 0 of {totalUsers} users...";
+            }
             WriteProgress(progressRecord);
+
+            var effectiveMax = MaxResults.HasValue && totalUsers.HasValue
+                ? Math.Min(MaxResults.Value, totalUsers.Value)
+                : MaxResults;
 
             await foreach (var user in _wizClient.GetUsersAsyncEnumerable(PageSize, Type, ProjectId, CancelToken)) {
                 if (CancelToken.IsCancellationRequested)
@@ -135,7 +156,15 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
                 _retrievedCount++;
 
                 // Update progress
-                if (MaxResults.HasValue) {
+                if (totalUsers.HasValue) {
+                    var total = totalUsers.Value;
+                    if (effectiveMax.HasValue)
+                        total = effectiveMax.Value;
+                    var percentComplete = total > 0 ? (int)((double)_retrievedCount / total * 100) : 0;
+                    progressRecord.StatusDescription = $"Retrieved {_retrievedCount} of {total} users...";
+                    progressRecord.PercentComplete = percentComplete;
+                    WriteProgress(progressRecord);
+                } else if (MaxResults.HasValue) {
                     var percentComplete = (int)((double)_retrievedCount / MaxResults.Value * 100);
                     progressRecord.StatusDescription = $"Retrieved {_retrievedCount} of {MaxResults.Value} users...";
                     progressRecord.PercentComplete = percentComplete;
@@ -146,8 +175,8 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
                 }
 
                 // Check if we've reached the maximum results
-                if (MaxResults.HasValue && _retrievedCount >= MaxResults.Value) {
-                    WriteVerbose($"Reached maximum result limit of {MaxResults.Value} users");
+                if (effectiveMax.HasValue && _retrievedCount >= effectiveMax.Value) {
+                    WriteVerbose($"Reached maximum result limit of {effectiveMax.Value} users");
                     break;
                 }
             }

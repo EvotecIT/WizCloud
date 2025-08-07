@@ -66,4 +66,38 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
         $task.GetAwaiter().GetResult()
         $script:err.Exception | Should -BeOfType ([System.Net.Http.HttpRequestException])
     }
+
+    It 'reports progress with total count when IncludeTotal is set' {
+        $cmdlet = [WizCloud.PowerShell.CmdletGetWizUser]::new()
+        $cmdlet.IncludeTotal = $true
+
+        $client = [WizCloud.WizClient]::new('token')
+        $list = [System.Collections.Generic.List[WizCloud.WizUser]]::new()
+        $list.Add([WizCloud.WizUser]::new())
+        $list.Add([WizCloud.WizUser]::new())
+
+        Mock -MemberName GetUsersCountAsync -Instance $client -MockWith { 2 }
+        Mock -MemberName GetUsersAsyncEnumerable -Instance $client -MockWith {
+            [TestAsyncEnumerable[WizCloud.WizUser]]::new($list)
+        }
+
+        $field = $cmdlet.GetType().GetField('_wizClient','NonPublic,Instance')
+        $field.SetValue($cmdlet,$client)
+
+        $script:progress = @()
+        Mock -MemberName WriteProgress -Instance $cmdlet -MockWith { param($pr) $script:progress += $pr }
+
+        $method = $cmdlet.GetType().GetMethod('ProcessRecordAsync','NonPublic,Instance')
+        $task = $method.Invoke($cmdlet,@())
+        $task.GetAwaiter().GetResult()
+
+        $script:progress | Should -Not -BeNullOrEmpty
+        $script:progress[1].PercentComplete | Should -Be 50
+        $script:progress[2].PercentComplete | Should -Be 100
+        if ($script:progress[0].psobject.Properties['Total']) {
+            $script:progress[0].Total | Should -Be 2
+        }
+        $script:progress[1].StatusDescription | Should -Be 'Retrieved 1 of 2 users...'
+        $script:progress[2].StatusDescription | Should -Be 'Retrieved 2 of 2 users...'
+    }
 }
