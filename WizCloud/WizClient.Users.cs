@@ -88,11 +88,6 @@ public partial class WizClient {
         string? projectId = null,
         int degreeOfParallelism = 1,
         [EnumeratorCancellation] CancellationToken cancellationToken = default) {
-        try {
-            await Task.CompletedTask.ConfigureAwait(false);
-        } catch (HttpRequestException) {
-            yield break;
-        }
 
         var channel = Channel.CreateBounded<(int Index, List<WizUser> Users)>(degreeOfParallelism);
 
@@ -109,39 +104,41 @@ public partial class WizClient {
                         endCursor = result.EndCursor;
                         index++;
                     }
-                } catch (HttpRequestException) {
-                } finally {
-                    channel.Writer.Complete();
-                }
-            }, cancellationToken);
-
-            var buffer = new SortedDictionary<int, List<WizUser>>();
-            var nextIndex = 0;
-
-            while (await channel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false)) {
-                while (channel.Reader.TryRead(out var item)) {
-                    buffer[item.Index] = item.Users;
-
-                    while (buffer.TryGetValue(nextIndex, out var users)) {
-                        foreach (var user in users) {
-                            if (cancellationToken.IsCancellationRequested)
-                                yield break;
-
-                            yield return user;
-                        }
-
-                        buffer.Remove(nextIndex);
-                        nextIndex++;
-                    }
-                }
-            }
-
-            try {
-                await channel.Reader.Completion.ConfigureAwait(false);
             } catch (HttpRequestException) {
-                yield break;
+                // Swallow HTTP errors to terminate streaming gracefully.
+            } finally {
+                channel.Writer.Complete();
+            }
+        }, cancellationToken);
+
+        var buffer = new SortedDictionary<int, List<WizUser>>();
+        var nextIndex = 0;
+
+        while (await channel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false)) {
+            while (channel.Reader.TryRead(out var item)) {
+                buffer[item.Index] = item.Users;
+
+                while (buffer.TryGetValue(nextIndex, out var users)) {
+                    foreach (var user in users) {
+                        if (cancellationToken.IsCancellationRequested)
+                            yield break;
+
+                        yield return user;
+                    }
+
+                    buffer.Remove(nextIndex);
+                    nextIndex++;
+                }
             }
         }
+
+        try {
+            await channel.Reader.Completion.ConfigureAwait(false);
+        } catch (HttpRequestException) {
+            // Stop iteration if the background task encountered HTTP errors.
+            yield break;
+        }
+    }
 
 
     /// <summary>

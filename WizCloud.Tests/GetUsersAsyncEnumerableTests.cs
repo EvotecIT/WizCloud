@@ -24,7 +24,7 @@ public sealed class GetUsersAsyncEnumerableTests {
         var source = string.Concat(Directory.GetFiles(directory, "WizClient*.cs").Select(File.ReadAllText));
         var index = source.IndexOf("GetUsersAsyncEnumerable", StringComparison.Ordinal);
         Assert.IsTrue(index >= 0, "GetUsersAsyncEnumerable method not found");
-        var snippet = source.Substring(index, Math.Min(800, source.Length - index));
+        var snippet = source.Substring(index);
         StringAssert.Contains(snippet, "catch (HttpRequestException)");
         StringAssert.Contains(snippet, "yield break");
     }
