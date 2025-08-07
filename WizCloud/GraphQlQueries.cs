@@ -24,6 +24,15 @@ public static class GraphQlQueries {
                 mediumSeverityCount highSeverityCount criticalSeverityCount
             }
         }";
+    /// <summary>
+    /// Query for retrieving the total count of cloud identity principals.
+    /// </summary>
+    public const string UsersCountQuery = @"query CloudIdentityPrincipalsCount($filterBy: CloudResourceV2Filters) {
+            cloudResourcesV2(filterBy: $filterBy) {
+                totalCount
+            }
+        }";
+
 
     /// <summary>
     /// Query for retrieving projects.

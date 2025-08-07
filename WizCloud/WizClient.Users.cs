@@ -38,6 +38,41 @@ public partial class WizClient {
     }
 
     /// <summary>
+    /// Retrieves the total count of users from Wiz asynchronously.
+    /// </summary>
+    /// <param name="types">Optional filter for user types.</param>
+    /// <param name="projectId">Optional project ID filter.</param>
+    /// <returns>The total number of users matching the criteria.</returns>
+    public async Task<int> GetUsersCountAsync(
+        IEnumerable<WizUserType>? types = null,
+        string? projectId = null) {
+        var query = GraphQlQueries.UsersCountQuery;
+
+        var typeFilter = types != null && types.Any()
+            ? types.Select(t => t.ToString())
+            : new[] { "USER_ACCOUNT", "SERVICE_ACCOUNT", "GROUP", "ACCESS_KEY" };
+
+        var propertyFilter = projectId != null
+            ? new object[] { new { name = "projectId", equals = new[] { projectId } } }
+            : Array.Empty<object>();
+
+        var variables = new {
+            filterBy = new {
+                type = new { equals = typeFilter },
+                property = propertyFilter
+            }
+        };
+
+        var requestBody = new {
+            query,
+            variables
+        };
+        var jsonResponse = await SendGraphQlRequestAsync(requestBody).ConfigureAwait(false);
+
+        return jsonResponse["data"]?["cloudResourcesV2"]?["totalCount"]?.GetValue<int>() ?? 0;
+    }
+
+    /// <summary>
     /// Retrieves all users from Wiz with progress reporting.
     /// </summary>
     /// <param name="progressCallback">Optional callback to report progress.</param>
