@@ -27,6 +27,7 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
         $cmdlet.MaxResults = 1
         $cmdlet.Type = [WizCloud.WizUserType]::GROUP
         $cmdlet.ProjectId = 'proj1'
+        $cmdlet.Parallel = 3
 
         $client = [WizCloud.WizClient]::new('token')
         $list = [System.Collections.Generic.List[WizCloud.WizUser]]::new()
@@ -34,8 +35,8 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
         $list.Add([WizCloud.WizUser]::new())
         $captured = $null
         Mock -MemberName GetUsersAsyncEnumerable -Instance $client -MockWith {
-            param($pageSize,$types,$projectId,$cancel)
-            $script:captured = [pscustomobject]@{PageSize=$pageSize; Types=$types; ProjectId=$projectId}
+            param($pageSize,$types,$projectId,$parallel,$cancel)
+            $script:captured = [pscustomobject]@{PageSize=$pageSize; Types=$types; ProjectId=$projectId; Parallel=$parallel}
             [TestAsyncEnumerable[WizCloud.WizUser]]::new($list)
         }
         $field = $cmdlet.GetType().GetField('_wizClient','NonPublic,Instance')
@@ -49,6 +50,7 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
         $captured.PageSize | Should -Be 2
         $captured.Types | Should -Be (@([WizCloud.WizUserType]::GROUP))
         $captured.ProjectId | Should -Be 'proj1'
+        $captured.Parallel | Should -Be 3
     }
 
     It 'restricts output to requested types' {
@@ -61,6 +63,7 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
         $u2 = [WizCloud.WizUser]::new(); $u2.Type = [WizCloud.WizUserType]::SERVICE_ACCOUNT; $list.Add($u2)
 
         Mock -MemberName GetUsersAsyncEnumerable -Instance $client -MockWith {
+            param($pageSize,$types,$projectId,$parallel,$cancel)
             [TestAsyncEnumerable[WizCloud.WizUser]]::new($list)
         }
         $field = $cmdlet.GetType().GetField('_wizClient','NonPublic,Instance')
@@ -78,6 +81,7 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
         $cmdlet = [WizCloud.PowerShell.CmdletGetWizUser]::new()
         $client = [WizCloud.WizClient]::new('token')
         Mock -MemberName GetUsersAsyncEnumerable -Instance $client -MockWith {
+            param($pageSize,$types,$projectId,$parallel,$cancel)
             throw [System.Net.Http.HttpRequestException]::new('fail')
         }
         $field = $cmdlet.GetType().GetField('_wizClient','NonPublic,Instance')
@@ -101,6 +105,7 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
 
         Mock -MemberName GetUsersCountAsync -Instance $client -MockWith { 2 }
         Mock -MemberName GetUsersAsyncEnumerable -Instance $client -MockWith {
+            param($pageSize,$types,$projectId,$parallel,$cancel)
             [TestAsyncEnumerable[WizCloud.WizUser]]::new($list)
         }
 
