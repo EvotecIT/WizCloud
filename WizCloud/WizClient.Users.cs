@@ -48,20 +48,8 @@ public partial class WizClient {
         IEnumerable<WizUserType>? types = null,
         string? projectId = null) {
         var query = GraphQlQueries.UsersCountQuery;
-
-        var typeFilter = types != null && types.Any()
-            ? types.Select(t => t.ToString())
-            : new[] { "USER_ACCOUNT", "SERVICE_ACCOUNT", "GROUP", "ACCESS_KEY" };
-
-        var propertyFilter = projectId != null
-            ? new object[] { new { name = "projectId", equals = new[] { projectId } } }
-            : Array.Empty<object>();
-
         var variables = new {
-            filterBy = new {
-                type = new { equalsAnyOf = typeFilter },
-                property = propertyFilter
-            }
+            filterBy = BuildUserFilters(types, projectId)
         };
 
         var requestBody = new {
@@ -185,22 +173,10 @@ public partial class WizClient {
         IEnumerable<WizUserType>? types = null,
         string? projectId = null) {
         var query = GraphQlQueries.UsersQuery;
-
-        var typeFilter = types != null && types.Any()
-            ? types.Select(t => t.ToString())
-            : new[] { "USER_ACCOUNT", "SERVICE_ACCOUNT", "GROUP", "ACCESS_KEY" };
-
-        var propertyFilter = projectId != null
-            ? new object[] { new { name = "projectId", equals = new[] { projectId } } }
-            : Array.Empty<object>();
-
         var variables = new {
             first,
             after,
-            filterBy = new {
-                type = new { equalsAnyOf = typeFilter },
-                property = propertyFilter
-            }
+            filterBy = BuildUserFilters(types, projectId)
         };
 
         var requestBody = new {
@@ -224,5 +200,20 @@ public partial class WizClient {
         string? endCursor = pageInfo?["endCursor"]?.GetValue<string>();
 
         return (users ?? new List<WizUser>(), hasNextPage, endCursor);
+    }
+
+    private static object BuildUserFilters(IEnumerable<WizUserType>? types, string? projectId) {
+        var typeFilter = types != null && types.Any()
+            ? types.Select(t => t.ToString())
+            : new[] { "USER_ACCOUNT", "SERVICE_ACCOUNT", "GROUP", "ACCESS_KEY" };
+
+        var propertyFilter = projectId != null
+            ? new object[] { new { name = "projectId", equals = new[] { projectId } } }
+            : Array.Empty<object>();
+
+        return new {
+            type = new { equalsAnyOf = typeFilter },
+            property = propertyFilter
+        };
     }
 }
