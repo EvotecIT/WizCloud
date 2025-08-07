@@ -141,7 +141,7 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
                 ? Math.Min(MaxResults.Value, totalUsers.Value)
                 : MaxResults;
 
-            await foreach (var user in _wizClient.GetUsersAsyncEnumerable(PageSize, Type, ProjectId, CancelToken)) {
+            await foreach (var user in _wizClient.GetUsersAsyncEnumerable(PageSize, Type, ProjectId, 1, CancelToken)) {
                 if (CancelToken.IsCancellationRequested)
                     break;
 
