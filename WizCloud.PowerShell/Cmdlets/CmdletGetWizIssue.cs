@@ -25,15 +25,27 @@ public class CmdletGetWizIssue : AsyncPSCmdlet {
     [ValidateRange(1, 5000)]
     public int PageSize { get; set; } = 500;
 
+    /// <summary>
+    /// <para type="description">Filter issues by severity.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by issue severities.")]
     public WizSeverity[] Severity { get; set; } = Array.Empty<WizSeverity>();
 
+    /// <summary>
+    /// <para type="description">Filter issues by status.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by issue status.")]
     public string[] Status { get; set; } = Array.Empty<string>();
 
+    /// <summary>
+    /// <para type="description">Filter issues by project identifier.</para>
+    /// </summary>
     [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
 
+    /// <summary>
+    /// <para type="description">Filter issues by type.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by issue types.")]
     public string[] Type { get; set; } = Array.Empty<string>();
 

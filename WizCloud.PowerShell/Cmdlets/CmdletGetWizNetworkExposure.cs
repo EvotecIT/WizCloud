@@ -21,18 +21,33 @@ public class CmdletGetWizNetworkExposure : AsyncPSCmdlet {
     [ValidateRange(1, 5000)]
     public int PageSize { get; set; } = 500;
 
+    /// <summary>
+    /// <para type="description">Filter exposures by port.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by port.")]
     public int[] Port { get; set; } = Array.Empty<int>();
 
+    /// <summary>
+    /// <para type="description">Filter exposures by protocol.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by protocol.")]
     public string[] Protocol { get; set; } = Array.Empty<string>();
 
+    /// <summary>
+    /// <para type="description">Filter exposures by internet-facing status.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by internet facing status.")]
     public bool? InternetFacing { get; set; }
 
+    /// <summary>
+    /// <para type="description">Filter exposures by project identifier.</para>
+    /// </summary>
     [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
 
+    /// <summary>
+    /// <para type="description">Maximum number of exposures to retrieve. Default is unlimited.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Maximum number of exposures to retrieve. Default is unlimited.")]
     [ValidateRange(1, int.MaxValue)]
     public int? MaxResults { get; set; }
@@ -40,6 +55,9 @@ public class CmdletGetWizNetworkExposure : AsyncPSCmdlet {
     private WizClient? _wizClient;
     private int _retrievedCount = 0;
 
+    /// <summary>
+    /// <para type="description">Initializes the Wiz client for network exposure retrieval.</para>
+    /// </summary>
     protected override Task BeginProcessingAsync() {
         try {
             var token = ModuleInitialization.DefaultToken;
@@ -80,6 +98,9 @@ public class CmdletGetWizNetworkExposure : AsyncPSCmdlet {
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// <para type="description">Processes the Get-WizNetworkExposure command.</para>
+    /// </summary>
     protected override async Task ProcessRecordAsync() {
         if (_wizClient == null) {
             WriteError(new ErrorRecord(
@@ -139,6 +160,9 @@ public class CmdletGetWizNetworkExposure : AsyncPSCmdlet {
         }
     }
 
+    /// <summary>
+    /// <para type="description">Releases the Wiz client resources.</para>
+    /// </summary>
     protected override Task EndProcessingAsync() {
         _wizClient?.Dispose();
         return Task.CompletedTask;

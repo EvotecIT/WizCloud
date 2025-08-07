@@ -37,9 +37,15 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
     [ValidateRange(1, 5000)]
     public int PageSize { get; set; } = 500;
 
+    /// <summary>
+    /// <para type="description">Filter users by Wiz user type.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by Wiz user types.")]
     public WizUserType[] Type { get; set; } = Array.Empty<WizUserType>();
 
+    /// <summary>
+    /// <para type="description">Filter users by project identifier.</para>
+    /// </summary>
     [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
 

@@ -12,6 +12,12 @@ using System.Threading.Tasks;
 namespace WizCloud;
 
 public partial class WizClient {
+    /// <summary>
+    /// Retrieves compliance posture results from Wiz.
+    /// </summary>
+    /// <param name="frameworks">Optional compliance frameworks filter.</param>
+    /// <param name="minScore">Optional minimum score filter.</param>
+    /// <returns>A list of compliance results.</returns>
     public async Task<List<WizComplianceResult>> GetCompliancePostureAsync(
         IEnumerable<string>? frameworks = null,
         double? minScore = null) {
@@ -40,6 +46,13 @@ public partial class WizClient {
         return results;
     }
 
+    /// <summary>
+    /// Streams compliance posture results from Wiz as an asynchronous sequence.
+    /// </summary>
+    /// <param name="frameworks">Optional compliance frameworks filter.</param>
+    /// <param name="minScore">Optional minimum score filter.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>An async enumerable of compliance results.</returns>
     public async IAsyncEnumerable<WizComplianceResult> GetCompliancePostureAsyncEnumerable(
         IEnumerable<string>? frameworks = null,
         double? minScore = null,

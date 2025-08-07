@@ -14,15 +14,24 @@ namespace WizCloud.PowerShell;
 [Cmdlet(VerbsCommon.Get, "WizCompliance")]
 [OutputType(typeof(WizComplianceResult))]
 public class CmdletGetWizCompliance : AsyncPSCmdlet {
+    /// <summary>
+    /// <para type="description">Filter compliance results by framework.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by compliance framework.")]
     public string[] Framework { get; set; } = Array.Empty<string>();
 
+    /// <summary>
+    /// <para type="description">Filter results by minimum compliance score.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by minimum compliance score.")]
     public double? MinScore { get; set; }
 
     private WizClient? _wizClient;
     private int _retrievedCount = 0;
 
+    /// <summary>
+    /// <para type="description">Initializes the Wiz client for compliance retrieval.</para>
+    /// </summary>
     protected override Task BeginProcessingAsync() {
         try {
             var token = ModuleInitialization.DefaultToken;
@@ -63,6 +72,9 @@ public class CmdletGetWizCompliance : AsyncPSCmdlet {
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// <para type="description">Processes the Get-WizCompliance command.</para>
+    /// </summary>
     protected override async Task ProcessRecordAsync() {
         if (_wizClient == null) {
             WriteError(new ErrorRecord(
@@ -111,6 +123,9 @@ public class CmdletGetWizCompliance : AsyncPSCmdlet {
         }
     }
 
+    /// <summary>
+    /// <para type="description">Releases the Wiz client resources.</para>
+    /// </summary>
     protected override Task EndProcessingAsync() {
         _wizClient?.Dispose();
         return Task.CompletedTask;

@@ -22,24 +22,45 @@ public class CmdletGetWizResource : AsyncPSCmdlet {
     [ValidateRange(1, 5000)]
     public int PageSize { get; set; } = 500;
 
+    /// <summary>
+    /// <para type="description">Filter resources by type.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by resource type.")]
     public string[] Type { get; set; } = Array.Empty<string>();
 
+    /// <summary>
+    /// <para type="description">Filter resources by cloud provider.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by cloud provider.")]
     public WizCloudProvider[] CloudProvider { get; set; } = Array.Empty<WizCloudProvider>();
 
+    /// <summary>
+    /// <para type="description">Filter resources by region.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by resource region.")]
     public string? Region { get; set; }
 
+    /// <summary>
+    /// <para type="description">Filter resources by public accessibility.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by public accessibility.")]
     public SwitchParameter PubliclyAccessible { get; set; }
 
+    /// <summary>
+    /// <para type="description">Filter resources by tag.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by tags.")]
     public Hashtable? Tag { get; set; }
 
+    /// <summary>
+    /// <para type="description">Filter resources by project identifier.</para>
+    /// </summary>
     [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
 
+    /// <summary>
+    /// <para type="description">Maximum number of resources to retrieve. Default is unlimited.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Maximum number of resources to retrieve. Default is unlimited.")]
     [ValidateRange(1, int.MaxValue)]
     public int? MaxResults { get; set; }
@@ -48,7 +69,7 @@ public class CmdletGetWizResource : AsyncPSCmdlet {
     private int _retrievedCount = 0;
 
     /// <summary>
-    /// Initialize the Wiz client.
+    /// <para type="description">Initializes the Wiz client for resource retrieval.</para>
     /// </summary>
     protected override Task BeginProcessingAsync() {
         try {
@@ -90,7 +111,7 @@ public class CmdletGetWizResource : AsyncPSCmdlet {
     }
 
     /// <summary>
-    /// Retrieve and output Wiz resources.
+    /// <para type="description">Processes the Get-WizResource command.</para>
     /// </summary>
     protected override async Task ProcessRecordAsync() {
         if (_wizClient == null) {
@@ -168,7 +189,7 @@ public class CmdletGetWizResource : AsyncPSCmdlet {
     }
 
     /// <summary>
-    /// Clean up resources.
+    /// <para type="description">Releases the Wiz client resources.</para>
     /// </summary>
     protected override Task EndProcessingAsync() {
         _wizClient?.Dispose();
