@@ -209,7 +209,10 @@ public partial class WizClient {
         var filter = new Dictionary<string, object>();
 
         if (hasTypes) {
-            filter["type"] = new { equalsAnyOf = types!.Select(t => t.ToString()) };
+            var typeValues = types!.Select(t => t.ToString()).ToArray();
+            filter["type"] = typeValues.Length == 1
+                ? new { equals = typeValues[0] }
+                : new { equalsAnyOf = typeValues };
         }
 
         if (hasProject) {

@@ -49,4 +49,24 @@ public sealed class GetUsersAsyncTypeFilterTests {
             field.SetValue(null, original);
         }
     }
+
+    [TestMethod]
+    public async Task GetUsersAsync_SendsEqualsFilterWhenSingleType() {
+        var responseJson = "{\"data\":{\"cloudResourcesV2\":{\"pageInfo\":{\"hasNextPage\":false},\"nodes\":[{\"id\":\"1\",\"name\":\"A\",\"type\":\"USER_ACCOUNT\"}]}}}";
+        var handler = new InspectingHandler(responseJson);
+        var field = typeof(WizClient).GetField("_httpClient", BindingFlags.Static | BindingFlags.NonPublic);
+        Assert.IsNotNull(field);
+        var original = (HttpClient)field!.GetValue(null)!;
+        try {
+            field.SetValue(null, new HttpClient(handler));
+            using var client = new WizClient("token");
+            var users = await client.GetUsersAsync(10, new[] { WizUserType.USER_ACCOUNT });
+            Assert.AreEqual(1, users.Count);
+            var json = JsonNode.Parse(handler.LastRequestBody!)!;
+            var type = json["variables"]?["filterBy"]?["type"]?["equals"]?.GetValue<string>();
+            Assert.AreEqual("USER_ACCOUNT", type);
+        } finally {
+            field.SetValue(null, original);
+        }
+    }
 }

@@ -17,13 +17,24 @@ public class BuildUserFiltersTests {
     }
 
     [TestMethod]
-    public void BuildUserFilters_IncludesType_WhenTypesProvided() {
+    public void BuildUserFilters_UsesEquals_WhenSingleTypeProvided() {
         var method = GetMethod();
         var types = new[] { WizCloud.WizUserType.USER_ACCOUNT };
         var result = method.Invoke(null, new object?[] { types, null });
         var json = JsonSerializer.Serialize(result);
+        StringAssert.Contains(json, "\"equals\":\"USER_ACCOUNT\"");
+        Assert.IsFalse(json.Contains("equalsAnyOf"), json);
+    }
+
+    [TestMethod]
+    public void BuildUserFilters_UsesEqualsAnyOf_WhenMultipleTypesProvided() {
+        var method = GetMethod();
+        var types = new[] { WizCloud.WizUserType.USER_ACCOUNT, WizCloud.WizUserType.SERVICE_ACCOUNT };
+        var result = method.Invoke(null, new object?[] { types, null });
+        var json = JsonSerializer.Serialize(result);
         StringAssert.Contains(json, "USER_ACCOUNT");
-        Assert.IsFalse(json.Contains("projectId"), json);
+        StringAssert.Contains(json, "SERVICE_ACCOUNT");
+        StringAssert.Contains(json, "equalsAnyOf");
     }
 
     [TestMethod]

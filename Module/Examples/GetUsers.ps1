@@ -12,7 +12,7 @@ $connectWizSplat = @{
 Connect-Wiz @connectWizSplat
 
 # Get all users (uses the region from Connect-Wiz)
-$users = Get-WizUser -Verbose -MaxResults 1200 -Type USER_ACCOUNT
+$users = Get-WizUser -Verbose -MaxResults 1200 -Type USER_ACCOUNT -Parallel 4
 Write-Host "Found $($users.Count) users"
 $Users[1101] | Format-List
 
