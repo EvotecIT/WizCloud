@@ -204,13 +204,16 @@ public partial class WizClient {
             ? types.Select(t => t.ToString())
             : new[] { "USER_ACCOUNT", "SERVICE_ACCOUNT", "GROUP", "ACCESS_KEY" };
 
-        var propertyFilter = projectId != null
-            ? new object[] { new { name = "projectId", equals = new[] { projectId } } }
-            : Array.Empty<object>();
+        if (!string.IsNullOrEmpty(projectId)) {
+            var propertyFilter = new object[] { new { name = "projectId", equals = new[] { projectId } } };
+            return new {
+                type = new { equalsAnyOf = typeFilter },
+                property = propertyFilter
+            };
+        }
 
         return new {
-            type = new { equalsAnyOf = typeFilter },
-            property = propertyFilter
+            type = new { equalsAnyOf = typeFilter }
         };
     }
 }
