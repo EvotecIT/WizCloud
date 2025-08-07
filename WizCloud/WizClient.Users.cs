@@ -82,9 +82,8 @@ public partial class WizClient {
         var cursorChannel = Channel.CreateUnbounded<(int Index, string? Cursor)>();
         var resultChannel = Channel.CreateUnbounded<(int Index, List<WizUser> Users)>();
 
-        for (var i = 0; i < degreeOfParallelism; i++)
-            await cursorChannel.Writer.WriteAsync((i, null), cancellationToken).ConfigureAwait(false);
-        var active = degreeOfParallelism;
+        await cursorChannel.Writer.WriteAsync((0, null), cancellationToken).ConfigureAwait(false);
+        var active = 1;
 
         async Task WorkerAsync() {
             while (await cursorChannel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false)) {
@@ -96,7 +95,7 @@ public partial class WizClient {
 
                         if (page.HasNextPage) {
                             Interlocked.Increment(ref active);
-                            await cursorChannel.Writer.WriteAsync((index + degreeOfParallelism, page.EndCursor), cancellationToken).ConfigureAwait(false);
+                            await cursorChannel.Writer.WriteAsync((index + 1, page.EndCursor), cancellationToken).ConfigureAwait(false);
                         }
                     } catch (HttpRequestException) {
                         cursorChannel.Writer.Complete();
