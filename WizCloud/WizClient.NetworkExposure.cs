@@ -12,6 +12,15 @@ using System.Threading.Tasks;
 namespace WizCloud;
 
 public partial class WizClient {
+    /// <summary>
+    /// Retrieves network exposures from Wiz.
+    /// </summary>
+    /// <param name="pageSize">The number of exposures to retrieve per page.</param>
+    /// <param name="ports">Optional port filters.</param>
+    /// <param name="protocols">Optional protocol filters.</param>
+    /// <param name="internetFacing">Optional internet-facing filter.</param>
+    /// <param name="projectId">Optional project identifier filter.</param>
+    /// <returns>A list of network exposures.</returns>
     public async Task<List<WizNetworkExposure>> GetNetworkExposuresAsync(
         int pageSize = 20,
         IEnumerable<int>? ports = null,
@@ -32,6 +41,16 @@ public partial class WizClient {
         return exposures;
     }
 
+    /// <summary>
+    /// Streams network exposures from Wiz as an asynchronous sequence.
+    /// </summary>
+    /// <param name="pageSize">The number of exposures to retrieve per page.</param>
+    /// <param name="ports">Optional port filters.</param>
+    /// <param name="protocols">Optional protocol filters.</param>
+    /// <param name="internetFacing">Optional internet-facing filter.</param>
+    /// <param name="projectId">Optional project identifier filter.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>An async enumerable of network exposures.</returns>
     public async IAsyncEnumerable<WizNetworkExposure> GetNetworkExposuresAsyncEnumerable(
         int pageSize = 20,
         IEnumerable<int>? ports = null,
@@ -62,6 +81,16 @@ public partial class WizClient {
         }
     }
 
+    /// <summary>
+    /// Retrieves a single page of network exposures from the Wiz API.
+    /// </summary>
+    /// <param name="first">The number of exposures to retrieve.</param>
+    /// <param name="after">Cursor for pagination.</param>
+    /// <param name="ports">Optional port filters.</param>
+    /// <param name="protocols">Optional protocol filters.</param>
+    /// <param name="internetFacing">Optional internet-facing filter.</param>
+    /// <param name="projectId">Optional project identifier filter.</param>
+    /// <returns>A tuple containing the exposures, pagination flag, and end cursor.</returns>
     private async Task<(List<WizNetworkExposure> Exposures, bool HasNextPage, string? EndCursor)> GetNetworkExposuresPageAsync(
         int first,
         string? after = null,

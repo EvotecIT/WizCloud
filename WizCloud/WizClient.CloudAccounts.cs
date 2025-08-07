@@ -12,6 +12,9 @@ using System.Threading.Tasks;
 
 namespace WizCloud;
 
+/// <summary>
+/// Provides cloud account operations for <see cref="WizClient"/>.
+/// </summary>
 public partial class WizClient {
     /// <summary>
     /// Retrieves all cloud accounts from Wiz asynchronously.

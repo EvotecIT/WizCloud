@@ -81,6 +81,11 @@ public partial class WizClient : IDisposable {
     public static Task<WizClient> CreateAsync(string clientId, string clientSecret, string region, int retryCount = 3, TimeSpan? retryDelay = null)
         => CreateAsync(clientId, clientSecret, WizRegionHelper.FromString(region), retryCount, retryDelay);
 
+    /// <summary>
+    /// Sends an HTTP request with automatic token refresh on unauthorized responses.
+    /// </summary>
+    /// <param name="request">The HTTP request message.</param>
+    /// <returns>The HTTP response message.</returns>
     private async Task<HttpResponseMessage> SendWithRefreshAsync(HttpRequestMessage request) {
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
         var response = await SendAsyncWithRetry(request).ConfigureAwait(false);
@@ -97,6 +102,11 @@ public partial class WizClient : IDisposable {
         return response;
     }
 
+    /// <summary>
+    /// Sends an HTTP request with retry logic for transient failures.
+    /// </summary>
+    /// <param name="request">The HTTP request message.</param>
+    /// <returns>The HTTP response message.</returns>
     private async Task<HttpResponseMessage> SendAsyncWithRetry(HttpRequestMessage request) {
         var delay = _retryDelay;
         for (var attempt = 0; ; attempt++) {
@@ -118,11 +128,21 @@ public partial class WizClient : IDisposable {
         }
     }
 
+    /// <summary>
+    /// Determines whether the specified status code represents a transient failure.
+    /// </summary>
+    /// <param name="statusCode">The HTTP status code.</param>
+    /// <returns><c>true</c> if the status code is transient; otherwise, <c>false</c>.</returns>
     private static bool IsTransient(HttpStatusCode statusCode)
         => (int)statusCode >= 500 ||
            statusCode == HttpStatusCode.RequestTimeout ||
            statusCode == (HttpStatusCode)429;
 
+    /// <summary>
+    /// Creates a copy of the specified HTTP request message.
+    /// </summary>
+    /// <param name="request">The request to clone.</param>
+    /// <returns>A cloned <see cref="HttpRequestMessage"/>.</returns>
     private static async Task<HttpRequestMessage> CloneRequestAsync(HttpRequestMessage request) {
         var clone = new HttpRequestMessage(request.Method, request.RequestUri) { Version = request.Version };
 
@@ -142,6 +162,11 @@ public partial class WizClient : IDisposable {
         return clone;
     }
 
+    /// <summary>
+    /// Sends a GraphQL request to the Wiz API.
+    /// </summary>
+    /// <param name="requestBody">The GraphQL request payload.</param>
+    /// <returns>The parsed JSON response.</returns>
     private async Task<JsonNode> SendGraphQlRequestAsync(object requestBody) {
         using var request = new HttpRequestMessage(HttpMethod.Post, _apiEndpoint) {
             Content = new StringContent(

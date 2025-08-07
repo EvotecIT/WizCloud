@@ -13,8 +13,16 @@ namespace WizCloud;
 
 public partial class WizClient {
     /// <summary>
-    /// Retrieves all resources from Wiz asynchronously.
+    /// Retrieves resources from Wiz.
     /// </summary>
+    /// <param name="pageSize">The number of resources to retrieve per page.</param>
+    /// <param name="types">Optional resource type filters.</param>
+    /// <param name="cloudProviders">Optional cloud provider filters.</param>
+    /// <param name="region">Optional region filter.</param>
+    /// <param name="publiclyAccessible">Optional public accessibility filter.</param>
+    /// <param name="tags">Optional tag filters.</param>
+    /// <param name="projectId">Optional project identifier filter.</param>
+    /// <returns>A list of resources.</returns>
     public async Task<List<WizResource>> GetResourcesAsync(
         int pageSize = 20,
         IEnumerable<string>? types = null,
@@ -46,8 +54,17 @@ public partial class WizClient {
     }
 
     /// <summary>
-    /// Streams resources from Wiz asynchronously.
+    /// Streams resources from Wiz as an asynchronous sequence.
     /// </summary>
+    /// <param name="pageSize">The number of resources to retrieve per page.</param>
+    /// <param name="types">Optional resource type filters.</param>
+    /// <param name="cloudProviders">Optional cloud provider filters.</param>
+    /// <param name="region">Optional region filter.</param>
+    /// <param name="publiclyAccessible">Optional public accessibility filter.</param>
+    /// <param name="tags">Optional tag filters.</param>
+    /// <param name="projectId">Optional project identifier filter.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>An async enumerable of resources.</returns>
     public async IAsyncEnumerable<WizResource> GetResourcesAsyncEnumerable(
         int pageSize = 20,
         IEnumerable<string>? types = null,
@@ -91,6 +108,15 @@ public partial class WizClient {
     /// <summary>
     /// Retrieves a single page of resources from the Wiz API.
     /// </summary>
+    /// <param name="first">The number of resources to retrieve.</param>
+    /// <param name="after">Cursor for pagination.</param>
+    /// <param name="types">Optional resource type filters.</param>
+    /// <param name="cloudProviders">Optional cloud provider filters.</param>
+    /// <param name="region">Optional region filter.</param>
+    /// <param name="publiclyAccessible">Optional public accessibility filter.</param>
+    /// <param name="tags">Optional tag filters.</param>
+    /// <param name="projectId">Optional project identifier filter.</param>
+    /// <returns>A tuple containing the resources, pagination flag, and end cursor.</returns>
     private async Task<(List<WizResource> Resources, bool HasNextPage, string? EndCursor)> GetResourcesPageAsync(
         int first,
         string? after = null,

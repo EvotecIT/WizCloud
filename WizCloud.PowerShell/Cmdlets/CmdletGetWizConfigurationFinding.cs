@@ -21,18 +21,33 @@ public class CmdletGetWizConfigurationFinding : AsyncPSCmdlet {
     [ValidateRange(1, 5000)]
     public int PageSize { get; set; } = 500;
 
+    /// <summary>
+    /// <para type="description">Filter configuration findings by compliance framework.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by compliance framework.")]
     public string[] Framework { get; set; } = Array.Empty<string>();
 
+    /// <summary>
+    /// <para type="description">Filter findings by severity.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by severity.")]
     public WizSeverity[] Severity { get; set; } = Array.Empty<WizSeverity>();
 
+    /// <summary>
+    /// <para type="description">Filter findings by category.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by category.")]
     public string[] Category { get; set; } = Array.Empty<string>();
 
+    /// <summary>
+    /// <para type="description">Filter findings by project identifier.</para>
+    /// </summary>
     [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
 
+    /// <summary>
+    /// <para type="description">Maximum number of findings to retrieve. Default is unlimited.</para>
+    /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Maximum number of findings to retrieve. Default is unlimited.")]
     [ValidateRange(1, int.MaxValue)]
     public int? MaxResults { get; set; }
@@ -40,6 +55,9 @@ public class CmdletGetWizConfigurationFinding : AsyncPSCmdlet {
     private WizClient? _wizClient;
     private int _retrievedCount = 0;
 
+    /// <summary>
+    /// <para type="description">Initializes the Wiz client for configuration findings.</para>
+    /// </summary>
     protected override Task BeginProcessingAsync() {
         try {
             var token = ModuleInitialization.DefaultToken;
@@ -80,6 +98,9 @@ public class CmdletGetWizConfigurationFinding : AsyncPSCmdlet {
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// <para type="description">Processes the Get-WizConfigurationFinding command.</para>
+    /// </summary>
     protected override async Task ProcessRecordAsync() {
         if (_wizClient == null) {
             WriteError(new ErrorRecord(
@@ -139,6 +160,9 @@ public class CmdletGetWizConfigurationFinding : AsyncPSCmdlet {
         }
     }
 
+    /// <summary>
+    /// <para type="description">Releases the Wiz client resources.</para>
+    /// </summary>
     protected override Task EndProcessingAsync() {
         _wizClient?.Dispose();
         return Task.CompletedTask;

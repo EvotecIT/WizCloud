@@ -12,6 +12,15 @@ using System.Threading.Tasks;
 namespace WizCloud;
 
 public partial class WizClient {
+    /// <summary>
+    /// Retrieves configuration findings from Wiz.
+    /// </summary>
+    /// <param name="pageSize">The number of findings to retrieve per page.</param>
+    /// <param name="frameworks">Optional compliance frameworks filter.</param>
+    /// <param name="severities">Optional severity filter.</param>
+    /// <param name="categories">Optional category filter.</param>
+    /// <param name="projectId">Optional project identifier filter.</param>
+    /// <returns>A list of configuration findings.</returns>
     public async Task<List<WizConfigurationFinding>> GetConfigurationFindingsAsync(
         int pageSize = 20,
         IEnumerable<string>? frameworks = null,
@@ -32,6 +41,16 @@ public partial class WizClient {
         return findings;
     }
 
+    /// <summary>
+    /// Streams configuration findings from Wiz as an asynchronous sequence.
+    /// </summary>
+    /// <param name="pageSize">The number of findings to retrieve per page.</param>
+    /// <param name="frameworks">Optional compliance frameworks filter.</param>
+    /// <param name="severities">Optional severity filter.</param>
+    /// <param name="categories">Optional category filter.</param>
+    /// <param name="projectId">Optional project identifier filter.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>An async enumerable of configuration findings.</returns>
     public async IAsyncEnumerable<WizConfigurationFinding> GetConfigurationFindingsAsyncEnumerable(
         int pageSize = 20,
         IEnumerable<string>? frameworks = null,
@@ -62,6 +81,16 @@ public partial class WizClient {
         }
     }
 
+    /// <summary>
+    /// Retrieves a single page of configuration findings from the Wiz API.
+    /// </summary>
+    /// <param name="first">The number of findings to retrieve.</param>
+    /// <param name="after">Cursor for pagination.</param>
+    /// <param name="frameworks">Optional compliance frameworks filter.</param>
+    /// <param name="severities">Optional severity filter.</param>
+    /// <param name="categories">Optional category filter.</param>
+    /// <param name="projectId">Optional project identifier filter.</param>
+    /// <returns>A tuple containing the findings, pagination flag, and end cursor.</returns>
     private async Task<(List<WizConfigurationFinding> Findings, bool HasNextPage, string? EndCursor)> GetConfigurationFindingsPageAsync(
         int first,
         string? after = null,
