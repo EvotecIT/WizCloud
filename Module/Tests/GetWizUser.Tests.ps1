@@ -51,6 +51,29 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
         $captured.ProjectId | Should -Be 'proj1'
     }
 
+    It 'restricts output to requested types' {
+        $cmdlet = [WizCloud.PowerShell.CmdletGetWizUser]::new()
+        $cmdlet.Type = @([WizCloud.WizUserType]::USER_ACCOUNT, [WizCloud.WizUserType]::SERVICE_ACCOUNT)
+
+        $client = [WizCloud.WizClient]::new('token')
+        $list = [System.Collections.Generic.List[WizCloud.WizUser]]::new()
+        $u1 = [WizCloud.WizUser]::new(); $u1.Type = [WizCloud.WizUserType]::USER_ACCOUNT; $list.Add($u1)
+        $u2 = [WizCloud.WizUser]::new(); $u2.Type = [WizCloud.WizUserType]::SERVICE_ACCOUNT; $list.Add($u2)
+
+        Mock -MemberName GetUsersAsyncEnumerable -Instance $client -MockWith {
+            [TestAsyncEnumerable[WizCloud.WizUser]]::new($list)
+        }
+        $field = $cmdlet.GetType().GetField('_wizClient','NonPublic,Instance')
+        $field.SetValue($cmdlet,$client)
+        $script:output = @()
+        Mock -MemberName WriteObject -Instance $cmdlet -MockWith { param($obj) $script:output += $obj }
+        $method = $cmdlet.GetType().GetMethod('ProcessRecordAsync','NonPublic,Instance')
+        $task = $method.Invoke($cmdlet,@())
+        $task.GetAwaiter().GetResult()
+        $script:output | Should -HaveCount 2
+        ($script:output | ForEach-Object { $_.Type } | Sort-Object -Unique) | Should -Be (@([WizCloud.WizUserType]::USER_ACCOUNT, [WizCloud.WizUserType]::SERVICE_ACCOUNT))
+    }
+
     It 'writes an error when WizClient throws HttpRequestException' {
         $cmdlet = [WizCloud.PowerShell.CmdletGetWizUser]::new()
         $client = [WizCloud.WizClient]::new('token')

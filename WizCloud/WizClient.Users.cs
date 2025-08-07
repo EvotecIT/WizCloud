@@ -58,7 +58,7 @@ public partial class WizClient {
 
         var variables = new {
             filterBy = new {
-                type = new { equals = typeFilter },
+                type = new { equalsAnyOf = typeFilter },
                 property = propertyFilter
             }
         };
@@ -163,7 +163,7 @@ public partial class WizClient {
             first,
             after,
             filterBy = new {
-                type = new { equals = typeFilter },
+                type = new { equalsAnyOf = typeFilter },
                 property = propertyFilter
             }
         };
