@@ -6,21 +6,32 @@ namespace WizCloud.Tests;
 
 [TestClass]
 public class BuildUserFiltersTests {
+    private static MethodInfo GetMethod() =>
+        typeof(WizCloud.WizClient).GetMethod("BuildUserFilters", BindingFlags.NonPublic | BindingFlags.Static)!;
+
     [TestMethod]
-    public void BuildUserFilters_OmitsProperty_WhenProjectIdNull() {
-        var method = typeof(WizCloud.WizClient).GetMethod("BuildUserFilters", BindingFlags.NonPublic | BindingFlags.Static);
-        Assert.IsNotNull(method);
-        var result = method!.Invoke(null, new object?[] { null, null });
+    public void BuildUserFilters_ReturnsNull_WhenNoFilters() {
+        var method = GetMethod();
+        var result = method.Invoke(null, new object?[] { null, null });
+        Assert.IsNull(result);
+    }
+
+    [TestMethod]
+    public void BuildUserFilters_IncludesType_WhenTypesProvided() {
+        var method = GetMethod();
+        var types = new[] { WizCloud.WizUserType.USER_ACCOUNT };
+        var result = method.Invoke(null, new object?[] { types, null });
         var json = JsonSerializer.Serialize(result);
-        Assert.IsFalse(json.Contains("property"), json);
+        StringAssert.Contains(json, "USER_ACCOUNT");
+        Assert.IsFalse(json.Contains("projectId"), json);
     }
 
     [TestMethod]
     public void BuildUserFilters_IncludesProperty_WhenProjectIdProvided() {
-        var method = typeof(WizCloud.WizClient).GetMethod("BuildUserFilters", BindingFlags.NonPublic | BindingFlags.Static);
-        Assert.IsNotNull(method);
-        var result = method!.Invoke(null, new object?[] { null, "proj1" });
+        var method = GetMethod();
+        var result = method.Invoke(null, new object?[] { null, "proj1" });
         var json = JsonSerializer.Serialize(result);
         StringAssert.Contains(json, "projectId");
+        Assert.IsFalse(json.Contains("\"type\""), json);
     }
 }

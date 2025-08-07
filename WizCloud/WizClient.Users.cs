@@ -199,21 +199,24 @@ public partial class WizClient {
         return (users ?? new List<WizUser>(), hasNextPage, endCursor);
     }
 
-    private static object BuildUserFilters(IEnumerable<WizUserType>? types, string? projectId) {
-        var typeFilter = types != null && types.Any()
-            ? types.Select(t => t.ToString())
-            : new[] { "USER_ACCOUNT", "SERVICE_ACCOUNT", "GROUP", "ACCESS_KEY" };
+    private static object? BuildUserFilters(IEnumerable<WizUserType>? types, string? projectId) {
+        bool hasTypes = types != null && types.Any();
+        bool hasProject = !string.IsNullOrEmpty(projectId);
 
-        if (!string.IsNullOrEmpty(projectId)) {
-            var propertyFilter = new object[] { new { name = "projectId", equals = new[] { projectId } } };
-            return new {
-                type = new { equalsAnyOf = typeFilter },
-                property = propertyFilter
-            };
+        if (!hasTypes && !hasProject)
+            return null;
+
+        var filter = new Dictionary<string, object>();
+
+        if (hasTypes) {
+            filter["type"] = new { equalsAnyOf = types!.Select(t => t.ToString()) };
         }
 
-        return new {
-            type = new { equalsAnyOf = typeFilter }
-        };
+        if (hasProject) {
+            var propertyFilter = new[] { new { name = "projectId", equals = new[] { projectId } } };
+            filter["property"] = propertyFilter;
+        }
+
+        return filter;
     }
 }
