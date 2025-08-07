@@ -77,33 +77,56 @@ public partial class WizClient {
         int degreeOfParallelism = 1,
         [EnumeratorCancellation] CancellationToken cancellationToken = default) {
 
-        var channel = Channel.CreateBounded<(int Index, List<WizUser> Users)>(degreeOfParallelism);
+        degreeOfParallelism = Math.Max(1, degreeOfParallelism);
+
+        var cursorChannel = Channel.CreateUnbounded<(int Index, string? Cursor)>();
+        var resultChannel = Channel.CreateUnbounded<(int Index, List<WizUser> Users)>();
+
+        for (var i = 0; i < degreeOfParallelism; i++)
+            await cursorChannel.Writer.WriteAsync((i, null), cancellationToken).ConfigureAwait(false);
+        var active = degreeOfParallelism;
+
+        async Task WorkerAsync() {
+            while (await cursorChannel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false)) {
+                while (cursorChannel.Reader.TryRead(out var item)) {
+                    var (index, cursor) = item;
+                    try {
+                        var page = await GetUsersPageAsync(pageSize, cursor, types, projectId).ConfigureAwait(false);
+                        await resultChannel.Writer.WriteAsync((index, page.Users), cancellationToken).ConfigureAwait(false);
+
+                        if (page.HasNextPage) {
+                            Interlocked.Increment(ref active);
+                            await cursorChannel.Writer.WriteAsync((index + degreeOfParallelism, page.EndCursor), cancellationToken).ConfigureAwait(false);
+                        }
+                    } catch (HttpRequestException) {
+                        cursorChannel.Writer.Complete();
+                        resultChannel.Writer.Complete();
+                        return;
+                    } finally {
+                        if (Interlocked.Decrement(ref active) == 0)
+                            cursorChannel.Writer.Complete();
+                    }
+                }
+            }
+        }
+
+        var workers = Enumerable.Range(0, degreeOfParallelism)
+            .Select(_ => Task.Run(WorkerAsync, cancellationToken))
+            .ToArray();
 
         _ = Task.Run(async () => {
             try {
-                string? endCursor = null;
-                    bool hasNextPage = true;
-                    var index = 0;
-
-                    while (!cancellationToken.IsCancellationRequested && hasNextPage) {
-                        var result = await GetUsersPageAsync(pageSize, endCursor, types, projectId).ConfigureAwait(false);
-                        await channel.Writer.WriteAsync((index, result.Users), cancellationToken).ConfigureAwait(false);
-                        hasNextPage = result.HasNextPage;
-                        endCursor = result.EndCursor;
-                        index++;
-                    }
-            } catch (HttpRequestException) {
-                // Swallow HTTP errors to terminate streaming gracefully.
+                await Task.WhenAll(workers).ConfigureAwait(false);
             } finally {
-                channel.Writer.Complete();
+                resultChannel.Writer.Complete();
             }
         }, cancellationToken);
 
         var buffer = new SortedDictionary<int, List<WizUser>>();
         var nextIndex = 0;
 
-        while (await channel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false)) {
-            while (channel.Reader.TryRead(out var item)) {
+        while (await resultChannel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false)) {
+            while (resultChannel.Reader.TryRead(out var item)) {
                 buffer[item.Index] = item.Users;
 
                 while (buffer.TryGetValue(nextIndex, out var users)) {
@@ -121,9 +144,8 @@ public partial class WizClient {
         }
 
         try {
-            await channel.Reader.Completion.ConfigureAwait(false);
+            await resultChannel.Reader.Completion.ConfigureAwait(false);
         } catch (HttpRequestException) {
-            // Stop iteration if the background task encountered HTTP errors.
             yield break;
         }
     }

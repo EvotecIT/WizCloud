@@ -50,9 +50,9 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
     public string? ProjectId { get; set; }
 
     /// <summary>
-    /// <para type="description">Maximum number of pages to prefetch concurrently.</para>
+    /// <para type="description">Maximum number of page requests to issue in parallel.</para>
     /// </summary>
-    [Parameter(Mandatory = false, HelpMessage = "Maximum number of pages to prefetch concurrently.")]
+    [Parameter(Mandatory = false, HelpMessage = "Maximum number of page requests to issue in parallel.")]
     [ValidateRange(1, int.MaxValue)]
     public int Parallel { get; set; } = 1;
 
