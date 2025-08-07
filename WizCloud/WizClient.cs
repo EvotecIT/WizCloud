@@ -17,7 +17,7 @@ namespace WizCloud;
 /// Provides a client for interacting with the Wiz GraphQL API.
 /// </summary>
 public partial class WizClient : IDisposable {
-    private static readonly HttpClient _httpClient = CreateClient();
+    private static HttpClient _httpClient = CreateClient();
     private readonly string _apiEndpoint;
     private readonly string? _clientId;
     private readonly string? _clientSecret;
