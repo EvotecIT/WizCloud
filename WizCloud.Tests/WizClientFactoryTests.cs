@@ -11,7 +11,7 @@ public sealed class WizClientFactoryTests {
     public void CreateAsync_ReturnsTaskOfWizClient() {
         var method = typeof(WizClient).GetMethod(
             "CreateAsync",
-            new[] { typeof(string), typeof(string), typeof(WizRegion) });
+            new[] { typeof(string), typeof(string), typeof(WizRegion), typeof(int), typeof(TimeSpan?) });
         Assert.IsNotNull(method);
         Assert.AreEqual(typeof(Task<WizClient>), method!.ReturnType);
     }
