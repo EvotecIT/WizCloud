@@ -35,7 +35,7 @@ public sealed class GetUsersWithProgressAsyncEnumerableTests {
             var progressEvents = new List<WizProgress>();
             var progress = new TestProgress(p => progressEvents.Add(p));
             var users = new List<WizUser>();
-            await foreach (var user in client.GetUsersWithProgressAsyncEnumerable(pageSize: 2, maxResults: 1, includeTotal: true, progress: progress)) {
+            await foreach (var user in client.GetUsersWithProgressAsyncEnumerable(pageSize: 2, maxResults: 1, progress: progress)) {
                 users.Add(user);
             }
             Assert.AreEqual(1, users.Count);

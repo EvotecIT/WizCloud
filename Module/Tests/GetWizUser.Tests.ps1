@@ -36,7 +36,7 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
         $list.Add([WizCloud.WizUser]::new())
         $client = New-MockObject -InputObject $client -Methods @{
             GetUsersWithProgressAsyncEnumerable = {
-                param($pageSize,$types,$projectId,$maxResults,$includeTotal,$progress,$cancel)
+                param($pageSize,$types,$projectId,$maxResults,$progress,$cancel)
                 $take = if ($maxResults) { $maxResults } else { $list.Count }
                 $subset = $list | Select-Object -First $take
                 [TestAsyncEnumerable[WizCloud.WizUser]]::new($subset)
@@ -62,7 +62,7 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
 
         $client = New-MockObject -InputObject $client -Methods @{
             GetUsersWithProgressAsyncEnumerable = {
-                param($pageSize,$types,$projectId,$maxResults,$includeTotal,$progress,$cancel)
+                param($pageSize,$types,$projectId,$maxResults,$progress,$cancel)
                 [TestAsyncEnumerable[WizCloud.WizUser]]::new($list)
             }
         }
@@ -80,7 +80,7 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
         $client = [WizCloud.WizClient]::new('token')
         $client = New-MockObject -InputObject $client -Methods @{
             GetUsersWithProgressAsyncEnumerable = {
-                param($pageSize,$types,$projectId,$maxResults,$includeTotal,$progress,$cancel)
+                param($pageSize,$types,$projectId,$maxResults,$progress,$cancel)
                 throw [System.Net.Http.HttpRequestException]::new('fail')
             }
         }
@@ -91,11 +91,10 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
         { $task.GetAwaiter().GetResult() } | Should -Not -Throw
     }
 
-    It 'reports progress with total count when IncludeTotal is set' {
+    It 'reports progress with total count' {
         $cmdlet = [WizCloud.PowerShell.CmdletGetWizUser]::new()
         $cmdletType = $cmdlet.GetType()
         $binding = [System.Reflection.BindingFlags]::NonPublic -bor [System.Reflection.BindingFlags]::Instance
-        $cmdlet.IncludeTotal = $true
 
         $client = [WizCloud.WizClient]::new('token')
         $list = [System.Collections.Generic.List[WizCloud.WizUser]]::new()
@@ -104,7 +103,7 @@ public class TestAsyncEnumerable<T> : IAsyncEnumerable<T> {
 
         $client = New-MockObject -InputObject $client -Methods @{
             GetUsersWithProgressAsyncEnumerable = {
-                param($pageSize,$types,$projectId,$maxResults,$includeTotal,$progress,$cancel)
+                param($pageSize,$types,$projectId,$maxResults,$progress,$cancel)
                 $progress.Report([WizCloud.WizProgress]::new(0,2))
                 $progress.Report([WizCloud.WizProgress]::new(1,2))
                 $progress.Report([WizCloud.WizProgress]::new(2,2))

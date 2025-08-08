@@ -66,7 +66,6 @@ public partial class WizClient {
     /// <param name="types">Optional filter for user types.</param>
     /// <param name="projectId">Optional project ID filter.</param>
     /// <param name="maxResults">Optional maximum number of users to retrieve.</param>
-    /// <param name="includeTotal">When true, total user count is retrieved and reported.</param>
     /// <param name="progress">Optional progress reporter receiving retrieved and total counts.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>An async enumerable sequence of users.</returns>
@@ -75,22 +74,11 @@ public partial class WizClient {
         IEnumerable<WizUserType>? types = null,
         string? projectId = null,
         int? maxResults = null,
-        bool includeTotal = false,
         IProgress<WizProgress>? progress = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default) {
         int retrieved = 0;
-        int? total = null;
-
-        if (includeTotal) {
-            total = await GetUsersCountAsync(types, projectId).ConfigureAwait(false);
-        }
-
-        int? effectiveMax = null;
-        if (maxResults.HasValue && total.HasValue) {
-            effectiveMax = Math.Min(maxResults.Value, total.Value);
-        } else {
-            effectiveMax = maxResults ?? total;
-        }
+        var total = await GetUsersCountAsync(types, projectId).ConfigureAwait(false);
+        var effectiveMax = maxResults.HasValue ? Math.Min(maxResults.Value, total) : total;
 
         progress?.Report(new WizProgress(retrieved, effectiveMax));
 
@@ -104,7 +92,7 @@ public partial class WizClient {
 
             progress?.Report(new WizProgress(retrieved, effectiveMax));
 
-            if (effectiveMax.HasValue && retrieved >= effectiveMax.Value) {
+            if (retrieved >= effectiveMax) {
                 yield break;
             }
         }

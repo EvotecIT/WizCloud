@@ -21,10 +21,6 @@ namespace WizCloud.PowerShell;
 /// <para>Select a region using Connect-Wiz and get raw API response objects:</para>
 /// <code>Connect-Wiz -Region "us1"; Get-WizUser -Raw -MaxResults 10</code>
 /// </example>
-/// <example>
-/// <para>Select a region using Connect-Wiz and report progress including total counts:</para>
-/// <code>Connect-Wiz -Region "us1"; Get-WizUser -IncludeTotal</code>
-/// </example>
 /// </summary>
 [Cmdlet(VerbsCommon.Get, "WizUser")]
 [OutputType(typeof(WizUserComprehensive), typeof(WizUser))]
@@ -61,12 +57,6 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
     /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Return raw API response objects.")]
     public SwitchParameter Raw { get; set; }
-
-    /// <summary>
-    /// <para type="description">Include total user count in progress output. This requires an additional API call.</para>
-    /// </summary>
-    [Parameter(Mandatory = false, HelpMessage = "Include total user count in progress output.")]
-    public SwitchParameter IncludeTotal { get; set; }
 
     private WizClient? _wizClient;
 
@@ -136,27 +126,15 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
             var totalProp = progressRecord.GetType().GetProperty("Total");
 
             var progress = new Progress<WizProgress>(info => {
-                if (info.Retrieved == 0 && info.Total.HasValue) {
-                    totalProp?.SetValue(progressRecord, info.Total);
-                }
-
-                if (info.Total.HasValue) {
-                    var total = info.Total.Value;
-                    var percentComplete = total > 0 ? (int)((double)info.Retrieved / total * 100) : 0;
-                    progressRecord.StatusDescription = $"Retrieved {info.Retrieved} of {total} users...";
-                    progressRecord.PercentComplete = percentComplete;
-                } else if (MaxResults.HasValue) {
-                    var percentComplete = (int)((double)info.Retrieved / MaxResults.Value * 100);
-                    progressRecord.StatusDescription = $"Retrieved {info.Retrieved} of {MaxResults.Value} users...";
-                    progressRecord.PercentComplete = percentComplete;
-                } else if (info.Retrieved % 100 == 0) {
-                    progressRecord.StatusDescription = $"Retrieved {info.Retrieved} users...";
-                }
-
+                totalProp?.SetValue(progressRecord, info.Total);
+                var total = info.Total ?? 0;
+                var percentComplete = total > 0 ? (int)((double)info.Retrieved / total * 100) : 0;
+                progressRecord.StatusDescription = $"Retrieved {info.Retrieved} of {total} users...";
+                progressRecord.PercentComplete = percentComplete;
                 WriteProgress(progressRecord);
             });
 
-            await foreach (var user in _wizClient.GetUsersWithProgressAsyncEnumerable(PageSize, Type, ProjectId, MaxResults, IncludeTotal, progress, CancelToken)) {
+            await foreach (var user in _wizClient.GetUsersWithProgressAsyncEnumerable(PageSize, Type, ProjectId, MaxResults, progress, CancelToken)) {
                 if (CancelToken.IsCancellationRequested)
                     break;
 
