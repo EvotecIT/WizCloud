@@ -6,9 +6,10 @@ internal class Program {
         await ClientCredentialSample.RunAsync();
         await MultiClientSample.RunAsync();
         await StreamingSample.RunAsync();
+        await UsersProgressSample.RunAsync();
         await ErrorHandlingSample.RunAsync();
         await GraphQlQueriesSample.RunAsync();
         await CloudAccountsSample.RunAsync();
         await FilterUsersSample.RunAsync();
-    }
+    }
 }

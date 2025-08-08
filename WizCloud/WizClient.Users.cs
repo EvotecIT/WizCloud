@@ -58,6 +58,45 @@ public partial class WizClient {
 
         return jsonResponse["data"]?["cloudResourcesV2"]?["totalCount"]?.GetValue<int>() ?? 0;
     }
+
+    /// <summary>
+    /// Streams users from Wiz with progress and optional limits.
+    /// </summary>
+    /// <param name="pageSize">Number of users per page. Default is 500.</param>
+    /// <param name="types">Optional filter for user types.</param>
+    /// <param name="projectId">Optional project ID filter.</param>
+    /// <param name="maxResults">Optional maximum number of users to retrieve.</param>
+    /// <param name="progress">Optional progress reporter receiving retrieved and total counts.</param>
+    /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
+    /// <returns>An async enumerable sequence of users.</returns>
+    public async IAsyncEnumerable<WizUser> GetUsersWithProgressAsyncEnumerable(
+        int pageSize = 500,
+        IEnumerable<WizUserType>? types = null,
+        string? projectId = null,
+        int? maxResults = null,
+        IProgress<WizProgress>? progress = null,
+        [EnumeratorCancellation] CancellationToken cancellationToken = default) {
+        int retrieved = 0;
+        var total = await GetUsersCountAsync(types, projectId).ConfigureAwait(false);
+        var effectiveMax = maxResults.HasValue ? Math.Min(maxResults.Value, total) : total;
+
+        progress?.Report(new WizProgress(retrieved, effectiveMax));
+
+        await foreach (var user in GetUsersAsyncEnumerable(pageSize, types, projectId, cancellationToken)) {
+            if (cancellationToken.IsCancellationRequested) {
+                yield break;
+            }
+
+            yield return user;
+            retrieved++;
+
+            progress?.Report(new WizProgress(retrieved, effectiveMax));
+
+            if (retrieved >= effectiveMax) {
+                yield break;
+            }
+        }
+    }
     /// <summary>
     /// Streams users from Wiz asynchronously as an <see cref="IAsyncEnumerable{WizUser}"/>.
     /// Pages are requested one at a time while the next page is prefetched in the background.
