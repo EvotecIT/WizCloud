@@ -10,7 +10,7 @@ namespace WizCloud.Tests;
 
 [TestClass]
 [DoNotParallelize]
-public sealed class GetUsersParallelTests {
+public sealed class GetUsersPrefetchTests {
     private sealed class PagingHandler : HttpMessageHandler {
         private int _callCount;
         public int CallCount => _callCount;
@@ -37,7 +37,7 @@ public sealed class GetUsersParallelTests {
         try {
             field.SetValue(null, new HttpClient(handler));
             using var client = new WizClient("token");
-            var users = await client.GetAllUsersAsync(pageSize: 2, degreeOfParallelism: 2);
+            var users = await client.GetAllUsersAsync(pageSize: 2);
             Assert.AreEqual(4, users.Count);
             CollectionAssert.AreEqual(new[] { "1", "2", "3", "4" }, users.Select(u => u.Id).ToArray());
         } finally {
@@ -55,7 +55,7 @@ public sealed class GetUsersParallelTests {
             field.SetValue(null, new HttpClient(handler));
             using var client = new WizClient("token");
             var list = new List<WizUser>();
-            await foreach (var user in client.GetUsersAsyncEnumerable(2, null, null, 2)) {
+            await foreach (var user in client.GetUsersAsyncEnumerable(2)) {
                 list.Add(user);
             }
             Assert.AreEqual(4, list.Count);
@@ -74,7 +74,7 @@ public sealed class GetUsersParallelTests {
         try {
             field.SetValue(null, new HttpClient(handler));
             using var client = new WizClient("token");
-            await using var enumerator = client.GetUsersAsyncEnumerable(2, null, null, 2).GetAsyncEnumerator();
+            await using var enumerator = client.GetUsersAsyncEnumerable(2).GetAsyncEnumerator();
             Assert.IsTrue(await enumerator.MoveNextAsync());
             Assert.IsTrue(handler.CallCount >= 2);
         } finally {

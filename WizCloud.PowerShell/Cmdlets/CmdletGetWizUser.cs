@@ -50,13 +50,6 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
     public string? ProjectId { get; set; }
 
     /// <summary>
-    /// <para type="description">Maximum number of page requests to issue in parallel.</para>
-    /// </summary>
-    [Parameter(Mandatory = false, HelpMessage = "Maximum number of page requests to issue in parallel.")]
-    [ValidateRange(1, int.MaxValue)]
-    public int Parallel { get; set; } = 1;
-
-    /// <summary>
     /// <para type="description">The maximum number of users to retrieve. Use this to limit results when dealing with large datasets.</para>
     /// </summary>
     [Parameter(Mandatory = false, HelpMessage = "Maximum number of users to retrieve. Default is unlimited.")]
@@ -138,8 +131,7 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
 
         try {
             WriteVerbose($"Retrieving Wiz users with page size: {PageSize}" +
-                (MaxResults.HasValue ? $", max results: {MaxResults.Value}" : "") +
-                (Parallel > 1 ? $", parallel: {Parallel}" : ""));
+                (MaxResults.HasValue ? $", max results: {MaxResults.Value}" : ""));
 
             var progressRecord = new ProgressRecord(1, "Get-WizUser", "Retrieving users from Wiz...");
             int? totalUsers = null;
@@ -155,7 +147,7 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
                 ? Math.Min(MaxResults.Value, totalUsers.Value)
                 : MaxResults;
 
-            await foreach (var user in _wizClient.GetUsersAsyncEnumerable(PageSize, Type, ProjectId, Parallel, CancelToken)) {
+            await foreach (var user in _wizClient.GetUsersAsyncEnumerable(PageSize, Type, ProjectId, CancelToken)) {
                 if (CancelToken.IsCancellationRequested)
                     break;
 
