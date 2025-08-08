@@ -69,7 +69,6 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
     public SwitchParameter IncludeTotal { get; set; }
 
     private WizClient? _wizClient;
-    private int _retrievedCount = 0;
 
     /// <summary>
     /// Initialize the Wiz client.
@@ -131,64 +130,45 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
 
         try {
             WriteVerbose($"Retrieving Wiz users with page size: {PageSize}" +
-                (MaxResults.HasValue ? $", max results: {MaxResults.Value}" : ""));
+                (MaxResults.HasValue ? $", max results: {MaxResults.Value}" : string.Empty));
 
             var progressRecord = new ProgressRecord(1, "Get-WizUser", "Retrieving users from Wiz...");
-            int? totalUsers = null;
-            if (IncludeTotal) {
-                totalUsers = await _wizClient.GetUsersCountAsync(Type, ProjectId).ConfigureAwait(false);
-                var totalProp = progressRecord.GetType().GetProperty("Total");
-                totalProp?.SetValue(progressRecord, totalUsers);
-                progressRecord.StatusDescription = $"Retrieved 0 of {totalUsers} users...";
-            }
-            WriteProgress(progressRecord);
+            var totalProp = progressRecord.GetType().GetProperty("Total");
 
-            var effectiveMax = MaxResults.HasValue && totalUsers.HasValue
-                ? Math.Min(MaxResults.Value, totalUsers.Value)
-                : MaxResults;
+            var progress = new Progress<WizProgress>(info => {
+                if (info.Retrieved == 0 && info.Total.HasValue) {
+                    totalProp?.SetValue(progressRecord, info.Total);
+                }
 
-            await foreach (var user in _wizClient.GetUsersAsyncEnumerable(PageSize, Type, ProjectId, CancelToken)) {
+                if (info.Total.HasValue) {
+                    var total = info.Total.Value;
+                    var percentComplete = total > 0 ? (int)((double)info.Retrieved / total * 100) : 0;
+                    progressRecord.StatusDescription = $"Retrieved {info.Retrieved} of {total} users...";
+                    progressRecord.PercentComplete = percentComplete;
+                } else if (MaxResults.HasValue) {
+                    var percentComplete = (int)((double)info.Retrieved / MaxResults.Value * 100);
+                    progressRecord.StatusDescription = $"Retrieved {info.Retrieved} of {MaxResults.Value} users...";
+                    progressRecord.PercentComplete = percentComplete;
+                } else if (info.Retrieved % 100 == 0) {
+                    progressRecord.StatusDescription = $"Retrieved {info.Retrieved} users...";
+                }
+
+                WriteProgress(progressRecord);
+            });
+
+            await foreach (var user in _wizClient.GetUsersWithProgressAsyncEnumerable(PageSize, Type, ProjectId, MaxResults, IncludeTotal, progress, CancelToken)) {
                 if (CancelToken.IsCancellationRequested)
                     break;
 
-                // Return raw or enhanced object based on parameter
                 if (Raw) {
                     WriteObject(user);
                 } else {
-                    // Return comprehensive typed object with all properties
                     var comprehensiveUser = WizUserComprehensive.FromWizUser(user);
                     WriteObject(comprehensiveUser);
-                }
-                _retrievedCount++;
-
-                // Update progress
-                if (totalUsers.HasValue) {
-                    var total = totalUsers.Value;
-                    if (effectiveMax.HasValue)
-                        total = effectiveMax.Value;
-                    var percentComplete = total > 0 ? (int)((double)_retrievedCount / total * 100) : 0;
-                    progressRecord.StatusDescription = $"Retrieved {_retrievedCount} of {total} users...";
-                    progressRecord.PercentComplete = percentComplete;
-                    WriteProgress(progressRecord);
-                } else if (MaxResults.HasValue) {
-                    var percentComplete = (int)((double)_retrievedCount / MaxResults.Value * 100);
-                    progressRecord.StatusDescription = $"Retrieved {_retrievedCount} of {MaxResults.Value} users...";
-                    progressRecord.PercentComplete = percentComplete;
-                    WriteProgress(progressRecord);
-                } else if (_retrievedCount % 100 == 0) {
-                    progressRecord.StatusDescription = $"Retrieved {_retrievedCount} users...";
-                    WriteProgress(progressRecord);
-                }
-
-                // Check if we've reached the maximum results
-                if (effectiveMax.HasValue && _retrievedCount >= effectiveMax.Value) {
-                    WriteVerbose($"Reached maximum result limit of {effectiveMax.Value} users");
-                    break;
                 }
             }
 
             progressRecord.StatusDescription = "Completed";
-
             progressRecord.PercentComplete = 100;
             progressRecord.RecordType = ProgressRecordType.Completed;
             WriteProgress(progressRecord);
@@ -213,5 +193,5 @@ public class CmdletGetWizUser : AsyncPSCmdlet {
     protected override Task EndProcessingAsync() {
         _wizClient?.Dispose();
         return Task.CompletedTask;
-    }
+       }
 }
