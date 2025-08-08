@@ -10,18 +10,21 @@ namespace WizCloud.Tests;
 
 [TestClass]
 [DoNotParallelize]
-public sealed class GetUsersParallelTests {
+public sealed class GetUsersPrefetchTests {
     private sealed class PagingHandler : HttpMessageHandler {
         private int _callCount;
+        public int CallCount => _callCount;
 
-        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken) {
             _callCount++;
             string content = _callCount switch {
                 1 => "{\"data\":{\"cloudResourcesV2\":{\"pageInfo\":{\"hasNextPage\":true,\"endCursor\":\"c1\"},\"nodes\":[{\"id\":\"1\",\"name\":\"A\",\"type\":\"USER_ACCOUNT\"},{\"id\":\"2\",\"name\":\"B\",\"type\":\"USER_ACCOUNT\"}]}}}",
                 2 => "{\"data\":{\"cloudResourcesV2\":{\"pageInfo\":{\"hasNextPage\":false},\"nodes\":[{\"id\":\"3\",\"name\":\"C\",\"type\":\"USER_ACCOUNT\"},{\"id\":\"4\",\"name\":\"D\",\"type\":\"USER_ACCOUNT\"}]}}}",
                 _ => "{\"data\":{\"cloudResourcesV2\":{\"pageInfo\":{\"hasNextPage\":false},\"nodes\":[]}}}"
             };
-            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(content) });
+
+            await Task.Delay(50, cancellationToken).ConfigureAwait(false);
+            return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(content) };
         }
     }
 
@@ -34,7 +37,7 @@ public sealed class GetUsersParallelTests {
         try {
             field.SetValue(null, new HttpClient(handler));
             using var client = new WizClient("token");
-            var users = await client.GetAllUsersAsync(pageSize: 2, degreeOfParallelism: 2);
+            var users = await client.GetAllUsersAsync(pageSize: 2);
             Assert.AreEqual(4, users.Count);
             CollectionAssert.AreEqual(new[] { "1", "2", "3", "4" }, users.Select(u => u.Id).ToArray());
         } finally {
@@ -52,7 +55,7 @@ public sealed class GetUsersParallelTests {
             field.SetValue(null, new HttpClient(handler));
             using var client = new WizClient("token");
             var list = new List<WizUser>();
-            await foreach (var user in client.GetUsersAsyncEnumerable(2, null, null, 2)) {
+            await foreach (var user in client.GetUsersAsyncEnumerable(2)) {
                 list.Add(user);
             }
             Assert.AreEqual(4, list.Count);
@@ -61,4 +64,22 @@ public sealed class GetUsersParallelTests {
             field.SetValue(null, original);
         }
     }
+
+    [TestMethod]
+    public async Task GetUsersAsyncEnumerable_PrefetchesNextPage() {
+        var handler = new PagingHandler();
+        var field = typeof(WizClient).GetField("_httpClient", BindingFlags.Static | BindingFlags.NonPublic);
+        Assert.IsNotNull(field);
+        var original = (HttpClient)field!.GetValue(null)!;
+        try {
+            field.SetValue(null, new HttpClient(handler));
+            using var client = new WizClient("token");
+            await using var enumerator = client.GetUsersAsyncEnumerable(2).GetAsyncEnumerator();
+            Assert.IsTrue(await enumerator.MoveNextAsync());
+            Assert.IsTrue(handler.CallCount >= 2);
+        } finally {
+            field.SetValue(null, original);
+        }
+    }
 }
+

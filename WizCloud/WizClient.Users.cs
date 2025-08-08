@@ -1,15 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Net;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Linq;
 using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace WizCloud;
@@ -19,6 +15,8 @@ public partial class WizClient {
     /// Retrieves all users from Wiz asynchronously.
     /// </summary>
     /// <param name="pageSize">The number of users to retrieve per page. Defaults to 20.</param>
+    /// <param name="types">Optional filter for user types.</param>
+    /// <param name="projectId">Optional project ID filter.</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains a list of all users.</returns>
     public async Task<List<WizUser>> GetUsersAsync(
         int pageSize = 20,
@@ -62,69 +60,56 @@ public partial class WizClient {
     }
     /// <summary>
     /// Streams users from Wiz asynchronously as an <see cref="IAsyncEnumerable{WizUser}"/>.
-    /// Results are yielded in the same order they are retrieved.
+    /// Pages are requested one at a time while the next page is prefetched in the background.
     /// </summary>
     /// <param name="pageSize">The number of users to retrieve per page. Defaults to 20.</param>
     /// <param name="types">Optional filter for user types.</param>
     /// <param name="projectId">Optional project ID filter.</param>
-    /// <param name="degreeOfParallelism">Maximum number of pages to prefetch concurrently.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>An async enumerable sequence of users.</returns>
     public async IAsyncEnumerable<WizUser> GetUsersAsyncEnumerable(
         int pageSize = 20,
         IEnumerable<WizUserType>? types = null,
         string? projectId = null,
-        int degreeOfParallelism = 1,
         [EnumeratorCancellation] CancellationToken cancellationToken = default) {
 
-        var channel = Channel.CreateBounded<(int Index, List<WizUser> Users)>(degreeOfParallelism);
+        Task<(List<WizUser> Users, bool HasNextPage, string? EndCursor)>? nextTask;
 
-        _ = Task.Run(async () => {
-            try {
-                string? endCursor = null;
-                    bool hasNextPage = true;
-                    var index = 0;
-
-                    while (!cancellationToken.IsCancellationRequested && hasNextPage) {
-                        var result = await GetUsersPageAsync(pageSize, endCursor, types, projectId).ConfigureAwait(false);
-                        await channel.Writer.WriteAsync((index, result.Users), cancellationToken).ConfigureAwait(false);
-                        hasNextPage = result.HasNextPage;
-                        endCursor = result.EndCursor;
-                        index++;
-                    }
-            } catch (HttpRequestException) {
-                // Swallow HTTP errors to terminate streaming gracefully.
-            } finally {
-                channel.Writer.Complete();
-            }
-        }, cancellationToken);
-
-        var buffer = new SortedDictionary<int, List<WizUser>>();
-        var nextIndex = 0;
-
-        while (await channel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false)) {
-            while (channel.Reader.TryRead(out var item)) {
-                buffer[item.Index] = item.Users;
-
-                while (buffer.TryGetValue(nextIndex, out var users)) {
-                    foreach (var user in users) {
-                        if (cancellationToken.IsCancellationRequested)
-                            yield break;
-
-                        yield return user;
-                    }
-
-                    buffer.Remove(nextIndex);
-                    nextIndex++;
-                }
-            }
+        (List<WizUser> Users, bool HasNextPage, string? EndCursor) page;
+        try {
+            page = await GetUsersPageAsync(pageSize, null, types, projectId).ConfigureAwait(false);
+        } catch (HttpRequestException) {
+            yield break;
         }
 
-        try {
-            await channel.Reader.Completion.ConfigureAwait(false);
-        } catch (HttpRequestException) {
-            // Stop iteration if the background task encountered HTTP errors.
-            yield break;
+        nextTask = page.HasNextPage
+            ? GetUsersPageAsync(pageSize, page.EndCursor, types, projectId)
+            : null;
+
+        foreach (var user in page.Users) {
+            if (cancellationToken.IsCancellationRequested)
+                yield break;
+
+            yield return user;
+        }
+
+        while (nextTask != null) {
+            try {
+                page = await nextTask.ConfigureAwait(false);
+            } catch (HttpRequestException) {
+                yield break;
+            }
+
+            nextTask = page.HasNextPage
+                ? GetUsersPageAsync(pageSize, page.EndCursor, types, projectId)
+                : null;
+
+            foreach (var user in page.Users) {
+                if (cancellationToken.IsCancellationRequested)
+                    yield break;
+
+                yield return user;
+            }
         }
     }
 
@@ -136,7 +121,6 @@ public partial class WizClient {
     /// <param name="pageSize">The number of users to retrieve per page. Defaults to 500.</param>
     /// <param name="types">Optional filter for user types.</param>
     /// <param name="projectId">Optional project ID filter.</param>
-    /// <param name="degreeOfParallelism">Maximum number of pages to prefetch concurrently.</param>
     /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
     /// <returns>A list of all users matching the criteria.</returns>
     public async Task<List<WizUser>> GetAllUsersAsync(
@@ -144,10 +128,9 @@ public partial class WizClient {
         int pageSize = 500,
         IEnumerable<WizUserType>? types = null,
         string? projectId = null,
-        int degreeOfParallelism = 1,
         CancellationToken cancellationToken = default) {
         var users = new List<WizUser>();
-        await foreach (var user in GetUsersAsyncEnumerable(pageSize, types, projectId, degreeOfParallelism, cancellationToken)) {
+        await foreach (var user in GetUsersAsyncEnumerable(pageSize, types, projectId, cancellationToken)) {
             if (cancellationToken.IsCancellationRequested)
                 break;
 
@@ -163,6 +146,8 @@ public partial class WizClient {
     /// </summary>
     /// <param name="first">The number of users to retrieve.</param>
     /// <param name="after">The cursor for pagination, if retrieving subsequent pages.</param>
+    /// <param name="types">Optional filter for user types.</param>
+    /// <param name="projectId">Optional project ID filter.</param>
     /// <returns>A tuple containing the users, whether there's a next page, and the cursor for the next page.</returns>
     private async Task<(List<WizUser> Users, bool HasNextPage, string? EndCursor)> GetUsersPageAsync(
         int first,
