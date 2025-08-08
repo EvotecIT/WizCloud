@@ -33,7 +33,7 @@ public sealed class GetUsersWithProgressAsyncEnumerableTests {
             field.SetValue(null, new HttpClient(handler));
             using var client = new WizClient("token");
             var progressEvents = new List<WizProgress>();
-            var progress = new Progress<WizProgress>(p => progressEvents.Add(p));
+            var progress = new TestProgress(p => progressEvents.Add(p));
             var users = new List<WizUser>();
             await foreach (var user in client.GetUsersWithProgressAsyncEnumerable(pageSize: 2, maxResults: 1, includeTotal: true, progress: progress)) {
                 users.Add(user);
@@ -46,6 +46,18 @@ public sealed class GetUsersWithProgressAsyncEnumerableTests {
             Assert.AreEqual(1, progressEvents[1].Total);
         } finally {
             field.SetValue(null, original);
+        }
+    }
+
+    private sealed class TestProgress : IProgress<WizProgress> {
+        private readonly Action<WizProgress> _handler;
+
+        public TestProgress(Action<WizProgress> handler) {
+            _handler = handler;
+        }
+
+        public void Report(WizProgress value) {
+            _handler(value);
         }
     }
 }
