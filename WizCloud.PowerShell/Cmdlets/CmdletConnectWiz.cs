@@ -5,63 +5,54 @@ using System.Threading.Tasks;
 using WizCloud;
 
 namespace WizCloud.PowerShell;
-/// <summary>
-/// <para type="synopsis">Connects to Wiz.io and stores authentication for the session.</para>
-/// <para type="description">The Connect-Wiz cmdlet establishes a connection to Wiz.io and stores the authentication token for use in other Wiz cmdlets during the session. Returns true on success, false on failure.</para>
+/// <summary>Connects to Wiz.io and stores authentication for the session.</summary>
+/// <para>Establishes a connection using a token or client credentials and optionally tests the API.</para>
+/// <list type="alertSet">
+/// <item>
+/// <description>Stored credentials remain in memory until <c>Disconnect-Wiz</c> is executed.</description>
+/// </item>
+/// </list>
 /// <example>
-/// <para>Connect using a token:</para>
-/// <code>Connect-Wiz -Token "your-service-account-token"</code>
+/// <summary>Connect using a token</summary>
+/// <code><prefix>PS&gt; </prefix>Connect-Wiz -Token 'your-service-account-token'</code>
+/// <para>The token is cached for subsequent cmdlets.</para>
 /// </example>
 /// <example>
-/// <para>Connect to a specific region:</para>
-/// <code>Connect-Wiz -Token "your-service-account-token" -Region "us1"</code>
+/// <summary>Connect with client credentials</summary>
+/// <code><prefix>PS&gt; </prefix>Connect-Wiz -ClientId 'id' -ClientSecret 'secret' -Region us1</code>
+/// <para>A token is acquired for region <c>us1</c>.</para>
 /// </example>
-/// <example>
-/// <para>Connect using client credentials:</para>
-/// <code>Connect-Wiz -ClientId "id" -ClientSecret "secret"</code>
-/// </example>
-/// </summary>
+/// <seealso href="https://learn.microsoft.com/powershell/scripting/overview">PowerShell documentation</seealso>
+/// <seealso href="https://github.com/EvotecIT/WizCloud">Project documentation</seealso>
 [Cmdlet(VerbsCommunications.Connect, "Wiz")]
 [OutputType(typeof(bool))]
 public class CmdletConnectWiz : AsyncPSCmdlet {
     private const string TokenParameterSet = nameof(TokenParameterSet);
     private const string ClientCredentialParameterSet = nameof(ClientCredentialParameterSet);
-    /// <summary>
-    /// <para type="description">The Wiz service account token for authentication.</para>
-    /// </summary>
+    /// <summary>The Wiz service account token for authentication.</summary>
     [Parameter(Mandatory = true, Position = 0, ParameterSetName = TokenParameterSet, HelpMessage = "The Wiz service account token for authentication.")]
     [ValidateNotNullOrEmpty]
     public string? Token { get; set; }
 
-    /// <summary>
-    /// <para type="description">The service account client ID.</para>
-    /// </summary>
+    /// <summary>The service account client ID.</summary>
     [Parameter(Mandatory = true, ParameterSetName = ClientCredentialParameterSet, HelpMessage = "The Wiz service account client ID.")]
     [ValidateNotNullOrEmpty]
     public string? ClientId { get; set; }
 
-    /// <summary>
-    /// <para type="description">The service account client secret.</para>
-    /// </summary>
+    /// <summary>The service account client secret.</summary>
     [Parameter(Mandatory = true, ParameterSetName = ClientCredentialParameterSet, HelpMessage = "The Wiz service account client secret.")]
     [ValidateNotNullOrEmpty]
     public string? ClientSecret { get; set; }
 
-    /// <summary>
-    /// <para type="description">The Wiz region to connect to. Default is 'eu17'.</para>
-    /// </summary>
+    /// <summary>The Wiz region to connect to. Default is 'eu17'.</summary>
     [Parameter(Mandatory = false, HelpMessage = "The Wiz region to connect to (e.g., 'eu17', 'us1', 'us2').")]
     public WizRegion Region { get; set; } = WizRegion.EU17;
 
-    /// <summary>
-    /// <para type="description">Test the connection to Wiz.</para>
-    /// </summary>
+    /// <summary>Tests the connection to Wiz.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Test the connection to Wiz.")]
     public SwitchParameter TestConnection { get; set; }
 
-    /// <summary>
-    /// <para type="description">Suppress the output (returns only true/false).</para>
-    /// </summary>
+    /// <summary>Suppresses informational output and returns only a Boolean result.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Suppress the output messages.")]
     public SwitchParameter Suppress { get; set; }
 

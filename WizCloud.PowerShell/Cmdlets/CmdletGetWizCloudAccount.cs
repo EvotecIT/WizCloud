@@ -6,31 +6,33 @@ using System.Threading.Tasks;
 using WizCloud;
 
 namespace WizCloud.PowerShell;
-/// <summary>
-/// <para type="synopsis">Gets cloud accounts from Wiz.io.</para>
-/// <para type="description">The Get-WizCloudAccount cmdlet retrieves cloud accounts from Wiz.io including AWS, Azure, and GCP accounts.</para>
+/// <summary>Gets cloud accounts from Wiz.io.</summary>
+/// <para>Enumerates cloud provider accounts linked to your organization.</para>
+/// <list type="alertSet">
+/// <item>
+/// <description>Retrieving many accounts may trigger API rate limiting.</description>
+/// </item>
+/// </list>
 /// <example>
-/// <para>Get all cloud accounts from Wiz:</para>
-/// <code>Get-WizCloudAccount</code>
+/// <summary>Get all cloud accounts</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizCloudAccount</code>
+/// <para>Lists every account accessible to the current connection.</para>
 /// </example>
 /// <example>
-/// <para>Get limited number of cloud accounts:</para>
-/// <code>Get-WizCloudAccount -MaxResults 50 -PageSize 50</code>
+/// <summary>Limit the number of accounts</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizCloudAccount -MaxResults 50 -PageSize 50</code>
+/// <para>Retrieves at most fifty accounts in pages of fifty.</para>
 /// </example>
-/// </summary>
+/// <seealso href="https://learn.microsoft.com/powershell/scripting/overview">PowerShell documentation</seealso>
+/// <seealso href="https://github.com/EvotecIT/WizCloud">Project documentation</seealso>
 [Cmdlet(VerbsCommon.Get, "WizCloudAccount")]
 [OutputType(typeof(WizCloudAccount))]
 public class CmdletGetWizCloudAccount : AsyncPSCmdlet {
-    /// <summary>
-    /// <para type="description">The number of cloud accounts to retrieve per page. Default is 500.</para>
-    /// </summary>
+    /// <summary>The number of cloud accounts to retrieve per page. Default is 500.</summary>
     [Parameter(Mandatory = false, HelpMessage = "The number of cloud accounts to retrieve per page.")]
     [ValidateRange(1, 5000)]
     public int PageSize { get; set; } = 500;
-
-    /// <summary>
-    /// <para type="description">The maximum number of cloud accounts to retrieve. Use this to limit results when dealing with large datasets.</para>
-    /// </summary>
+    /// <summary>The maximum number of cloud accounts to retrieve. Use this to limit results when dealing with large datasets.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Maximum number of cloud accounts to retrieve. Default is unlimited.")]
     [ValidateRange(1, int.MaxValue)]
     public int? MaxResults { get; set; }

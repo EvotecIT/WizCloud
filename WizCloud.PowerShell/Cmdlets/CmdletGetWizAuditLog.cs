@@ -7,63 +7,55 @@ using WizCloud;
 
 namespace WizCloud.PowerShell;
 
-/// <summary>
-/// <para type="synopsis">Gets audit logs from Wiz.io.</para>
-/// <para type="description">The Get-WizAuditLog cmdlet retrieves audit log entries from Wiz.io using streaming enumeration.</para>
-/// </summary>
+/// <summary>Gets audit logs from Wiz.io.</summary>
+/// <para>Retrieves records of user actions and system events.</para>
+/// <list type="alertSet">
+/// <item>
+/// <description>Audit logs may be extensive; apply date or user filters to narrow the output.</description>
+/// </item>
+/// </list>
+/// <example>
+/// <summary>Get recent audit logs</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizAuditLog</code>
+/// <para>Returns audit logs using default paging.</para>
+/// </example>
+/// <example>
+/// <summary>Filter by user and date</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizAuditLog -User admin@example.com -StartDate (Get-Date).AddDays(-1)</code>
+/// <para>Retrieves actions for the specified user in the last day.</para>
+/// </example>
+/// <seealso href="https://learn.microsoft.com/powershell/scripting/overview">PowerShell documentation</seealso>
+/// <seealso href="https://github.com/EvotecIT/WizCloud">Project documentation</seealso>
 [Cmdlet(VerbsCommon.Get, "WizAuditLog")]
 [OutputType(typeof(WizAuditLogEntry))]
 public class CmdletGetWizAuditLog : AsyncPSCmdlet {
-    /// <summary>
-    /// <para type="description">The number of audit logs to retrieve per page. Default is 500.</para>
-    /// </summary>
+    /// <summary>The number of audit logs to retrieve per page. Default is 500.</summary>
     [Parameter(Mandatory = false, HelpMessage = "The number of audit logs to retrieve per page.")]
     [ValidateRange(1, 5000)]
     public int PageSize { get; set; } = 500;
-
-    /// <summary>
-    /// <para type="description">Filter audit logs by start date.</para>
-    /// </summary>
+    /// <summary>Filter audit logs by start date.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by start date.")]
     public DateTime? StartDate { get; set; }
-
-    /// <summary>
-    /// <para type="description">Filter audit logs by end date.</para>
-    /// </summary>
+    /// <summary>Filter audit logs by end date.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by end date.")]
     public DateTime? EndDate { get; set; }
-
-    /// <summary>
-    /// <para type="description">Filter audit logs by user.</para>
-    /// </summary>
+    /// <summary>Filter audit logs by user.</summary>
     [Parameter(Mandatory = false, ValueFromPipeline = true, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by user.")]
     public string? User { get; set; }
-
-    /// <summary>
-    /// <para type="description">Filter audit logs by action.</para>
-    /// </summary>
+    /// <summary>Filter audit logs by action.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by action.")]
     public string? Action { get; set; }
-
-    /// <summary>
-    /// <para type="description">Filter audit logs by status.</para>
-    /// </summary>
+    /// <summary>Filter audit logs by status.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by status.")]
     public string? Status { get; set; }
-
-    /// <summary>
-    /// <para type="description">Maximum number of audit logs to retrieve. Default is unlimited.</para>
-    /// </summary>
+    /// <summary>Maximum number of audit logs to retrieve. Default is unlimited.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Maximum number of audit logs to retrieve. Default is unlimited.")]
     [ValidateRange(1, int.MaxValue)]
     public int? MaxResults { get; set; }
 
     private WizClient? _wizClient;
     private int _retrievedCount = 0;
-
-    /// <summary>
-    /// <para type="description">Initializes the Wiz client for audit log retrieval.</para>
-    /// </summary>
+    /// <summary>Initializes the Wiz client for audit log retrieval.</summary>
     protected override Task BeginProcessingAsync() {
         try {
             var token = ModuleInitialization.DefaultToken;
@@ -103,10 +95,7 @@ public class CmdletGetWizAuditLog : AsyncPSCmdlet {
 
         return Task.CompletedTask;
     }
-
-    /// <summary>
-    /// <para type="description">Processes the Get-WizAuditLog command.</para>
-    /// </summary>
+    /// <summary>Processes the Get-WizAuditLog command.</summary>
     protected override async Task ProcessRecordAsync() {
         if (_wizClient == null) {
             WriteError(new ErrorRecord(
@@ -165,10 +154,7 @@ public class CmdletGetWizAuditLog : AsyncPSCmdlet {
                 null));
         }
     }
-
-    /// <summary>
-    /// <para type="description">Releases the Wiz client resources.</para>
-    /// </summary>
+    /// <summary>Releases the Wiz client resources.</summary>
     protected override Task EndProcessingAsync() {
         _wizClient?.Dispose();
         return Task.CompletedTask;

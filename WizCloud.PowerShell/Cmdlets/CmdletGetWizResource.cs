@@ -8,69 +8,58 @@ using System.Threading.Tasks;
 using WizCloud;
 
 namespace WizCloud.PowerShell;
-/// <summary>
-/// <para type="synopsis">Gets cloud resources from Wiz.io.</para>
-/// <para type="description">The Get-WizResource cmdlet retrieves resources from Wiz.io inventory.</para>
-/// </summary>
+/// <summary>Gets cloud resources from Wiz.io.</summary>
+/// <para>Retrieves resource inventory items from the Wiz API.</para>
+/// <list type="alertSet">
+/// <item>
+/// <description>Large result sets may require multiple API requests and increase run time.</description>
+/// </item>
+/// </list>
+/// <example>
+/// <summary>Get all resources</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizResource</code>
+/// <para>Returns all resources visible to the current connection.</para>
+/// </example>
+/// <example>
+/// <summary>Filter by type and page size</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizResource -Type vm -PageSize 100</code>
+/// <para>Retrieves virtual machines 100 at a time.</para>
+/// </example>
+/// <seealso href="https://learn.microsoft.com/powershell/scripting/overview">PowerShell documentation</seealso>
+/// <seealso href="https://github.com/EvotecIT/WizCloud">Project documentation</seealso>
 [Cmdlet(VerbsCommon.Get, "WizResource")]
 [OutputType(typeof(WizResource))]
 public class CmdletGetWizResource : AsyncPSCmdlet {
-    /// <summary>
-    /// <para type="description">The number of resources to retrieve per page. Default is 500.</para>
-    /// </summary>
+    /// <summary>The number of resources to retrieve per page. Default is 500.</summary>
     [Parameter(Mandatory = false, HelpMessage = "The number of resources to retrieve per page.")]
     [ValidateRange(1, 5000)]
     public int PageSize { get; set; } = 500;
-
-    /// <summary>
-    /// <para type="description">Filter resources by type.</para>
-    /// </summary>
+    /// <summary>Filter resources by type.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by resource type.")]
     public string[] Type { get; set; } = Array.Empty<string>();
-
-    /// <summary>
-    /// <para type="description">Filter resources by cloud provider.</para>
-    /// </summary>
+    /// <summary>Filter resources by cloud provider.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by cloud provider.")]
     public WizCloudProvider[] CloudProvider { get; set; } = Array.Empty<WizCloudProvider>();
-
-    /// <summary>
-    /// <para type="description">Filter resources by region.</para>
-    /// </summary>
+    /// <summary>Filter resources by region.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by resource region.")]
     public string? Region { get; set; }
-
-    /// <summary>
-    /// <para type="description">Filter resources by public accessibility.</para>
-    /// </summary>
+    /// <summary>Filter resources by public accessibility.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by public accessibility.")]
     public SwitchParameter PubliclyAccessible { get; set; }
-
-    /// <summary>
-    /// <para type="description">Filter resources by tag.</para>
-    /// </summary>
+    /// <summary>Filter resources by tag.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by tags.")]
     public Hashtable? Tag { get; set; }
-
-    /// <summary>
-    /// <para type="description">Filter resources by project identifier.</para>
-    /// </summary>
+    /// <summary>Filter resources by project identifier.</summary>
     [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
-
-    /// <summary>
-    /// <para type="description">Maximum number of resources to retrieve. Default is unlimited.</para>
-    /// </summary>
+    /// <summary>Maximum number of resources to retrieve. Default is unlimited.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Maximum number of resources to retrieve. Default is unlimited.")]
     [ValidateRange(1, int.MaxValue)]
     public int? MaxResults { get; set; }
 
     private WizClient? _wizClient;
     private int _retrievedCount = 0;
-
-    /// <summary>
-    /// <para type="description">Initializes the Wiz client for resource retrieval.</para>
-    /// </summary>
+    /// <summary>Initializes the Wiz client for resource retrieval.</summary>
     protected override Task BeginProcessingAsync() {
         try {
             var token = ModuleInitialization.DefaultToken;
@@ -109,10 +98,7 @@ public class CmdletGetWizResource : AsyncPSCmdlet {
 
         return Task.CompletedTask;
     }
-
-    /// <summary>
-    /// <para type="description">Processes the Get-WizResource command.</para>
-    /// </summary>
+    /// <summary>Processes the Get-WizResource command.</summary>
     protected override async Task ProcessRecordAsync() {
         if (_wizClient == null) {
             WriteError(new ErrorRecord(
@@ -187,10 +173,7 @@ public class CmdletGetWizResource : AsyncPSCmdlet {
                 null));
         }
     }
-
-    /// <summary>
-    /// <para type="description">Releases the Wiz client resources.</para>
-    /// </summary>
+    /// <summary>Releases the Wiz client resources.</summary>
     protected override Task EndProcessingAsync() {
         _wizClient?.Dispose();
         return Task.CompletedTask;
