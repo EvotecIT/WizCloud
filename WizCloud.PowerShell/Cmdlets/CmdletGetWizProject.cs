@@ -6,36 +6,33 @@ using System.Threading.Tasks;
 using WizCloud;
 
 namespace WizCloud.PowerShell;
-/// <summary>
-/// <para type="synopsis">Gets projects from Wiz.io.</para>
-/// <para type="description">The Get-WizProject cmdlet retrieves projects from Wiz.io using streaming enumeration.</para>
+/// <summary>Gets projects from Wiz.io.</summary>
+/// <para>Retrieves project and folder information from the Wiz API.</para>
+/// <list type="alertSet">
+/// <item>
+/// <description>Projects are returned in pages and may include folder entries.</description>
+/// </item>
+/// </list>
 /// <example>
-/// <para>Get all projects from Wiz:</para>
-/// <code>Get-WizProject</code>
+/// <summary>Get all projects</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizProject</code>
+/// <para>Returns every project for the connected organization.</para>
 /// </example>
 /// <example>
-/// <para>Get projects with a specific page size:</para>
-/// <code>Get-WizProject -PageSize 100</code>
+/// <summary>Specify page size</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizProject -PageSize 100</code>
+/// <para>Retrieves projects in pages of one hundred.</para>
 /// </example>
-/// <example>
-/// <para>Select a region using Connect-Wiz and then retrieve projects:</para>
-/// <code>Connect-Wiz -Region "us1"; Get-WizProject</code>
-/// </example>
-/// </summary>
+/// <seealso href="https://learn.microsoft.com/powershell/scripting/overview">PowerShell documentation</seealso>
+/// <seealso href="https://github.com/EvotecIT/WizCloud">Project documentation</seealso>
 [Cmdlet(VerbsCommon.Get, "WizProject")]
 [OutputType(typeof(WizProject))]
 public class CmdletGetWizProject : AsyncPSCmdlet {
-
-    /// <summary>
-    /// <para type="description">The number of projects to retrieve per page. Default is 20.</para>
-    /// </summary>
+    /// <summary>The number of projects to retrieve per page. Default is 20.</summary>
     [Parameter(Mandatory = false, HelpMessage = "The number of projects to retrieve per page.")]
     [ValidateRange(1, 5000)]
     public int PageSize { get; set; } = 500;
-
-    /// <summary>
-    /// <para type="description">The maximum number of projects to retrieve. Use this to limit results when dealing with large datasets.</para>
-    /// </summary>
+    /// <summary>The maximum number of projects to retrieve. Use this to limit results when dealing with large datasets.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Maximum number of projects to retrieve. Default is unlimited.")]
     [ValidateRange(1, int.MaxValue)]
     public int? MaxResults { get; set; }

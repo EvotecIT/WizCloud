@@ -6,55 +6,43 @@ using System.Threading.Tasks;
 using WizCloud;
 
 namespace WizCloud.PowerShell;
-/// <summary>
-/// <para type="synopsis">Gets users from Wiz.io with all their properties.</para>
-/// <para type="description">The Get-WizUser cmdlet retrieves users from Wiz.io including their security properties, projects, cloud accounts, and issue analytics. By default, returns enhanced user objects with all properties exposed. Use -Raw to get the original API response.</para>
+/// <summary>Gets users from Wiz.io.</summary>
+/// <para>Retrieves user identities along with security properties and related projects.</para>
+/// <list type="alertSet">
+/// <item>
+/// <description>Using <c>-Raw</c> returns original API objects and may consume additional memory.</description>
+/// </item>
+/// </list>
 /// <example>
-/// <para>Select a region using Connect-Wiz and get all users from Wiz:</para>
-/// <code>Connect-Wiz -Region "us1"; Get-WizUser</code>
+/// <summary>Get all users</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizUser</code>
+/// <para>Retrieves enhanced user objects for the current connection.</para>
 /// </example>
 /// <example>
-/// <para>Select a region using Connect-Wiz and retrieve a limited number of users:</para>
-/// <code>Connect-Wiz -Region "us1"; Get-WizUser -MaxResults 1000 -PageSize 500</code>
+/// <summary>Limit results and return raw objects</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizUser -MaxResults 10 -Raw</code>
+/// <para>Outputs the first ten users using the raw API response.</para>
 /// </example>
-/// <example>
-/// <para>Select a region using Connect-Wiz and get raw API response objects:</para>
-/// <code>Connect-Wiz -Region "us1"; Get-WizUser -Raw -MaxResults 10</code>
-/// </example>
-/// </summary>
+/// <seealso href="https://learn.microsoft.com/powershell/scripting/overview">PowerShell documentation</seealso>
+/// <seealso href="https://github.com/EvotecIT/WizCloud">Project documentation</seealso>
 [Cmdlet(VerbsCommon.Get, "WizUser")]
 [OutputType(typeof(WizUserComprehensive), typeof(WizUser))]
 public class CmdletGetWizUser : AsyncPSCmdlet {
-
-    /// <summary>
-    /// <para type="description">The number of users to retrieve per page. Default is 20.</para>
-    /// </summary>
+    /// <summary>The number of users to retrieve per page. Default is 20.</summary>
     [Parameter(Mandatory = false, HelpMessage = "The number of users to retrieve per page.")]
     [ValidateRange(1, 5000)]
     public int PageSize { get; set; } = 500;
-
-    /// <summary>
-    /// <para type="description">Filter users by Wiz user type.</para>
-    /// </summary>
+    /// <summary>Filter users by Wiz user type.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by Wiz user types.")]
     public WizUserType[] Type { get; set; } = Array.Empty<WizUserType>();
-
-    /// <summary>
-    /// <para type="description">Filter users by project identifier.</para>
-    /// </summary>
+    /// <summary>Filter users by project identifier.</summary>
     [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
-
-    /// <summary>
-    /// <para type="description">The maximum number of users to retrieve. Use this to limit results when dealing with large datasets.</para>
-    /// </summary>
+    /// <summary>The maximum number of users to retrieve. Use this to limit results when dealing with large datasets.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Maximum number of users to retrieve. Default is unlimited.")]
     [ValidateRange(1, int.MaxValue)]
     public int? MaxResults { get; set; }
-
-    /// <summary>
-    /// <para type="description">Return raw API response objects without additional property expansion.</para>
-    /// </summary>
+    /// <summary>Return raw API response objects without additional property expansion.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Return raw API response objects.")]
     public SwitchParameter Raw { get; set; }
 

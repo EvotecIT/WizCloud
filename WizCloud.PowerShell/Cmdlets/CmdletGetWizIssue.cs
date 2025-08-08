@@ -7,51 +7,45 @@ using WizCloud;
 
 namespace WizCloud.PowerShell;
 
-/// <summary>
-/// <para type="synopsis">Gets security issues from Wiz.io.</para>
-/// <para type="description">The Get-WizIssue cmdlet retrieves security issues from Wiz.io using streaming enumeration.</para>
+/// <summary>Gets security issues from Wiz.io.</summary>
+/// <para>Streams security issues reported by the Wiz platform.</para>
+/// <list type="alertSet">
+/// <item>
+/// <description>Retrieving all issues may produce a large volume of output and take considerable time.</description>
+/// </item>
+/// </list>
 /// <example>
-/// <para>Get all issues from Wiz:</para>
-/// <code>Get-WizIssue</code>
+/// <summary>Get all issues</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizIssue</code>
+/// <para>Returns every issue available to the current connection.</para>
 /// </example>
-/// </summary>
+/// <example>
+/// <summary>Filter by severity</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizIssue -Severity High</code>
+/// <para>Retrieves only high-severity issues.</para>
+/// </example>
+/// <seealso href="https://learn.microsoft.com/powershell/scripting/overview">PowerShell documentation</seealso>
+/// <seealso href="https://github.com/EvotecIT/WizCloud">Project documentation</seealso>
 [Cmdlet(VerbsCommon.Get, "WizIssue")]
 [OutputType(typeof(WizIssue))]
 public class CmdletGetWizIssue : AsyncPSCmdlet {
-    /// <summary>
-    /// <para type="description">The number of issues to retrieve per page. Default is 20.</para>
-    /// </summary>
+    /// <summary>The number of issues to retrieve per page. Default is 20.</summary>
     [Parameter(Mandatory = false, HelpMessage = "The number of issues to retrieve per page.")]
     [ValidateRange(1, 5000)]
     public int PageSize { get; set; } = 500;
-
-    /// <summary>
-    /// <para type="description">Filter issues by severity.</para>
-    /// </summary>
+    /// <summary>Filter issues by severity.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by issue severities.")]
     public WizSeverity[] Severity { get; set; } = Array.Empty<WizSeverity>();
-
-    /// <summary>
-    /// <para type="description">Filter issues by status.</para>
-    /// </summary>
+    /// <summary>Filter issues by status.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by issue status.")]
     public string[] Status { get; set; } = Array.Empty<string>();
-
-    /// <summary>
-    /// <para type="description">Filter issues by project identifier.</para>
-    /// </summary>
+    /// <summary>Filter issues by project identifier.</summary>
     [Parameter(Mandatory = false, ValueFromPipelineByPropertyName = true, HelpMessage = "Filter by project identifier.")]
     public string? ProjectId { get; set; }
-
-    /// <summary>
-    /// <para type="description">Filter issues by type.</para>
-    /// </summary>
+    /// <summary>Filter issues by type.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by issue types.")]
     public string[] Type { get; set; } = Array.Empty<string>();
-
-    /// <summary>
-    /// <para type="description">The maximum number of issues to retrieve. Default is unlimited.</para>
-    /// </summary>
+    /// <summary>The maximum number of issues to retrieve. Default is unlimited.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Maximum number of issues to retrieve. Default is unlimited.")]
     [ValidateRange(1, int.MaxValue)]
     public int? MaxResults { get; set; }

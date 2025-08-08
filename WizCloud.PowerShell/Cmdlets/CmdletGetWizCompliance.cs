@@ -7,31 +7,38 @@ using WizCloud;
 
 namespace WizCloud.PowerShell;
 
-/// <summary>
-/// <para type="synopsis">Gets compliance posture from Wiz.io.</para>
-/// <para type="description">The Get-WizCompliance cmdlet retrieves compliance posture results from Wiz.io.</para>
-/// </summary>
+/// <summary>Gets compliance posture from Wiz.io.</summary>
+/// <para>Retrieves compliance scores for supported frameworks.</para>
+/// <list type="alertSet">
+/// <item>
+/// <description>Results represent the latest assessment and may change as new scans run.</description>
+/// </item>
+/// </list>
+/// <example>
+/// <summary>Get compliance posture</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizCompliance</code>
+/// <para>Returns compliance scores for all available frameworks.</para>
+/// </example>
+/// <example>
+/// <summary>Filter by framework and score</summary>
+/// <code><prefix>PS&gt; </prefix>Get-WizCompliance -Framework CIS -MinScore 80</code>
+/// <para>Shows CIS results with scores of at least 80.</para>
+/// </example>
+/// <seealso href="https://learn.microsoft.com/powershell/scripting/overview">PowerShell documentation</seealso>
+/// <seealso href="https://github.com/EvotecIT/WizCloud">Project documentation</seealso>
 [Cmdlet(VerbsCommon.Get, "WizCompliance")]
 [OutputType(typeof(WizComplianceResult))]
 public class CmdletGetWizCompliance : AsyncPSCmdlet {
-    /// <summary>
-    /// <para type="description">Filter compliance results by framework.</para>
-    /// </summary>
+    /// <summary>Filter compliance results by framework.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by compliance framework.")]
     public string[] Framework { get; set; } = Array.Empty<string>();
-
-    /// <summary>
-    /// <para type="description">Filter results by minimum compliance score.</para>
-    /// </summary>
+    /// <summary>Filter results by minimum compliance score.</summary>
     [Parameter(Mandatory = false, HelpMessage = "Filter by minimum compliance score.")]
     public double? MinScore { get; set; }
 
     private WizClient? _wizClient;
     private int _retrievedCount = 0;
-
-    /// <summary>
-    /// <para type="description">Initializes the Wiz client for compliance retrieval.</para>
-    /// </summary>
+    /// <summary>Initializes the Wiz client for compliance retrieval.</summary>
     protected override Task BeginProcessingAsync() {
         try {
             var token = ModuleInitialization.DefaultToken;
@@ -71,10 +78,7 @@ public class CmdletGetWizCompliance : AsyncPSCmdlet {
 
         return Task.CompletedTask;
     }
-
-    /// <summary>
-    /// <para type="description">Processes the Get-WizCompliance command.</para>
-    /// </summary>
+    /// <summary>Processes the Get-WizCompliance command.</summary>
     protected override async Task ProcessRecordAsync() {
         if (_wizClient == null) {
             WriteError(new ErrorRecord(
@@ -122,10 +126,7 @@ public class CmdletGetWizCompliance : AsyncPSCmdlet {
                 null));
         }
     }
-
-    /// <summary>
-    /// <para type="description">Releases the Wiz client resources.</para>
-    /// </summary>
+    /// <summary>Releases the Wiz client resources.</summary>
     protected override Task EndProcessingAsync() {
         _wizClient?.Dispose();
         return Task.CompletedTask;
