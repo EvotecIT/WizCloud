@@ -6,6 +6,20 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <LangVersion>latest</LangVersion>
+    <PackageId>WizCloud</PackageId>
+    <Title>WizCloud</Title>
+    <Version>1.0.0</Version>
+    <Authors>Przemyslaw Klys</Authors>
+    <Company>Evotec</Company>
+    <Product>WizCloud</Product>
+    <Description>Modern asynchronous Wiz.io client for .NET, providing strongly typed access to the Wiz GraphQL API.</Description>
+    <PackageTags>wiz;wizcloud;wiz.io;graphql;api;security;cloud</PackageTags>
+    <PackageProjectUrl>https://github.com/EvotecIT/WizCloud</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/EvotecIT/WizCloud</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'net8.0'">

@@ -20,6 +20,16 @@
         <Authors>Przemyslaw Klys</Authors>
         <Copyright>(c) 2011 - 2025 Przemyslaw Klys @ Evotec. All rights reserved.</Copyright>
         <LangVersion>Latest</LangVersion>
+        <PackageId>WizCloud.PowerShell</PackageId>
+        <Title>WizCloud PowerShell</Title>
+        <Description>PowerShell module built on the WizCloud client library to interact with the Wiz.io GraphQL API.</Description>
+        <PackageTags>wiz;wizcloud;powershell;wiz.io;graphql;api;security;cloud</PackageTags>
+        <PackageProjectUrl>https://github.com/EvotecIT/WizCloud</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/EvotecIT/WizCloud</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
     </PropertyGroup>
 
 
