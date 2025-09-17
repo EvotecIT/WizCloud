@@ -22,7 +22,7 @@ env:
 jobs:
   test-windows:
     name: 'Windows'
-    runs-on: [self-hosted, windows]
+    runs-on: windows-latest
     timeout-minutes: 20
     steps:
       - name: Checkout code
@@ -71,7 +71,7 @@ jobs:
 
   test-ubuntu:
     name: 'Ubuntu'
-    runs-on: [self-hosted, ubuntu]
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - name: Checkout code
@@ -112,9 +112,8 @@ jobs:
           verbose: true
 
   test-macos:
-    if: false
     name: 'macOS'
-    runs-on: [self-hosted, macos]
+    runs-on: macos-latest
     timeout-minutes: 20
     steps:
       - name: Checkout code
