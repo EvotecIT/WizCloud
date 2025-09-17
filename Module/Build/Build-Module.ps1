@@ -7,7 +7,7 @@
         Author               = 'Przemyslaw Klys'
         CompanyName          = 'Evotec'
         Copyright            = "(c) 2011 - $((Get-Date).Year) Przemyslaw Klys @ Evotec. All rights reserved."
-        Description          = 'WizCloud is a PowerShell module that provides a set of cmdlets for managing and interacting with cloud resources.'
+        Description          = 'WizCloud is a PowerShell module that provides a set of cmdlets for managing and interacting with Wiz.io service'
         Tags                 = @('Windows', 'MacOS', 'Linux')
         ProjectUri           = 'https://github.com/EvotecIT/WizCloud'
         PowerShellVersion    = '5.1'
