@@ -37,7 +37,7 @@ public static class GraphQlQueries {
     /// <summary>
     /// Query for retrieving projects.
     /// </summary>
-        public const string ProjectsQuery = @"query Projects($first: Int, $after: String) {
+    public const string ProjectsQuery = @"query Projects($first: Int, $after: String) {
             projects(first: $first, after: $after) {
                 pageInfo { hasNextPage endCursor }
                 nodes { id name slug isFolder }

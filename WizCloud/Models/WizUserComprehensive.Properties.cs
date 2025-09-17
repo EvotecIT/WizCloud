@@ -5,7 +5,7 @@ namespace WizCloud;
 
 public partial class WizUserComprehensive {
     // Azure AD User Properties
-    
+
     /// <summary>
     /// Gets or sets the user principal name (UPN).
     /// </summary>

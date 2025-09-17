@@ -12,8 +12,12 @@ $connectWizSplat = @{
 Connect-Wiz @connectWizSplat
 
 # Get all users (uses the region from Connect-Wiz)
-$users = Get-WizUser -Verbose -MaxResults 1200 -Type USER_ACCOUNT
+$users1 = Get-WizUser -Verbose -MaxResults 2500 -Type USER_ACCOUNT
 Write-Host "Found $($users.Count) users"
-$Users[1101] | Format-List
+$Users1[1101] | Format-List
 
-$Users | Format-Table Name, UserPrincipalName, UserType, HasMfa, ProjectNames, Email, IsActive, CreatedAt, LastSeenAt, LastLoginAt, LastLoginIpAddress, ProductNames, ProductIds
+$Users1 | Format-Table Name, UserPrincipalName, UserType, HasMfa, ProjectNames, Email, IsActive, CreatedAt, LastSeenAt, LastLoginAt, LastLoginIpAddress, ProductNames, ProductIds
+
+Clear-Host
+$Temp = $Users1 | Where-Object { $_.UserPrincipalName -notlike "*#EXT#*" }
+$Temp | Format-Table Name, UserPrincipalName, UserType, HasMfa, ProjectNames, Email, IsActive, CreatedAt, LastSeenAt, LastLoginAt, LastLoginIpAddress, ProductNames, ProductIds
