@@ -10,7 +10,7 @@ WizCloud is available as NuGet from the NuGet Gallery and as PowerShell module f
 💻 PowerShell Module
 
 [![powershell gallery version](https://img.shields.io/powershellgallery/v/WizCloud.svg)](https://www.powershellgallery.com/packages/WizCloud)
-[![powershell gallery preview](https://img.shields.io/powershellgallery/vpre/WizCloud.svg?label=powershell%20gallery%20preview&colorB=yellow)](https://www.powershellgallery.com/packages/WizCloud)
+[![powershell gallery preview](https://img.shields.io/powershellgallery/v/WizCloud.svg?label=powershell%20gallery%20preview&colorB=yellow&include_prereleases)](https://www.powershellgallery.com/packages/WizCloud)
 [![powershell gallery platforms](https://img.shields.io/powershellgallery/p/WizCloud.svg)](https://www.powershellgallery.com/packages/WizCloud)
 [![powershell gallery downloads](https://img.shields.io/powershellgallery/dt/WizCloud.svg)](https://www.powershellgallery.com/packages/WizCloud)
 
