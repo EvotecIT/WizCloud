@@ -82,7 +82,7 @@ public class CmdletGetWizNetworkExposure : AsyncPSCmdlet {
                 "WizApiHttpError",
                 ErrorCategory.ConnectionError,
                 null));
-        } catch (Exception ex) {
+        } catch (Exception ex) when (ex is not ActionPreferenceStopException) {
             WriteError(new ErrorRecord(
                 ex,
                 "WizClientInitializationError",
@@ -143,7 +143,7 @@ public class CmdletGetWizNetworkExposure : AsyncPSCmdlet {
                 "WizApiHttpError",
                 ErrorCategory.ReadError,
                 null));
-        } catch (Exception ex) {
+        } catch (Exception ex) when (ex is not ActionPreferenceStopException) {
             WriteError(new ErrorRecord(
                 ex,
                 "WizNetworkExposureRetrievalError",

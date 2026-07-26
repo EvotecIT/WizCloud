@@ -103,7 +103,7 @@ public class CmdletConnectWiz : AsyncPSCmdlet {
                 ErrorCategory.ConnectionError,
                 null));
             WriteObject(false);
-        } catch (Exception ex) {
+        } catch (Exception ex) when (ex is not ActionPreferenceStopException) {
             WriteError(new ErrorRecord(
                 ex,
                 "WizConnectionError",
