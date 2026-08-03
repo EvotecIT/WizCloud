@@ -11,7 +11,7 @@ Gets users from Wiz.io.
 ## SYNTAX
 ### __AllParameterSets
 ```powershell
-Get-WizUser [-PageSize <int>] [-Type <WizUserType[]>] [-ProjectId <string>] [-MaxResults <int>] [-Raw] [<CommonParameters>]
+Get-WizUser [-PageSize <int>] [-Type <WizUserType[]>] [-ProjectId <string>] [-MaxResults <Int32>] [-Raw] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -39,7 +39,7 @@ Outputs the first ten users using the raw API response.
 Maximum number of users to retrieve. Default is unlimited.
 
 ```yaml
-Type: Nullable`1
+Type: Int32
 Parameter Sets: __AllParameterSets
 Aliases: None
 Possible values:

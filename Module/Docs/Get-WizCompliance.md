@@ -11,7 +11,7 @@ Gets compliance posture from Wiz.io.
 ## SYNTAX
 ### __AllParameterSets
 ```powershell
-Get-WizCompliance [-Framework <string[]>] [-MinScore <double>] [<CommonParameters>]
+Get-WizCompliance [-Framework <string[]>] [-MinScore <Double>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -55,7 +55,7 @@ Accept wildcard characters: False
 Filter by minimum compliance score.
 
 ```yaml
-Type: Nullable`1
+Type: Double
 Parameter Sets: __AllParameterSets
 Aliases: None
 Possible values:

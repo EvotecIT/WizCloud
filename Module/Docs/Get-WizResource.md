@@ -11,7 +11,7 @@ Gets cloud resources from Wiz.io.
 ## SYNTAX
 ### __AllParameterSets
 ```powershell
-Get-WizResource [-PageSize <int>] [-Type <string[]>] [-CloudProvider <WizCloudProvider[]>] [-Region <string>] [-PubliclyAccessible] [-Tag <hashtable>] [-ProjectId <string>] [-MaxResults <int>] [<CommonParameters>]
+Get-WizResource [-PageSize <int>] [-Type <string[]>] [-CloudProvider <WizCloudProvider[]>] [-Region <string>] [-PubliclyAccessible] [-Tag <hashtable>] [-ProjectId <string>] [-MaxResults <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -55,7 +55,7 @@ Accept wildcard characters: False
 Maximum number of resources to retrieve. Default is unlimited.
 
 ```yaml
-Type: Nullable`1
+Type: Int32
 Parameter Sets: __AllParameterSets
 Aliases: None
 Possible values:

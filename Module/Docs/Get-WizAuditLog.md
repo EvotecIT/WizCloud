@@ -11,7 +11,7 @@ Gets audit logs from Wiz.io.
 ## SYNTAX
 ### __AllParameterSets
 ```powershell
-Get-WizAuditLog [-PageSize <int>] [-StartDate <datetime>] [-EndDate <datetime>] [-User <string>] [-Action <string>] [-Status <string>] [-MaxResults <int>] [<CommonParameters>]
+Get-WizAuditLog [-PageSize <int>] [-StartDate <DateTime>] [-EndDate <DateTime>] [-User <string>] [-Action <string>] [-Status <string>] [-MaxResults <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -55,7 +55,7 @@ Accept wildcard characters: False
 Filter by end date.
 
 ```yaml
-Type: Nullable`1
+Type: DateTime
 Parameter Sets: __AllParameterSets
 Aliases: None
 Possible values:
@@ -71,7 +71,7 @@ Accept wildcard characters: False
 Maximum number of audit logs to retrieve. Default is unlimited.
 
 ```yaml
-Type: Nullable`1
+Type: Int32
 Parameter Sets: __AllParameterSets
 Aliases: None
 Possible values:
@@ -103,7 +103,7 @@ Accept wildcard characters: False
 Filter by start date.
 
 ```yaml
-Type: Nullable`1
+Type: DateTime
 Parameter Sets: __AllParameterSets
 Aliases: None
 Possible values:

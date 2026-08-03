@@ -11,7 +11,7 @@ Gets security issues from Wiz.io.
 ## SYNTAX
 ### __AllParameterSets
 ```powershell
-Get-WizIssue [-PageSize <int>] [-Severity <WizSeverity[]>] [-Status <string[]>] [-ProjectId <string>] [-Type <string[]>] [-MaxResults <int>] [<CommonParameters>]
+Get-WizIssue [-PageSize <int>] [-Severity <WizSeverity[]>] [-Status <string[]>] [-ProjectId <string>] [-Type <string[]>] [-MaxResults <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -39,7 +39,7 @@ Retrieves only high-severity issues.
 Maximum number of issues to retrieve. Default is unlimited.
 
 ```yaml
-Type: Nullable`1
+Type: Int32
 Parameter Sets: __AllParameterSets
 Aliases: None
 Possible values:

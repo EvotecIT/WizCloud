@@ -11,7 +11,7 @@ Gets cloud accounts from Wiz.io.
 ## SYNTAX
 ### __AllParameterSets
 ```powershell
-Get-WizCloudAccount [-PageSize <int>] [-MaxResults <int>] [<CommonParameters>]
+Get-WizCloudAccount [-PageSize <int>] [-MaxResults <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -39,7 +39,7 @@ Retrieves at most fifty accounts in pages of fifty.
 Maximum number of cloud accounts to retrieve. Default is unlimited.
 
 ```yaml
-Type: Nullable`1
+Type: Int32
 Parameter Sets: __AllParameterSets
 Aliases: None
 Possible values:

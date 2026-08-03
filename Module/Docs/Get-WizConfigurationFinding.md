@@ -11,7 +11,7 @@ Gets configuration findings from Wiz.io.
 ## SYNTAX
 ### __AllParameterSets
 ```powershell
-Get-WizConfigurationFinding [-PageSize <int>] [-Framework <string[]>] [-Severity <WizSeverity[]>] [-Category <string[]>] [-ProjectId <string>] [-MaxResults <int>] [<CommonParameters>]
+Get-WizConfigurationFinding [-PageSize <int>] [-Framework <string[]>] [-Severity <WizSeverity[]>] [-Category <string[]>] [-ProjectId <string>] [-MaxResults <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -71,7 +71,7 @@ Accept wildcard characters: False
 Maximum number of findings to retrieve. Default is unlimited.
 
 ```yaml
-Type: Nullable`1
+Type: Int32
 Parameter Sets: __AllParameterSets
 Aliases: None
 Possible values:

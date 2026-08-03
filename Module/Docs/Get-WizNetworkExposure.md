@@ -11,7 +11,7 @@ Gets network exposure data from Wiz.io.
 ## SYNTAX
 ### __AllParameterSets
 ```powershell
-Get-WizNetworkExposure [-PageSize <int>] [-Port <int[]>] [-Protocol <string[]>] [-InternetFacing <bool>] [-ProjectId <string>] [-MaxResults <int>] [<CommonParameters>]
+Get-WizNetworkExposure [-PageSize <int>] [-Port <int[]>] [-Protocol <string[]>] [-InternetFacing <Boolean>] [-ProjectId <string>] [-MaxResults <Int32>] [<CommonParameters>]
 ```
 
 ## DESCRIPTION
@@ -39,7 +39,7 @@ Retrieves exposures for TCP port 443.
 Filter by internet facing status.
 
 ```yaml
-Type: Nullable`1
+Type: Boolean
 Parameter Sets: __AllParameterSets
 Aliases: None
 Possible values:
@@ -55,7 +55,7 @@ Accept wildcard characters: False
 Maximum number of exposures to retrieve. Default is unlimited.
 
 ```yaml
-Type: Nullable`1
+Type: Int32
 Parameter Sets: __AllParameterSets
 Aliases: None
 Possible values:

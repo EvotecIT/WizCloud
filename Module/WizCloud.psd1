@@ -1,4 +1,4 @@
-@{
+﻿@{
     AliasesToExport      = @()
     Author               = 'Przemyslaw Klys'
     CmdletsToExport      = @('Connect-Wiz', 'Disconnect-Wiz', 'Get-WizAuditLog', 'Get-WizCloudAccount', 'Get-WizCompliance', 'Get-WizConfigurationFinding', 'Get-WizIssue', 'Get-WizNetworkExposure', 'Get-WizProject', 'Get-WizResource', 'Get-WizUser', 'Get-WizVulnerability')
