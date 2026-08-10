@@ -63,7 +63,7 @@ public sealed class WizClientRetryTests {
             field.SetValue(null, new HttpClient(handler));
             using var client = new WizClient("token", retryCount: 2, retryDelay: TimeSpan.FromMilliseconds(1));
             var method = typeof(WizClient).GetMethod("SendGraphQlRequestAsync", BindingFlags.Instance | BindingFlags.NonPublic)!;
-            await Assert.ThrowsExceptionAsync<HttpRequestException>(async () => {
+            await Assert.ThrowsAsync<HttpRequestException>(async () => {
                 var task = (Task<JsonNode>)method.Invoke(client, new object[] { new { query = "" } })!;
                 await task.ConfigureAwait(false);
             }).ConfigureAwait(false);

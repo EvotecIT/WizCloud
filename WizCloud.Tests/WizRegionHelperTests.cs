@@ -37,11 +37,11 @@ public sealed class WizRegionHelperTests {
 
     [TestMethod]
     public void FromString_InvalidValue_Throws() {
-        Assert.ThrowsException<ArgumentException>(() => WizRegionHelper.FromString("invalid"));
+        Assert.Throws<ArgumentException>(() => WizRegionHelper.FromString("invalid"));
     }
 
     [TestMethod]
     public void ToApiString_InvalidEnum_Throws() {
-        Assert.ThrowsException<ArgumentOutOfRangeException>(() => WizRegionHelper.ToApiString((WizRegion)999));
+        Assert.Throws<ArgumentOutOfRangeException>(() => WizRegionHelper.ToApiString((WizRegion)999));
     }
 }
